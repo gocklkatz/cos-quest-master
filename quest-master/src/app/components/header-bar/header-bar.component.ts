@@ -1,8 +1,7 @@
 import { Component, inject, output } from '@angular/core';
 import { GameStateService } from '../../services/game-state.service';
 import { ConnectionIndicatorComponent } from '../connection-indicator/connection-indicator.component';
-
-const XP_TABLE = [0, 50, 120, 200, 350, 500, 750, 1200, 1500, 1900, 2400, 3000, 3700, 4500, 5000];
+import { xpForLevel, xpForNextLevel, levelProgress, MAX_LEVEL } from '../../data/xp-table';
 
 @Component({
   selector: 'app-header-bar',
@@ -15,20 +14,21 @@ export class HeaderBarComponent {
   openSettings = output<void>();
 
   readonly gameState = inject(GameStateService);
+  readonly maxLevel = MAX_LEVEL;
 
   get xpForCurrentLevel(): number {
-    const level = this.gameState.level();
-    return XP_TABLE[level - 1] ?? 0;
+    return xpForLevel(this.gameState.level());
   }
 
-  get xpForNextLevel(): number {
-    const level = this.gameState.level();
-    return XP_TABLE[level] ?? XP_TABLE[XP_TABLE.length - 1];
+  get xpForNextLevelValue(): number {
+    return xpForNextLevel(this.gameState.level());
   }
 
   get xpProgress(): number {
-    const current = this.gameState.xp() - this.xpForCurrentLevel;
-    const total = this.xpForNextLevel - this.xpForCurrentLevel;
-    return total > 0 ? Math.min(100, (current / total) * 100) : 100;
+    return levelProgress(this.gameState.xp());
+  }
+
+  get isMaxLevel(): boolean {
+    return this.gameState.level() >= MAX_LEVEL;
   }
 }

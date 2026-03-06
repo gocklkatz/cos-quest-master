@@ -1,0 +1,11 @@
+@if (visible()) {
+  <div class="xp-overlay">
+    <div class="xp-toast" [class.level-up]="leveledUp()">
+      @if (leveledUp()) {
+        <div class="level-up-title">LEVEL UP!</div>
+        <div class="level-up-sub">You are now Level {{ newLevel() }}</div>
+      }
+      <div class="xp-gained">+{{ xpEarned() }} XP</div>
+    </div>
+  </div>
+}

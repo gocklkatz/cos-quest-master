@@ -82,7 +82,7 @@ export const STARTER_QUESTS: Quest[] = [
     hints: [
       'SET ^Guild("members", 1) = "Aldric" stores a value at a subscript.',
       '$ORDER(^Guild("members", "")) returns the first subscript key.',
-      'Loop pattern: SET key="" FOR { SET key=$ORDER(^Guild("members",key))  QUIT:key=""  WRITE ^Guild("members",key), ! }',
+      'Loop pattern: SET key="" FOR { SET key=$ORDER(^Guild("members",key)) QUIT:key="" WRITE ^Guild("members",key), ! }',
     ],
     bonusObjectives: [
       'Add a second level: store each member\'s class, e.g. SET ^Guild("members", 1, "class") = "Mage"',

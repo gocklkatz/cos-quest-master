@@ -2,6 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { GameState, DEFAULT_GAME_STATE, QuestLogEntry } from '../models/game-state.models';
 import { IRISConfig } from '../models/iris.models';
 import { Quest } from '../models/quest.models';
+import { calcLevel } from '../data/xp-table';
 
 const STORAGE_KEY = 'questmaster';
 
@@ -90,15 +91,4 @@ export class GameStateService {
   private persist(): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state()));
   }
-}
-
-const XP_TABLE = [0, 50, 120, 200, 350, 500, 750, 1200, 1500, 1900, 2400, 3000, 3700, 4500, 5000];
-
-function calcLevel(xp: number): number {
-  let level = 1;
-  for (let i = 0; i < XP_TABLE.length; i++) {
-    if (xp >= XP_TABLE[i]) level = i + 1;
-    else break;
-  }
-  return level;
 }

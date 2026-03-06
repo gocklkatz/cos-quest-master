@@ -61,4 +61,11 @@
   @if (showSettings()) {
     <app-settings-modal (closed)="closeSettings()" />
   }
+
+  <app-xp-animation
+    [trigger]="xpAnimTrigger()"
+    [xpEarned]="xpAnimAmount()"
+    [leveledUp]="xpAnimLeveledUp()"
+    [newLevel]="xpAnimNewLevel()"
+  />
 </div>

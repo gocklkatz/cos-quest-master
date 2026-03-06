@@ -4,6 +4,7 @@ import { SettingsModalComponent } from './components/settings-modal/settings-mod
 import { CodeEditorComponent } from './components/code-editor/code-editor.component';
 import { OutputPanelComponent } from './components/output-panel/output-panel.component';
 import { QuestPanelComponent } from './components/quest-panel/quest-panel.component';
+import { XpAnimationComponent } from './components/xp-animation/xp-animation.component';
 import { GameStateService } from './services/game-state.service';
 import { IrisConnectionService } from './services/iris-connection.service';
 import { IrisApiService } from './services/iris-api.service';
@@ -19,6 +20,7 @@ import { EvaluationResult } from './models/quest.models';
     CodeEditorComponent,
     OutputPanelComponent,
     QuestPanelComponent,
+    XpAnimationComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -41,6 +43,12 @@ export class App implements OnInit {
 
   /** Last evaluation result (cleared when code is run again). */
   evaluation = signal<EvaluationResult | null>(null);
+
+  /** XP animation trigger — increment to fire a new animation. */
+  xpAnimTrigger = signal(0);
+  xpAnimAmount = signal(0);
+  xpAnimLeveledUp = signal(false);
+  xpAnimNewLevel = signal(1);
 
   ngOnInit(): void {
     this.connectionSvc.startPolling(this.gameState.irisConfig());
@@ -101,7 +109,16 @@ export class App implements OnInit {
     this.evaluation.set(result);
 
     if (result.passed) {
+      const levelBefore = this.gameState.level();
       this.questEngine.completeQuest(quest, this.editorCode(), result);
+      const levelAfter = this.gameState.level();
+
+      // Fire XP animation.
+      this.xpAnimAmount.set(result.xpEarned);
+      this.xpAnimLeveledUp.set(levelAfter > levelBefore);
+      this.xpAnimNewLevel.set(levelAfter);
+      this.xpAnimTrigger.update(n => n + 1);
+
       // Load starter code for the newly selected quest (if any).
       const next = this.questEngine.currentQuest();
       if (next && next.id !== quest.id) {

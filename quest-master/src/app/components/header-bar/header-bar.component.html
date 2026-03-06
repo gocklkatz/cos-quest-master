@@ -6,7 +6,11 @@
 
   <div class="xp-section">
     <div class="xp-label">
-      <span>XP: {{ gameState.xp() }}/{{ xpForNextLevel }}</span>
+      @if (isMaxLevel) {
+        <span>XP: {{ gameState.xp() }} (MAX)</span>
+      } @else {
+        <span>XP: {{ gameState.xp() }}/{{ xpForNextLevelValue }}</span>
+      }
       <span class="level-badge">Level {{ gameState.level() }}</span>
     </div>
     <div class="xp-bar">
