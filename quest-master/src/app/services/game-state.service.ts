@@ -31,15 +31,27 @@ export class GameStateService {
     this.persist();
   }
 
-  completeQuest(questId: string, xpEarned: number, entry: QuestLogEntry): void {
+  completeQuest(
+    questId: string,
+    xpEarned: number,
+    entry: QuestLogEntry,
+    newConcepts: string[] = [],
+    branch?: string,
+  ): void {
     this.state.update(s => {
       const newXp = s.xp + xpEarned;
+      const coveredConcepts = [...new Set([...s.coveredConcepts, ...newConcepts])];
+      const unlockedBranches = branch
+        ? [...new Set([...s.unlockedBranches, branch])]
+        : s.unlockedBranches;
       return {
         ...s,
         xp: newXp,
         level: calcLevel(newXp),
         completedQuests: [...new Set([...s.completedQuests, questId])],
         questLog: [...s.questLog, entry],
+        coveredConcepts,
+        unlockedBranches,
       };
     });
     this.persist();

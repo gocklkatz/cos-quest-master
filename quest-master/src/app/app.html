@@ -2,14 +2,15 @@
   <app-header-bar (openSettings)="openSettings()" />
 
   <div class="workspace">
-    <!-- Left: quest panel placeholder (populated in Step 3) -->
+    <!-- Left: quest panel -->
     <aside class="quest-sidebar">
-      <div class="quest-placeholder">
-        <div class="quest-placeholder-icon">📜</div>
-        <p class="quest-placeholder-title">Quest Panel</p>
-        <p class="quest-placeholder-sub">Quests will appear here in the next step.</p>
-        <p class="quest-placeholder-sub">For now, write any ObjectScript in the editor and run it on IRIS.</p>
-      </div>
+      <app-quest-panel
+        [quest]="questEngine.currentQuest()"
+        [availableQuests]="questEngine.availableQuests()"
+        [completedQuestIds]="questEngine.completedQuestIds()"
+        [evaluation]="evaluation()"
+        (questSelected)="onQuestSelected($event)"
+      />
     </aside>
 
     <!-- Right: editor + output -->
@@ -25,12 +26,26 @@
           [disabled]="isRunning()"
         >
           @if (isRunning()) {
-            <span class="spinner">⟳</span> Running…
+            <span class="spinner">&#8635;</span> Running&hellip;
           } @else {
-            ▶ Run on IRIS
+            &#9654; Run on IRIS
           }
         </button>
-        <span class="run-hint">Ctrl+Enter</span>
+
+        <button
+          class="submit-btn"
+          (click)="submitCode()"
+          [disabled]="isRunning() || !questEngine.currentQuest() || questEngine.currentQuestCompleted()"
+          [title]="questEngine.currentQuestCompleted() ? 'Quest already completed' : 'Submit your solution'"
+        >
+          @if (questEngine.currentQuestCompleted()) {
+            &#10003; Completed
+          } @else {
+            &#128228; Submit
+          }
+        </button>
+
+        <span class="run-hint">Ctrl+Enter to run</span>
       </div>
 
       <div class="output-pane">

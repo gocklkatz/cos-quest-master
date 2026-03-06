@@ -116,6 +116,30 @@
   to   { transform: rotate(360deg); }
 }
 
+.submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 16px;
+  background: #1e3a28;
+  color: #80d0a0;
+  border: 1px solid #2e5a3a;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) {
+    background: #284d34;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
 .run-hint {
   font-size: 0.72rem;
   color: #4a4060;

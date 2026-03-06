@@ -1,0 +1,348 @@
+// ── Container ────────────────────────────────────────────
+.quest-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: #d4c9ed;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+// ── Sections ─────────────────────────────────────────────
+.quest-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid #1e1830;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7a6ea8;
+  margin-bottom: 8px;
+}
+
+// ── Header ───────────────────────────────────────────────
+.quest-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #1e1830;
+  background: linear-gradient(180deg, #1a1530 0%, #110f1e 100%);
+}
+
+.quest-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.tier-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 12px;
+
+  &.tier-apprentice {
+    background: #3b2a1a;
+    color: #c89060;
+    border: 1px solid #5a3e22;
+  }
+
+  &.tier-journeyman {
+    background: #1e2535;
+    color: #98b4d4;
+    border: 1px solid #2e3f5a;
+  }
+
+  &.tier-master {
+    background: #2a2415;
+    color: #d4b54a;
+    border: 1px solid #4a3e1a;
+  }
+}
+
+.xp-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #8070c0;
+  background: #1e1830;
+  border: 1px solid #2e2848;
+  padding: 2px 8px;
+  border-radius: 12px;
+
+  &.small {
+    font-size: 0.6rem;
+    padding: 1px 6px;
+  }
+}
+
+.quest-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e8deff;
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.quest-branch {
+  font-size: 0.65rem;
+  color: #5a5070;
+  text-transform: capitalize;
+  letter-spacing: 0.04em;
+}
+
+// ── Narrative ────────────────────────────────────────────
+.narrative-section {
+  background: #0e0c1a;
+}
+
+.narrative-text {
+  color: #9a90b8;
+  font-style: italic;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+// ── Objective ────────────────────────────────────────────
+.objective-text {
+  color: #c8bfdf;
+  margin: 0;
+}
+
+// ── Hints ────────────────────────────────────────────────
+.hints-label {
+  justify-content: space-between;
+}
+
+.hint-count {
+  color: #5a5070;
+  font-weight: 400;
+}
+
+.hint-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+  align-items: flex-start;
+}
+
+.hint-num {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2a2048;
+  color: #8070c0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.hint-text {
+  color: #b8aed8;
+  font-family: monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.hint-btn {
+  margin-top: 6px;
+  background: transparent;
+  border: 1px solid #2e2848;
+  color: #7060a8;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+
+  &:hover {
+    border-color: #5040a0;
+    color: #a090e0;
+  }
+}
+
+.hints-exhausted {
+  color: #4a4060;
+  font-size: 0.72rem;
+  margin: 4px 0 0;
+}
+
+// ── Bonus ────────────────────────────────────────────────
+.bonus-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bonus-item {
+  color: #9a8ab8;
+  padding-left: 14px;
+  position: relative;
+  font-size: 0.78rem;
+
+  &::before {
+    content: '•';
+    position: absolute;
+    left: 2px;
+    color: #5a5070;
+  }
+}
+
+// ── Evaluation ───────────────────────────────────────────
+.evaluation-section {
+  border-left: 3px solid #2e2848;
+
+  &.passed {
+    border-left-color: #3a7a4a;
+    background: #0e1a12;
+  }
+
+  &.failed {
+    border-left-color: #7a3a3a;
+    background: #1a0e0e;
+  }
+}
+
+.eval-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.eval-icon {
+  font-size: 0.9rem;
+
+  .passed & { color: #4a9a5a; }
+  .failed & { color: #9a4a4a; }
+}
+
+.eval-title {
+  font-weight: 700;
+  font-size: 0.8rem;
+
+  .passed & { color: #6ac880; }
+  .failed & { color: #c87070; }
+}
+
+.eval-feedback {
+  margin: 0 0 4px;
+  color: #a89ab8;
+  font-size: 0.78rem;
+}
+
+.eval-xp {
+  margin: 4px 0 0;
+  font-weight: 700;
+  color: #8070c0;
+  font-size: 0.78rem;
+}
+
+// ── Quest list ───────────────────────────────────────────
+.quest-list-section {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.quest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quest-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.12s;
+
+  &:hover:not(.active) {
+    background: #1a1630;
+  }
+
+  &.active {
+    background: #22193a;
+    cursor: default;
+  }
+
+  &.completed {
+    opacity: 0.55;
+
+    .quest-list-icon {
+      color: #4a9a5a;
+    }
+  }
+}
+
+.quest-list-icon {
+  font-size: 0.7rem;
+  color: #4a4060;
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.quest-list-title {
+  flex: 1;
+  color: #b8aed8;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quest-list-xp {
+  font-size: 0.65rem;
+  color: #5a5070;
+}
+
+// ── Empty state ──────────────────────────────────────────
+.quest-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 32px 24px;
+  text-align: center;
+  color: #5c6370;
+}
+
+.quest-empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.quest-empty-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6b6080;
+  margin: 0 0 8px;
+}
+
+.quest-empty-sub {
+  font-size: 0.78rem;
+  margin: 4px 0;
+  line-height: 1.5;
+}
