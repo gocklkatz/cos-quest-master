@@ -1,0 +1,15 @@
+<div class="app-shell">
+  <app-header-bar (openSettings)="openSettings()" />
+
+  <main class="app-main">
+    <div class="placeholder-content">
+      <h1>Quest Master</h1>
+      <p>Your ObjectScript training begins here.</p>
+      <p class="sub">Open Settings to configure your IRIS connection, then quests will appear here.</p>
+    </div>
+  </main>
+
+  @if (showSettings()) {
+    <app-settings-modal (closed)="closeSettings()" />
+  }
+</div>

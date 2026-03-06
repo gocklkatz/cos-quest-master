@@ -1,0 +1,90 @@
+.header-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px;
+  height: 56px;
+  background: #110f1e;
+  border-bottom: 1px solid #2d2550;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+
+  .logo {
+    font-size: 1.4rem;
+  }
+
+  .title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e2d9f3;
+    letter-spacing: 0.02em;
+  }
+}
+
+.xp-section {
+  flex: 1;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.xp-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #9b8ec4;
+}
+
+.level-badge {
+  background: #3b3058;
+  padding: 1px 8px;
+  border-radius: 10px;
+  color: #d4b8f5;
+  font-weight: 600;
+}
+
+.xp-bar {
+  height: 6px;
+  background: #2d2550;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c5cbf, #a07ee0);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.settings-btn {
+  background: none;
+  border: none;
+  color: #9b8ec4;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover {
+    color: #e2d9f3;
+    background: #2d2550;
+  }
+}

@@ -1,0 +1,18 @@
+{
+    "intersystems.servers": {
+        "local-iris": {
+            "webServer": {
+                "scheme": "http",
+                "host": "localhost",
+                "port": 52773
+            },
+            "username": "_SYSTEM"
+        }
+    },
+    "objectscript.conn": {
+        "server": "local-iris",
+        "ns": "USER",
+        "active": true
+    },
+    "objectscript.export.folder": "src"
+}

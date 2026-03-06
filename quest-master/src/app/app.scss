@@ -1,0 +1,36 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-content {
+  text-align: center;
+  color: #9b8ec4;
+
+  h1 {
+    font-size: 2rem;
+    color: #d4b8f5;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin: 4px 0;
+    font-size: 1rem;
+  }
+
+  .sub {
+    font-size: 0.85rem;
+    color: #6b6080;
+    margin-top: 12px;
+  }
+}

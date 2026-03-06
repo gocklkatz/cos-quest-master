@@ -1,0 +1,10 @@
+<span class="connection-indicator" [class]="connectionSvc.connectionStatus()">
+  <span class="dot"></span>
+  <span class="label">
+    @switch (connectionSvc.connectionStatus()) {
+      @case ('connected') { IRIS Connected }
+      @case ('connecting') { Connecting... }
+      @default { IRIS Offline }
+    }
+  </span>
+</span>

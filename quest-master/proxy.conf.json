@@ -1,0 +1,12 @@
+{
+  "/api/quest": {
+    "target": "http://localhost:52773",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/api/atelier": {
+    "target": "http://localhost:52773",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

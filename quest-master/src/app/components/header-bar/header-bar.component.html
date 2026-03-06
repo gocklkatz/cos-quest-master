@@ -1,0 +1,21 @@
+<header class="header-bar">
+  <div class="brand">
+    <span class="logo">&#x2694;</span>
+    <span class="title">Quest Master</span>
+  </div>
+
+  <div class="xp-section">
+    <div class="xp-label">
+      <span>XP: {{ gameState.xp() }}/{{ xpForNextLevel }}</span>
+      <span class="level-badge">Level {{ gameState.level() }}</span>
+    </div>
+    <div class="xp-bar">
+      <div class="xp-fill" [style.width.%]="xpProgress"></div>
+    </div>
+  </div>
+
+  <div class="right-section">
+    <app-connection-indicator />
+    <button class="settings-btn" (click)="openSettings.emit()" title="Settings">&#x2699;</button>
+  </div>
+</header>

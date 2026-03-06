@@ -1,0 +1,65 @@
+<div class="modal-backdrop" (click)="cancel()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Settings</h2>
+      <button class="close-btn" (click)="cancel()">&#x2715;</button>
+    </div>
+
+    <div class="modal-body">
+      <section>
+        <h3>Player</h3>
+        <label>
+          Name
+          <input type="text" [ngModel]="playerName()" (ngModelChange)="playerName.set($event)" placeholder="Your name" />
+        </label>
+      </section>
+
+      <section>
+        <h3>IRIS Connection</h3>
+        <label>
+          Base URL
+          <input type="text" [ngModel]="baseUrl()" (ngModelChange)="baseUrl.set($event)" placeholder="http://localhost:52773" />
+        </label>
+        <label>
+          Namespace
+          <input type="text" [ngModel]="namespace()" (ngModelChange)="namespace.set($event)" placeholder="USER" />
+        </label>
+        <label>
+          Username
+          <input type="text" [ngModel]="username()" (ngModelChange)="username.set($event)" placeholder="_SYSTEM" />
+        </label>
+        <label>
+          Password
+          <input type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" placeholder="SYS" />
+        </label>
+      </section>
+
+      <section>
+        <h3>AI Features</h3>
+        <label>
+          Anthropic API Key
+          <input type="password" [ngModel]="anthropicApiKey()" (ngModelChange)="anthropicApiKey.set($event)" placeholder="sk-ant-..." />
+        </label>
+        <p class="hint">Your API key is stored only in this browser and never sent anywhere except api.anthropic.com.</p>
+      </section>
+
+      <section class="danger-zone">
+        <h3>Danger Zone</h3>
+        @if (!showResetConfirm()) {
+          <button class="btn-danger" (click)="confirmReset()">Reset All Progress</button>
+        } @else {
+          <p class="warning">This will erase all XP, quests, and quest history. Are you sure?</p>
+          <div class="confirm-row">
+            <button class="btn-danger" (click)="doReset()">Yes, Reset Everything</button>
+            <button class="btn-secondary" (click)="showResetConfirm.set(false)">Cancel</button>
+          </div>
+        }
+      </section>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cancel()">Cancel</button>
+      <button class="btn-primary" (click)="save()">Save Settings</button>
+    </div>
+  </div>
+</div>

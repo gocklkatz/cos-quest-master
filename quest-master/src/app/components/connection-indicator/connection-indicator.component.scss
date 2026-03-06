@@ -1,0 +1,38 @@
+.connection-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &.connected {
+    color: #4ade80;
+    .dot { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+  }
+
+  &.disconnected {
+    color: #f87171;
+    .dot { background: #f87171; }
+  }
+
+  &.connecting {
+    color: #fbbf24;
+    .dot {
+      background: #fbbf24;
+      animation: pulse 1s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
