@@ -21,3 +21,12 @@ button {
 input, textarea {
   font-family: inherit;
 }
+
+/* Allow ngx-monaco-editor to fill its flex container instead of the default 200px */
+ngx-monaco-editor {
+  display: block !important;
+  height: 100% !important;
+}
+ngx-monaco-editor .editor-container {
+  height: 100% !important;
+}

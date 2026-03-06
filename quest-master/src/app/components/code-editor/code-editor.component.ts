@@ -1,0 +1,74 @@
+import { Component, effect, model, output } from '@angular/core';
+import { EditorComponent } from 'ngx-monaco-editor-v2';
+
+@Component({
+  selector: 'app-code-editor',
+  standalone: true,
+  imports: [EditorComponent],
+  templateUrl: './code-editor.component.html',
+  styleUrl: './code-editor.component.scss',
+})
+export class CodeEditorComponent {
+  /** Two-way bindable: parent sets starter code; child emits user edits. */
+  code = model('');
+
+  /** Emitted when the user presses Ctrl+Enter inside the editor. */
+  runRequested = output<void>();
+
+  readonly editorOptions = {
+    theme: 'objectscript-dark',
+    language: 'objectscript',
+    minimap: { enabled: false },
+    fontSize: 14,
+    automaticLayout: true,
+    scrollBeyondLastLine: false,
+    lineNumbers: 'on' as const,
+    renderLineHighlight: 'line' as const,
+    tabSize: 2,
+    wordWrap: 'on' as const,
+  };
+
+  private editor: any = null;
+
+  constructor() {
+    // When the parent changes the `code` signal (e.g. loading starter code from a quest),
+    // push the new value into Monaco without triggering a propagateChange → setValue loop.
+    effect(() => {
+      const newCode = this.code();
+      if (this.editor) {
+        const current: string = this.editor.getValue();
+        if (current !== newCode) {
+          // Replace content while preserving undo history and cursor position.
+          const model = this.editor.getModel();
+          this.editor.pushUndoStop();
+          this.editor.executeEdits('load', [{ range: model.getFullModelRange(), text: newCode }]);
+          this.editor.pushUndoStop();
+        }
+      }
+    });
+  }
+
+  onEditorInit(editor: any): void {
+    this.editor = editor;
+
+    // Set initial value (effect() runs before editor exists on first load).
+    const initialCode = this.code();
+    if (initialCode) {
+      editor.setValue(initialCode);
+    }
+
+    // Forward user edits to the model() signal — no ngModel in the loop.
+    editor.onDidChangeModelContent(() => {
+      this.code.set(editor.getValue());
+    });
+
+    // Ctrl+Enter → run code.
+    const monaco = (window as any).monaco;
+    editor.addAction({
+      id: 'run-on-iris',
+      label: 'Run on IRIS',
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      run: () => this.runRequested.emit(),
+    });
+  }
+}

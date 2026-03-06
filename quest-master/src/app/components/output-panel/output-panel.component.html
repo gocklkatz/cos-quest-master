@@ -1,0 +1,30 @@
+<div class="output-panel">
+  <div class="output-header">
+    <span class="label">OUTPUT</span>
+    @if (isRunning()) {
+      <span class="running-badge">Running...</span>
+    }
+  </div>
+
+  <div class="output-body">
+    @if (isRunning()) {
+      <div class="output-line muted">Sending code to IRIS...</div>
+    } @else if (error()) {
+      <div class="output-line error">
+        <span class="prompt">!</span>
+        <pre>{{ error() }}</pre>
+      </div>
+    } @else if (output() !== null) {
+      @if (output() === '') {
+        <div class="output-line muted">(no output)</div>
+      } @else {
+        <div class="output-line success">
+          <span class="prompt">&gt;</span>
+          <pre>{{ output() }}</pre>
+        </div>
+      }
+    } @else {
+      <div class="output-line muted">Run your code to see output here.</div>
+    }
+  </div>
+</div>
