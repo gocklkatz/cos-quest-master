@@ -133,6 +133,9 @@
       (branchSelected)="selectedBranch.set($event)"
     />
 
+    <!-- ── Quest log ────────────────────────────── -->
+    <app-quest-log [entries]="questLog()" />
+
   </div>
 } @else {
   <div class="quest-empty">

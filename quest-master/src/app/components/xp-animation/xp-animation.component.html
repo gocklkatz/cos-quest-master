@@ -1,7 +1,21 @@
 @if (visible()) {
-  <div class="xp-overlay">
+  <div class="xp-overlay" [class.level-up-overlay]="leveledUp()">
+
+    <!-- Sparkle particles (always shown) -->
+    <div class="sparks">
+      @for (i of sparkIndices; track i) {
+        <span class="spark" [attr.data-i]="i"></span>
+      }
+    </div>
+
+    @if (leveledUp()) {
+      <!-- Full-screen level-up pulse ring -->
+      <div class="level-up-ring"></div>
+    }
+
     <div class="xp-toast" [class.level-up]="leveledUp()">
       @if (leveledUp()) {
+        <div class="level-up-crown">&#9733;</div>
         <div class="level-up-title">LEVEL UP!</div>
         <div class="level-up-sub">You are now Level {{ newLevel() }}</div>
       }

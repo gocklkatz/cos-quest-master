@@ -7,21 +7,74 @@
   animation: floatUp 2.8s ease-out forwards;
 }
 
+// ── Level-up full-screen pulse ────────────────────────
+.level-up-overlay {
+  // Extend to cover viewport for the ring effect, but keep toast anchored
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 80px 24px 0 0;
+  animation: none; // container doesn't float — children do
+}
+
+.level-up-ring {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  animation: ringExpand 0.9s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes ringExpand {
+  0%   { width: 0;     height: 0;     box-shadow: 0 0 0   0   rgba(240, 192, 64, 0.6); opacity: 1; }
+  50%  { width: 600px; height: 600px; box-shadow: 0 0 60px 8px rgba(240, 192, 64, 0.3); opacity: 0.6; }
+  100% { width: 900px; height: 900px; box-shadow: 0 0 0   0   rgba(240, 192, 64, 0);   opacity: 0; }
+}
+
+// ── Toast ─────────────────────────────────────────────
 .xp-toast {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  background: rgba(17, 13, 30, 0.95);
+  background: rgba(17, 13, 30, 0.97);
   border: 1px solid #5c3d9e;
   border-radius: 12px;
   padding: 12px 20px;
   box-shadow: 0 4px 24px rgba(120, 80, 200, 0.4);
+  animation: toastFloat 2.8s ease-out forwards;
 
   &.level-up {
     border-color: #f0c040;
-    box-shadow: 0 4px 32px rgba(240, 192, 64, 0.5);
+    box-shadow: 0 4px 40px rgba(240, 192, 64, 0.55), 0 0 0 1px rgba(240, 192, 64, 0.2);
+    animation: toastFloatLevelUp 2.8s ease-out forwards;
   }
+}
+
+@keyframes toastFloat {
+  0%   { opacity: 0; transform: translateY(16px) scale(0.85); }
+  15%  { opacity: 1; transform: translateY(0)    scale(1.05); }
+  20%  { transform: translateY(0) scale(1); }
+  70%  { opacity: 1; transform: translateY(-8px) scale(1); }
+  100% { opacity: 0; transform: translateY(-28px) scale(0.9); }
+}
+
+@keyframes toastFloatLevelUp {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.7); }
+  15%  { opacity: 1; transform: translateY(0)    scale(1.12); }
+  22%  { transform: translateY(0) scale(1); }
+  70%  { opacity: 1; transform: translateY(-10px) scale(1); }
+  100% { opacity: 0; transform: translateY(-36px) scale(0.9); }
 }
 
 .xp-gained {
@@ -35,6 +88,18 @@
     color: #f0c040;
     font-size: 1.2rem;
   }
+}
+
+.level-up-crown {
+  font-size: 1.6rem;
+  color: #f0c040;
+  animation: crownPulse 0.6s ease-out 0.1s both;
+}
+
+@keyframes crownPulse {
+  0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60%  { transform: scale(1.3) rotate(8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 .level-up-title {
@@ -51,9 +116,38 @@
   opacity: 0.85;
 }
 
-@keyframes floatUp {
-  0%   { opacity: 0; transform: translateY(16px) scale(0.85); }
-  15%  { opacity: 1; transform: translateY(0)    scale(1); }
-  70%  { opacity: 1; transform: translateY(-8px) scale(1); }
-  100% { opacity: 0; transform: translateY(-28px) scale(0.9); }
+// ── Sparks ────────────────────────────────────────────
+.sparks {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
 }
+
+.spark {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #a07ee0;
+
+  // 8 sparks — each gets its own named keyframe via a unique CSS custom property pair
+  &[data-i="0"] { background: #f0c040; width: 6px; height: 6px; animation: spark0 0.7s ease-out 0.05s both; }
+  &[data-i="1"] { animation: spark1 0.7s ease-out 0.08s both; }
+  &[data-i="2"] { background: #e090f0; width: 4px; height: 4px; animation: spark2 0.7s ease-out 0.11s both; }
+  &[data-i="3"] { animation: spark3 0.7s ease-out 0.06s both; }
+  &[data-i="4"] { background: #f0c040; width: 6px; height: 6px; animation: spark4 0.7s ease-out 0.09s both; }
+  &[data-i="5"] { animation: spark5 0.7s ease-out 0.07s both; }
+  &[data-i="6"] { background: #e090f0; width: 4px; height: 4px; animation: spark6 0.7s ease-out 0.12s both; }
+  &[data-i="7"] { animation: spark7 0.7s ease-out 0.04s both; }
+}
+
+// Right, Up-Right, Up, Up-Left, Left, Down-Left, Down, Down-Right
+@keyframes spark0 { 0% { transform: translate(0,0) scale(1); opacity:1 } 100% { transform: translate(52px, -4px) scale(0); opacity:0 } }
+@keyframes spark1 { 0% { transform: translate(0,0) scale(1); opacity:1 } 100% { transform: translate(36px,-36px) scale(0); opacity:0 } }
+@keyframes spark2 { 0% { transform: translate(0,0) scale(1); opacity:1 } 100% { transform: translate(4px, -50px) scale(0); opacity:0 } }
+@keyframes spark3 { 0% { transform: translate(0,0) scale(1); opacity:1 } 100% { transform: translate(-38px,-34px) scale(0); opacity:0 } }
+@keyframes spark4 { 0% { transform: translate(0,0) scale(1); opacity:1 } 100% { transform: translate(-52px, 2px) scale(0); opacity:0 } }
+@keyframes spark5 { 0% { transform: translate(0,0) scale(1); opacity:1 } 100% { transform: translate(-34px, 40px) scale(0); opacity:0 } }
+@keyframes spark6 { 0% { transform: translate(0,0) scale(1); opacity:1 } 100% { transform: translate(0px,  52px) scale(0); opacity:0 } }
+@keyframes spark7 { 0% { transform: translate(0,0) scale(1); opacity:1 } 100% { transform: translate(40px, 36px) scale(0); opacity:0 } }

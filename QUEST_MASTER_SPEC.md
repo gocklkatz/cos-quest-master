@@ -926,13 +926,13 @@ If either fails, show instructions for completing Quest Zero.
 
 Build in this order:
 
-1. **Scaffold + Settings + IRIS connection** — ng new quest-master --standalone --style=scss --routing=false. Settings modal, IRIS health check, connection indicator, proxy config.
-2. **Code editor + execution** — Monaco editor with ObjectScript syntax, execute button, output panel.
-3. **Hard-coded quests** — Quest panel rendering, quest progression with starter quests.
-4. **XP system** — XP tracking, level display, progress bar, localStorage persistence.
-5. **Claude integration** — API key input, quest generation, code evaluation.
-6. **Skill tree** — Branch visualization, unlock logic.
-7. **Polish** — XP animations, quest log, theme refinements.
+1. ✅ **Scaffold + Settings + IRIS connection** — ng new quest-master --standalone --style=scss --routing=false. Settings modal, IRIS health check, connection indicator, proxy config.
+2. ✅ **Code editor + execution** — Monaco editor with ObjectScript syntax, execute button, output panel.
+3. ✅ **Hard-coded quests** — Quest panel rendering, quest progression with starter quests.
+4. ✅ **XP system** — XP tracking, level display, progress bar, localStorage persistence.
+5. ✅ **Claude integration** — API key input, quest generation, code evaluation.
+6. ✅ **Skill tree** — Branch visualization, unlock logic.
+7. ✅ **Polish** — XP animations, quest log, theme refinements.
 
 ---
 

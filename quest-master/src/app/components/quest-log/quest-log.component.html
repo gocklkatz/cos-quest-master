@@ -1,0 +1,34 @@
+<div class="quest-log">
+  <button class="log-toggle" (click)="toggleExpanded()">
+    <span class="log-icon">&#128220;</span>
+    <span class="log-title">Quest Log</span>
+    <span class="log-count">{{ entries().length }}</span>
+    <span class="chevron" [class.open]="expanded()">&#8250;</span>
+  </button>
+
+  @if (expanded()) {
+    <div class="log-body">
+      @if (sortedEntries().length === 0) {
+        <p class="log-empty">No quests completed yet. Your legend begins here.</p>
+      } @else {
+        <ul class="log-list">
+          @for (entry of sortedEntries(); track entry.questId) {
+            <li class="log-entry">
+              <div class="entry-header">
+                <span class="entry-title">{{ entry.title }}</span>
+                <span class="entry-score" [class]="scoreClass(entry.score)">{{ entry.score }}</span>
+              </div>
+              <div class="entry-meta">
+                <span class="entry-xp">+{{ entry.xpEarned }} XP</span>
+                <span class="entry-date">{{ formatDate(entry.completedAt) }}</span>
+              </div>
+              @if (entry.feedback) {
+                <p class="entry-feedback">{{ entry.feedback }}</p>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</div>

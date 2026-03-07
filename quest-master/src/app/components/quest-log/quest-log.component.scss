@@ -1,0 +1,173 @@
+.quest-log {
+  border-top: 1px solid #1e1830;
+}
+
+// ── Toggle button ─────────────────────────────────────
+.log-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  color: #7a6ea8;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: #16132a;
+    color: #a090d8;
+  }
+}
+
+.log-icon {
+  font-size: 0.85rem;
+}
+
+.log-title {
+  flex: 1;
+  text-align: left;
+}
+
+.log-count {
+  background: #1e1838;
+  border: 1px solid #2e2858;
+  color: #6858a8;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.chevron {
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+  display: inline-block;
+
+  &.open {
+    transform: rotate(90deg);
+  }
+}
+
+// ── Log body ──────────────────────────────────────────
+.log-body {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.log-empty {
+  padding: 10px 16px 14px;
+  color: #4a4060;
+  font-size: 0.75rem;
+  font-style: italic;
+  margin: 0;
+  line-height: 1.5;
+}
+
+// ── List ──────────────────────────────────────────────
+.log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 8px;
+}
+
+.log-entry {
+  padding: 8px 16px;
+  border-bottom: 1px solid #16132a;
+  transition: background 0.12s;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: #14112a;
+  }
+}
+
+.entry-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.entry-title {
+  flex: 1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #c0b4dc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-score {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  flex-shrink: 0;
+
+  &.score-high {
+    background: #1a3020;
+    color: #5aba78;
+    border: 1px solid #2a4830;
+  }
+
+  &.score-mid {
+    background: #2a2010;
+    color: #c89a40;
+    border: 1px solid #3a3018;
+  }
+
+  &.score-low {
+    background: #2a1010;
+    color: #c87070;
+    border: 1px solid #3a2020;
+  }
+}
+
+.entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 3px;
+}
+
+.entry-xp {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #7058b8;
+}
+
+.entry-date {
+  font-size: 0.65rem;
+  color: #4a4060;
+}
+
+.entry-feedback {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #7a7090;
+  font-style: italic;
+  line-height: 1.45;
+
+  // Clamp to 2 lines
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

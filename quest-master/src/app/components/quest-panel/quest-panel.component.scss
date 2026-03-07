@@ -99,7 +99,9 @@
 
 // ── Narrative ────────────────────────────────────────────
 .narrative-section {
-  background: #0e0c1a;
+  background: linear-gradient(135deg, #100d1f 0%, #0e0c1a 100%);
+  border-left: 3px solid #2a1f4a;
+  padding-left: 14px;
 }
 
 .narrative-text {
@@ -107,7 +109,25 @@
   font-style: italic;
   margin: 0;
   font-size: 0.8rem;
-  line-height: 1.6;
+  line-height: 1.65;
+
+  &::before {
+    content: '\201C';
+    color: #4a3a6a;
+    font-size: 1.4rem;
+    line-height: 0;
+    vertical-align: -0.4em;
+    margin-right: 2px;
+  }
+
+  &::after {
+    content: '\201D';
+    color: #4a3a6a;
+    font-size: 1.4rem;
+    line-height: 0;
+    vertical-align: -0.4em;
+    margin-left: 2px;
+  }
 }
 
 // ── Objective ────────────────────────────────────────────

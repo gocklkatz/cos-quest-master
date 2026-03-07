@@ -22,6 +22,31 @@ input, textarea {
   font-family: inherit;
 }
 
+/* ── Custom scrollbars ───────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0b1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2d2550;
+  border-radius: 3px;
+
+  &:hover {
+    background: #3d3568;
+  }
+}
+
+/* ── Focus ring ──────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #7c5cbf;
+  outline-offset: 2px;
+}
+
 /* Allow ngx-monaco-editor to fill its flex container instead of the default 200px */
 ngx-monaco-editor {
   display: block !important;
@@ -29,4 +54,10 @@ ngx-monaco-editor {
 }
 ngx-monaco-editor .editor-container {
   height: 100% !important;
+}
+
+/* ── Utility ─────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

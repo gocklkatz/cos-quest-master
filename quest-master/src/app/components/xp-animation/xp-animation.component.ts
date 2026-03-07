@@ -8,6 +8,7 @@ import { Component, input, OnChanges, signal } from '@angular/core';
   styleUrl: './xp-animation.component.scss',
 })
 export class XpAnimationComponent implements OnChanges {
+  readonly sparkIndices = [0, 1, 2, 3, 4, 5, 6, 7];
   /** Trigger a new animation by incrementing this counter. */
   trigger = input(0);
   xpEarned = input(0);
