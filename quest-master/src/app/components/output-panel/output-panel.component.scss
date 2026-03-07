@@ -68,3 +68,39 @@
   &.error    pre { color: #e06c75; }
   &.muted       { color: #5c6370; font-style: italic; }
 }
+
+.compile-errors {
+  margin-bottom: 10px;
+  border-left: 3px solid #e06c75;
+  padding-left: 10px;
+}
+
+.compile-errors-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #e06c75;
+  margin-bottom: 6px;
+}
+
+.compile-error-line {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 4px;
+
+  pre {
+    margin: 0;
+    color: #ff8080;
+    white-space: pre-wrap;
+    word-break: break-all;
+    flex: 1;
+  }
+}
+
+.compile-error-loc {
+  flex-shrink: 0;
+  color: #cc6666;
+  font-size: 11px;
+  min-width: 70px;
+}

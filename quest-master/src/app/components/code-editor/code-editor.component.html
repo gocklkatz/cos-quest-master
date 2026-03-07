@@ -1,3 +1,21 @@
+<div class="editor-toolbar">
+  <button
+    class="mode-btn"
+    [class.active]="questMode() === 'snippet'"
+    (click)="switchMode('snippet')"
+    title="Snippet mode — run ObjectScript commands directly via XECUTE"
+  >Snippet</button>
+  <button
+    class="mode-btn"
+    [class.active]="questMode() === 'class'"
+    (click)="switchMode('class')"
+    title="Class mode — compile a full .cls file and run a test harness"
+  >Class</button>
+  @if (questMode() === 'class') {
+    <span class="mode-hint">Define a complete Class block. Ctrl+Enter compiles &amp; runs.</span>
+  }
+</div>
+
 <ngx-monaco-editor
   class="monaco-host"
   [options]="editorOptions"

@@ -119,4 +119,112 @@ export const STARTER_QUESTS: Quest[] = [
       { label: 'FOR command', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_cfor' },
     ],
   },
+
+  // ─── Class-mode quests ───────────────────────────────────────────────────
+
+  {
+    id: 'classes-01',
+    title: 'Craft the First Blueprint',
+    branch: 'classes-extended',
+    tier: 'apprentice',
+    xpReward: 120,
+    bonusXP: 40,
+    mode: 'class',
+    className: 'Guild.Greeter',
+    narrative:
+      'A master craftsman does not merely issue commands — he designs tools that endure. ' +
+      'In IRIS, a Class is a blueprint: properties hold state, methods define behaviour, ' +
+      'and compilation forges the design into executable form. ' +
+      'Forge your first class and let the Guild greet every newcomer by name.',
+    objective:
+      'Define a class Guild.Greeter with a class method Greet(name As %String) that ' +
+      'returns the string "Welcome to the Guild, " followed by the name. ' +
+      'The test harness will call ##class(Guild.Greeter).Greet("Hero") — your output must ' +
+      'contain "Welcome to the Guild, Hero".',
+    hints: [
+      'Start your file with: Class Guild.Greeter { }',
+      'Inside the class body, declare: ClassMethod Greet(name As %String) As %String { }',
+      'Return a value with: Quit "Welcome to the Guild, " _ name',
+      'The test harness calls WRITE ##class(Guild.Greeter).Greet("Hero"), ! — make sure you return the string, not WRITE it.',
+    ],
+    bonusObjectives: [
+      'Add a second method FormalGreet(name As %String) that returns "Hail and well met, " _ name _ "!"',
+    ],
+    evaluationCriteria:
+      'Class must compile without errors. Test harness output must contain "Welcome to the Guild, Hero".',
+    prerequisites: ['quest-zero'],
+    testHarness: 'WRITE ##class(Guild.Greeter).Greet("Hero"), !',
+    starterCode:
+      'Class Guild.Greeter\n' +
+      '{\n\n' +
+      'ClassMethod Greet(name As %String) As %String\n' +
+      '{\n' +
+      '  // Return a greeting string\n' +
+      '  Quit ""\n' +
+      '}\n\n' +
+      '}',
+    conceptsIntroduced: ['Class definition', 'ClassMethod', 'As %String', 'Quit (return)', '##class()'],
+    docLinks: [
+      { label: 'Defining classes', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_classes' },
+      { label: 'Class methods', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_methods' },
+      { label: '%String data type', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=ROBJ_datatype_string' },
+    ],
+  },
+
+  {
+    id: 'classes-02',
+    title: 'The Persistent Ledger',
+    branch: 'classes-extended',
+    tier: 'journeyman',
+    xpReward: 200,
+    bonusXP: 60,
+    mode: 'class',
+    className: 'Guild.Member',
+    narrative:
+      'Commands vanish when the session ends; globals persist but lack structure. ' +
+      'A %Persistent class gives you both — structured objects that survive across sessions, ' +
+      'stored in the IRIS database with automatic SQL projection. ' +
+      'Define the Guild\'s Member ledger so recruits can be saved and retrieved by ID.',
+    objective:
+      'Define a %Persistent class Guild.Member with properties Name (%String) and ' +
+      'Rank (%String, default "Apprentice"). ' +
+      'The test harness will create a member, save it, and re-open it by ID — ' +
+      'your class must save and load without errors.',
+    hints: [
+      'Extend %Persistent: Class Guild.Member Extends %Persistent',
+      'Declare a property: Property Name As %String;',
+      'Set a default: Property Rank As %String [ InitialExpression = "Apprentice" ];',
+      'The test harness calls %Save() and checks $$$ISOK(sc) — make sure it returns success.',
+      '%OpenId(id) retrieves a saved instance — no extra code needed, it comes from %Persistent.',
+    ],
+    bonusObjectives: [
+      'Add a Title property computed as Name _ " the " _ Rank using [ Calculated, SqlComputeCode, SqlComputed ]',
+    ],
+    evaluationCriteria:
+      'Class must compile. Test harness must save a member and retrieve it by ID with matching Name.',
+    prerequisites: ['classes-01'],
+    testHarness:
+      'SET m = ##class(Guild.Member).%New()\n' +
+      'SET m.Name = "Aldric"\n' +
+      'SET sc = m.%Save()\n' +
+      'IF $$$ISOK(sc) {\n' +
+      '  SET id = m.%Id()\n' +
+      '  SET m2 = ##class(Guild.Member).%OpenId(id)\n' +
+      '  WRITE "Saved: ", m2.Name, " (", m2.Rank, ")", !\n' +
+      '} ELSE {\n' +
+      '  WRITE "Save failed: ", $SYSTEM.Status.GetErrorText(sc), !\n' +
+      '}',
+    starterCode:
+      'Class Guild.Member Extends %Persistent\n' +
+      '{\n\n' +
+      'Property Name As %String;\n\n' +
+      '// Add Rank property with default "Apprentice"\n\n' +
+      '}',
+    conceptsIntroduced: ['%Persistent', 'Property', '%Save', '%OpenId', '%Id', '$$$ISOK', 'InitialExpression'],
+    docLinks: [
+      { label: '%Persistent class', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_persobj' },
+      { label: 'Defining properties', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_propers' },
+      { label: 'Object persistence', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_persobj_saving' },
+    ],
+  },
 ];

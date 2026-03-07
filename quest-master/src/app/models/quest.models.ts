@@ -1,4 +1,5 @@
 export type QuestTier = 'apprentice' | 'journeyman' | 'master';
+export type QuestMode = 'snippet' | 'class' | 'project';
 
 export interface Quest {
   id: string;
@@ -17,6 +18,26 @@ export interface Quest {
   starterCode?: string;
   conceptsIntroduced: string[];
   docLinks?: { label: string; url: string }[];
+  /** Defaults to 'snippet' for backwards compatibility. */
+  mode?: QuestMode;
+  /** ObjectScript snippet run after class compiles (class mode only). */
+  testHarness?: string;
+  /** e.g. "Guild.Member" — required when mode is 'class'. */
+  className?: string;
+}
+
+export interface CompileError {
+  line: number;
+  col: number;
+  text: string;
+  severity: number;
+}
+
+export interface CompileResult {
+  hasErrors: boolean;
+  errors: CompileError[];
+  /** Runtime output from the test harness; empty string if compile failed or no harness. */
+  output: string;
 }
 
 export interface EvaluationResult {

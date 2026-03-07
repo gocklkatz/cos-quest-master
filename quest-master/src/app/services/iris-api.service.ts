@@ -49,6 +49,39 @@ export class IrisApiService {
       );
   }
 
+  /** Save a .cls document via Atelier and return the raw Atelier response. */
+  atelierSave(config: IRISConfig, docName: string, lines: string[]): Observable<any> {
+    const body = { enc: false, content: lines };
+    return this.http
+      .put<any>(
+        `/api/atelier/v1/${config.namespace}/doc/${docName}`,
+        body,
+        { headers: this.getHeaders(config) }
+      )
+      .pipe(catchError(err => of({ error: this.friendlyError(err) })));
+  }
+
+  /** Compile one or more documents via Atelier and return the raw compile response. */
+  atelierCompile(config: IRISConfig, docNames: string[]): Observable<any> {
+    return this.http
+      .post<any>(
+        `/api/atelier/v1/${config.namespace}/action/compile`,
+        docNames,
+        { headers: this.getHeaders(config) }
+      )
+      .pipe(catchError(err => of({ error: this.friendlyError(err) })));
+  }
+
+  /** Delete a document from IRIS via Atelier. */
+  atelierDelete(config: IRISConfig, docName: string): Observable<any> {
+    return this.http
+      .delete<any>(
+        `/api/atelier/v1/${config.namespace}/doc/${docName}`,
+        { headers: this.getHeaders(config) }
+      )
+      .pipe(catchError(err => of({ error: err.message })));
+  }
+
   private friendlyError(err: { status?: number; message?: string }): string {
     if (err.status === 0) {
       return 'Could not reach IRIS. Check that Docker is running and the dev-server proxy is configured correctly.';

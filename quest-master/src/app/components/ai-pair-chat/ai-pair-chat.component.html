@@ -1,0 +1,54 @@
+<div class="chat-panel">
+  <div class="chat-header">
+    <span class="chat-title">AI Pair Programmer</span>
+    <span class="context-counter">{{ messageCount() }} / {{ maxMessages }} in context</span>
+    <button class="clear-btn" (click)="clearChat()" title="Clear chat history">Clear</button>
+  </div>
+
+  @if (!apiKey()) {
+    <div class="chat-no-key">
+      Add your Anthropic API key in Settings to use the AI pair programmer.
+    </div>
+  } @else if (!quest()) {
+    <div class="chat-no-key">Select a quest to start chatting.</div>
+  } @else {
+    <div class="message-list" #messageList>
+      @if (history().length === 0) {
+        <div class="chat-empty">
+          Ask a question about the current quest. The mentor will guide you without giving away the answer.
+        </div>
+      }
+      @for (msg of history(); track $index) {
+        <div class="message" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
+          <span class="message-role">{{ msg.role === 'user' ? 'You' : 'Mentor' }}</span>
+          <p class="message-text">{{ msg.content }}</p>
+        </div>
+      }
+      @if (isThinking()) {
+        <div class="message assistant thinking">
+          <span class="message-role">Mentor</span>
+          <p class="message-text">
+            <span class="dot-pulse">&#9679;&#9679;&#9679;</span>
+          </p>
+        </div>
+      }
+    </div>
+
+    <div class="chat-input-row">
+      <textarea
+        class="chat-input"
+        [value]="inputText()"
+        (input)="inputText.set($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+        placeholder="Ask a question... (Enter to send, Shift+Enter for newline)"
+        rows="2"
+        [disabled]="isThinking()"
+      ></textarea>
+      <button
+        class="send-btn"
+        (click)="send()"
+        [disabled]="isThinking() || !inputText().trim()"
+      >Send</button>
+    </div>
+  }
+</div>

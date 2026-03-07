@@ -504,8 +504,8 @@ quest-master/
 
 | # | Feature | Priority | Status |
 |---|---|---|---|
-| 1 | **Class-based quest infrastructure** — Atelier compile flow, `mode` field, compile error rendering | phase2-high | ⬜ Not started |
-| 2 | **AI Pair Programmer** — chat panel wired to Claude with quest context | phase2-high | ⬜ Not started |
+| 1 | **Class-based quest infrastructure** — Atelier compile flow, `mode` field, compile error rendering | phase2-high | ✅ Complete |
+| 2 | **AI Pair Programmer** — chat panel wired to Claude with quest context | phase2-high | ✅ Complete |
 | 3 | **Documentation links in hints** — `docLinks` field, badge UI in quest panel, starter quest data | phase2-high | ✅ Complete |
 | 4 | **Challenge Mode** — `starterCodeHint` field, `challengeMode` GameState flag, toolbar toggle + restore button, starter quest hints | phase2-high | ⬜ Not started |
 | 5 | **Concept glossary** — starter data, quest-linked popover, sidebar tab | phase2-mid | ⬜ Not started |

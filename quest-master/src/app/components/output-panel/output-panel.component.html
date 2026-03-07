@@ -9,22 +9,37 @@
   <div class="output-body">
     @if (isRunning()) {
       <div class="output-line muted">Sending code to IRIS...</div>
-    } @else if (error()) {
-      <div class="output-line error">
-        <span class="prompt">!</span>
-        <pre>{{ error() }}</pre>
-      </div>
-    } @else if (output() !== null) {
-      @if (output() === '') {
-        <div class="output-line muted">(no output)</div>
-      } @else {
-        <div class="output-line success">
-          <span class="prompt">&gt;</span>
-          <pre>{{ output() }}</pre>
+    } @else {
+      @if (compileErrors().length > 0) {
+        <div class="compile-errors">
+          <div class="compile-errors-label">COMPILE ERRORS</div>
+          @for (err of compileErrors(); track $index) {
+            <div class="compile-error-line">
+              @if (err.line > 0) {
+                <span class="compile-error-loc">Line {{ err.line }}:{{ err.col }}</span>
+              }
+              <pre>{{ err.text }}</pre>
+            </div>
+          }
         </div>
       }
-    } @else {
-      <div class="output-line muted">Run your code to see output here.</div>
+      @if (error()) {
+        <div class="output-line error">
+          <span class="prompt">!</span>
+          <pre>{{ error() }}</pre>
+        </div>
+      } @else if (output() !== null) {
+        @if (output() === '') {
+          <div class="output-line muted">(no output)</div>
+        } @else {
+          <div class="output-line success">
+            <span class="prompt">&gt;</span>
+            <pre>{{ output() }}</pre>
+          </div>
+        }
+      } @else if (compileErrors().length === 0) {
+        <div class="output-line muted">Run your code to see output here.</div>
+      }
     }
   </div>
 </div>

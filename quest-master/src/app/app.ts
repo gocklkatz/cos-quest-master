@@ -5,11 +5,14 @@ import { CodeEditorComponent } from './components/code-editor/code-editor.compon
 import { OutputPanelComponent } from './components/output-panel/output-panel.component';
 import { QuestPanelComponent } from './components/quest-panel/quest-panel.component';
 import { XpAnimationComponent } from './components/xp-animation/xp-animation.component';
+import { AiPairChatComponent } from './components/ai-pair-chat/ai-pair-chat.component';
 import { GameStateService } from './services/game-state.service';
 import { IrisConnectionService } from './services/iris-connection.service';
 import { IrisApiService } from './services/iris-api.service';
 import { QuestEngineService } from './services/quest-engine.service';
-import { EvaluationResult } from './models/quest.models';
+import { ClassQuestService } from './services/class-quest.service';
+import { AiPairService } from './services/ai-pair.service';
+import { CompileError, EvaluationResult, QuestMode } from './models/quest.models';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +24,7 @@ import { EvaluationResult } from './models/quest.models';
     OutputPanelComponent,
     QuestPanelComponent,
     XpAnimationComponent,
+    AiPairChatComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -29,19 +33,27 @@ export class App implements OnInit {
   private gameState = inject(GameStateService);
   private connectionSvc = inject(IrisConnectionService);
   private irisApi = inject(IrisApiService);
+  private classQuest = inject(ClassQuestService);
+  private aiPair = inject(AiPairService);
   readonly questEngine = inject(QuestEngineService);
 
   showSettings = signal(false);
+  showChat = signal(false);
 
   /** True when an Anthropic API key is configured. */
   readonly hasApiKey = computed(() => !!this.gameState.anthropicApiKey());
+  readonly anthropicApiKey = computed(() => this.gameState.anthropicApiKey());
 
   /** Current code in the editor. */
   editorCode = signal('// Write your ObjectScript here\nWRITE "Hello from IRIS!", !');
 
+  /** Active editor mode — driven by the current quest's mode field, or manually toggled. */
+  editorMode = signal<QuestMode>('snippet');
+
   /** Execution state. */
   output = signal<string | null>(null);
   error = signal<string | null>(null);
+  compileErrors = signal<CompileError[]>([]);
   isRunning = signal(false);
 
   /** True while Claude is evaluating a submission. */
@@ -60,10 +72,16 @@ export class App implements OnInit {
     this.connectionSvc.startPolling(this.gameState.irisConfig());
     this.questEngine.initialize();
 
-    // Load starter code for the initial quest.
+    // Load starter code and chat history for the initial quest.
     const initial = this.questEngine.currentQuest();
     if (initial?.starterCode) {
       this.editorCode.set(initial.starterCode);
+    }
+    if (initial?.mode) {
+      this.editorMode.set(initial.mode);
+    }
+    if (initial) {
+      this.aiPair.loadForQuest(initial.id);
     }
   }
 
@@ -76,6 +94,18 @@ export class App implements OnInit {
     this.connectionSvc.startPolling(this.gameState.irisConfig());
   }
 
+  toggleChat(): void {
+    this.showChat.update(v => !v);
+  }
+
+  onModeChanged(mode: QuestMode): void {
+    this.editorMode.set(mode);
+    this.output.set(null);
+    this.error.set(null);
+    this.compileErrors.set([]);
+    this.evaluation.set(null);
+  }
+
   runCode(): void {
     if (this.isRunning()) return;
 
@@ -85,23 +115,68 @@ export class App implements OnInit {
     this.isRunning.set(true);
     this.output.set(null);
     this.error.set(null);
-    this.evaluation.set(null); // clear previous evaluation when re-running
+    this.compileErrors.set([]);
+    this.evaluation.set(null);
 
-    this.irisApi.executeCode(this.gameState.irisConfig(), code).subscribe(result => {
+    if (this.editorMode() === 'class') {
+      this.runClassMode(code);
+    } else {
+      this.irisApi.executeCode(this.gameState.irisConfig(), code).subscribe(result => {
+        this.isRunning.set(false);
+        if (result.success) {
+          this.output.set(result.output ?? '');
+        } else {
+          this.error.set(result.error ?? 'Unknown error');
+        }
+      });
+    }
+  }
+
+  private async runClassMode(source: string): Promise<void> {
+    const quest = this.questEngine.currentQuest();
+    const className = quest?.className ?? this.inferClassName(source);
+
+    if (!className) {
       this.isRunning.set(false);
-      if (result.success) {
-        this.output.set(result.output ?? '');
+      this.error.set('Could not determine class name. Make sure your code starts with "Class ClassName".');
+      return;
+    }
+
+    try {
+      const result = await this.classQuest.runClassQuest(
+        this.gameState.irisConfig(),
+        className,
+        source,
+        quest?.testHarness,
+      );
+      this.isRunning.set(false);
+      if (result.hasErrors) {
+        this.compileErrors.set(result.errors);
+        this.output.set(null);
+        this.error.set(null);
       } else {
-        this.error.set(result.error ?? 'Unknown error');
+        this.compileErrors.set([]);
+        this.output.set(result.output);
+        this.error.set(null);
       }
-    });
+    } catch (e: any) {
+      this.isRunning.set(false);
+      this.error.set(e?.message ?? 'Unexpected error during class compile');
+    }
+  }
+
+  /** Extract class name from "Class Foo.Bar Extends ..." header. */
+  private inferClassName(source: string): string | null {
+    const match = source.match(/^\s*Class\s+([\w.]+)/im);
+    return match ? match[1] : null;
   }
 
   async submitCode(): Promise<void> {
     const quest = this.questEngine.currentQuest();
     if (!quest || this.questEngine.currentQuestCompleted() || this.isEvaluating()) return;
 
-    if (this.output() === null && this.error() === null) {
+    const hasOutput = this.output() !== null || this.error() !== null || this.compileErrors().length > 0;
+    if (!hasOutput) {
       this.error.set('Run your code first, then submit.');
       return;
     }
@@ -109,24 +184,31 @@ export class App implements OnInit {
     let result: EvaluationResult;
     const apiKey = this.gameState.anthropicApiKey();
 
+    // For class mode, build a combined output/error string for evaluation.
+    const effectiveOutput = this.editorMode() === 'class'
+      ? this.buildClassOutput()
+      : (this.output() ?? '');
+    const effectiveError = this.editorMode() === 'class'
+      ? this.buildClassError()
+      : (this.error() ?? '');
+
     if (apiKey) {
       this.isEvaluating.set(true);
       try {
         result = await this.questEngine.evaluateWithClaude(
           quest,
           this.editorCode(),
-          this.output() ?? '',
-          this.error() ?? '',
+          effectiveOutput,
+          effectiveError,
           apiKey,
         );
       } catch {
-        // Claude failed — fall back to simple evaluation
-        result = this.questEngine.evaluateSimple(quest, this.output() ?? '', this.error() !== null);
+        result = this.questEngine.evaluateSimple(quest, effectiveOutput, effectiveError !== '');
       } finally {
         this.isEvaluating.set(false);
       }
     } else {
-      result = this.questEngine.evaluateSimple(quest, this.output() ?? '', this.error() !== null);
+      result = this.questEngine.evaluateSimple(quest, effectiveOutput, effectiveError !== '');
     }
 
     this.evaluation.set(result);
@@ -136,21 +218,25 @@ export class App implements OnInit {
       this.questEngine.completeQuest(quest, this.editorCode(), result);
       const levelAfter = this.gameState.level();
 
-      // Fire XP animation.
       this.xpAnimAmount.set(result.xpEarned);
       this.xpAnimLeveledUp.set(levelAfter > levelBefore);
       this.xpAnimNewLevel.set(levelAfter);
       this.xpAnimTrigger.update(n => n + 1);
 
-      // Load starter code for the newly selected quest (if any).
       const next = this.questEngine.currentQuest();
       if (next && next.id !== quest.id) {
+        // Clean up the compiled class before switching away.
+        if (this.editorMode() === 'class') {
+          this.classQuest.cleanupLastClass(this.gameState.irisConfig());
+        }
         this.editorCode.set(next.starterCode ?? '');
+        this.editorMode.set(next.mode ?? 'snippet');
         this.output.set(null);
         this.error.set(null);
+        this.compileErrors.set([]);
+        this.aiPair.loadForQuest(next.id);
       }
 
-      // Generate next quest via Claude if few active quests remain.
       if (apiKey && this.questEngine.activeQuests().length < 2) {
         this.questEngine.generateNextQuest(quest.branch, apiKey);
       }
@@ -158,11 +244,30 @@ export class App implements OnInit {
   }
 
   onQuestSelected(questId: string): void {
+    const prev = this.questEngine.currentQuest();
+    if (prev && this.editorMode() === 'class') {
+      this.classQuest.cleanupLastClass(this.gameState.irisConfig());
+    }
     this.gameState.setCurrentQuest(questId);
     const q = this.questEngine.allQuests().find(q => q.id === questId);
     this.editorCode.set(q?.starterCode ?? '');
+    this.editorMode.set(q?.mode ?? 'snippet');
     this.output.set(null);
     this.error.set(null);
+    this.compileErrors.set([]);
     this.evaluation.set(null);
+    this.aiPair.loadForQuest(questId);
+  }
+
+  private buildClassOutput(): string {
+    const errors = this.compileErrors();
+    if (errors.length > 0) {
+      return errors.map(e => e.line > 0 ? `Line ${e.line}:${e.col} ${e.text}` : e.text).join('\n');
+    }
+    return this.output() ?? '';
+  }
+
+  private buildClassError(): string {
+    return this.compileErrors().length > 0 ? 'Compile failed' : (this.error() ?? '');
   }
 }

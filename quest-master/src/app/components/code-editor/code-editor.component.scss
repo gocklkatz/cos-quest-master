@@ -6,8 +6,48 @@
   overflow: hidden;
 }
 
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #1a1a2e;
+  border-bottom: 1px solid #2a2a4a;
+  flex-shrink: 0;
+}
+
+.mode-btn {
+  padding: 2px 12px;
+  border: 1px solid #3a3a5a;
+  border-radius: 3px;
+  background: transparent;
+  color: #8888aa;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: #ccccee;
+    border-color: #5555aa;
+  }
+
+  &.active {
+    background: #2a2a5a;
+    color: #aaaaff;
+    border-color: #6666cc;
+  }
+}
+
+.mode-hint {
+  margin-left: 8px;
+  font-size: 11px;
+  color: #666688;
+  font-style: italic;
+}
+
 .monaco-host {
   display: block;
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
 }

@@ -1,5 +1,6 @@
-import { Component, effect, model, output } from '@angular/core';
+import { Component, effect, input, model, output } from '@angular/core';
 import { EditorComponent } from 'ngx-monaco-editor-v2';
+import { QuestMode } from '../../models/quest.models';
 
 @Component({
   selector: 'app-code-editor',
@@ -12,8 +13,14 @@ export class CodeEditorComponent {
   /** Two-way bindable: parent sets starter code; child emits user edits. */
   code = model('');
 
-  /** Emitted when the user presses Ctrl+Enter inside the editor. */
+  /** Current quest mode — controls toolbar display. */
+  questMode = input<QuestMode>('snippet');
+
+  /** Emitted when the user presses Ctrl+Enter or clicks Run. */
   runRequested = output<void>();
+
+  /** Emitted when the user switches between snippet/class mode. */
+  modeChanged = output<QuestMode>();
 
   readonly editorOptions = {
     theme: 'objectscript-dark',
@@ -70,5 +77,11 @@ export class CodeEditorComponent {
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
       run: () => this.runRequested.emit(),
     });
+  }
+
+  switchMode(mode: QuestMode): void {
+    if (mode !== this.questMode()) {
+      this.modeChanged.emit(mode);
+    }
   }
 }
