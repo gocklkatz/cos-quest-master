@@ -40,6 +40,35 @@
   overflow: hidden;
 }
 
+/* ── Sidebar tab switcher ────────────────────────────── */
+.sidebar-tabs {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid #2a2040;
+}
+
+.sidebar-tab {
+  flex: 1;
+  padding: 6px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #5a5070;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover { color: #9a90c8; }
+
+  &.active {
+    color: #b0a0e8;
+    border-bottom-color: #6b52c0;
+  }
+}
+
 /* ── Quest sidebar (left, fixed width) ───────────────── */
 .quest-sidebar {
   width: 300px;

@@ -35,6 +35,7 @@ export class QuestPanelComponent {
   });
 
   questSelected = output<string>();
+  conceptClicked = output<string>();
 
   /** How many hints have been revealed. Reset when quest changes. */
   hintsRevealed = signal(0);

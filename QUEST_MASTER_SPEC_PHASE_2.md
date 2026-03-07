@@ -508,7 +508,7 @@ quest-master/
 | 2 | **AI Pair Programmer** — chat panel wired to Claude with quest context | phase2-high | ✅ Complete |
 | 3 | **Documentation links in hints** — `docLinks` field, badge UI in quest panel, starter quest data | phase2-high | ✅ Complete |
 | 4 | **Challenge Mode** — `starterCodeHint` field, `challengeMode` GameState flag, toolbar toggle + restore button, starter quest hints | phase2-high | ✅ Complete |
-| 5 | **Concept glossary** — starter data, quest-linked popover, sidebar tab | phase2-mid | ⬜ Not started |
+| 5 | **Concept glossary** — starter data, quest-linked popover, sidebar tab | phase2-mid | ✅ Complete |
 | 6 | **Multi-file project quests** — file tabs, project mode compile flow | phase2-mid | ⬜ Not started |
 | 7 | **Leaderboard & achievements** — opt-in ranking, unlock logic, overlay animation | phase3 | ⬜ Not started |
 

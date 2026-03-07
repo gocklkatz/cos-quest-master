@@ -1,0 +1,63 @@
+<div class="glossary-panel">
+  <div class="glossary-search">
+    <input
+      class="search-input"
+      type="text"
+      placeholder="Search terms, categories..."
+      [value]="glossary.searchQuery()"
+      (input)="glossary.searchQuery.set($any($event.target).value)"
+    />
+    @if (glossary.searchQuery()) {
+      <button class="search-clear" (click)="glossary.searchQuery.set('')">&#10005;</button>
+    }
+  </div>
+
+  <div class="entry-count">
+    {{ glossary.filteredEntries().length }} entries
+  </div>
+
+  <div class="entry-list" #entryList>
+    @for (entry of glossary.filteredEntries(); track entry.term) {
+      <div
+        class="entry-card"
+        [class.quest-concept]="isQuestConcept(entry)"
+        [class.highlighted]="isHighlighted(entry)"
+        [attr.data-term]="entry.term"
+      >
+        <div class="entry-header">
+          <span class="entry-term">{{ entry.term }}</span>
+          <span class="entry-cat" [class]="catClass(entry.category)">{{ entry.category }}</span>
+          @if (isQuestConcept(entry)) {
+            <span class="quest-badge" title="Introduced in current quest">&#9670; quest</span>
+          }
+        </div>
+
+        <p class="entry-summary">{{ entry.summary }}</p>
+
+        <div class="entry-syntax">
+          <span class="code-label">syntax</span>
+          <code class="code-block">{{ entry.syntax }}</code>
+        </div>
+
+        <div class="entry-example">
+          <span class="code-label">example</span>
+          <pre class="code-block">{{ entry.example }}</pre>
+          <button class="copy-btn" (click)="copy(entry)" title="Copy example to editor">&#128203; Copy</button>
+        </div>
+
+        @if (entry.relatedConcepts.length > 0) {
+          <div class="related">
+            <span class="related-label">Related:</span>
+            @for (r of entry.relatedConcepts; track r) {
+              <span class="related-tag">{{ r }}</span>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (glossary.filteredEntries().length === 0) {
+      <div class="empty-state">No entries match "{{ glossary.searchQuery() }}"</div>
+    }
+  </div>
+</div>

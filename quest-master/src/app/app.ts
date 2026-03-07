@@ -6,6 +6,7 @@ import { OutputPanelComponent } from './components/output-panel/output-panel.com
 import { QuestPanelComponent } from './components/quest-panel/quest-panel.component';
 import { XpAnimationComponent } from './components/xp-animation/xp-animation.component';
 import { AiPairChatComponent } from './components/ai-pair-chat/ai-pair-chat.component';
+import { GlossaryComponent } from './components/glossary/glossary.component';
 import { GameStateService } from './services/game-state.service';
 import { IrisConnectionService } from './services/iris-connection.service';
 import { IrisApiService } from './services/iris-api.service';
@@ -25,6 +26,7 @@ import { CompileError, EvaluationResult, QuestMode } from './models/quest.models
     QuestPanelComponent,
     XpAnimationComponent,
     AiPairChatComponent,
+    GlossaryComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -39,6 +41,8 @@ export class App implements OnInit {
 
   showSettings = signal(false);
   showChat = signal(false);
+  sidebarTab = signal<'quest' | 'glossary'>('quest');
+  glossaryHighlight = signal<string | null>(null);
 
   /** True when an Anthropic API key is configured. */
   readonly hasApiKey = computed(() => !!this.gameState.anthropicApiKey());
@@ -92,6 +96,15 @@ export class App implements OnInit {
 
   toggleChat(): void {
     this.showChat.update(v => !v);
+  }
+
+  onConceptClicked(term: string): void {
+    this.sidebarTab.set('glossary');
+    this.glossaryHighlight.set(term);
+  }
+
+  onCopyToEditor(code: string): void {
+    this.editorCode.set(code);
   }
 
   onToggleChallengeMode(): void {

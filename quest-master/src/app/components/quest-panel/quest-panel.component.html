@@ -24,6 +24,18 @@
       <p class="objective-text">{{ quest()!.objective }}</p>
     </div>
 
+    <!-- ── Concepts introduced ───────────────── -->
+    @if (quest()!.conceptsIntroduced.length > 0) {
+      <div class="quest-section concepts-section">
+        <div class="section-label">Concepts</div>
+        <div class="concept-badges">
+          @for (c of quest()!.conceptsIntroduced; track c) {
+            <button class="concept-badge" (click)="conceptClicked.emit(c)" title="Look up in glossary">{{ c }}</button>
+          }
+        </div>
+      </div>
+    }
+
     <!-- ── Hints ─────────────────────────────── -->
     <div class="quest-section">
       <div class="section-label hints-label">

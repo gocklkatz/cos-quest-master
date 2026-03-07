@@ -11,17 +11,31 @@
   }
 
   <div class="workspace">
-    <!-- Left: quest panel -->
+    <!-- Left: quest panel / glossary -->
     <aside class="quest-sidebar">
-      <app-quest-panel
-        [quest]="questEngine.currentQuest()"
-        [availableQuests]="questEngine.availableQuests()"
-        [allQuests]="questEngine.allQuests()"
-        [completedQuestIds]="questEngine.completedQuestIds()"
-        [evaluation]="evaluation()"
-        [isEvaluating]="isEvaluating()"
-        (questSelected)="onQuestSelected($event)"
-      />
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab" [class.active]="sidebarTab() === 'quest'" (click)="sidebarTab.set('quest')">Quest</button>
+        <button class="sidebar-tab" [class.active]="sidebarTab() === 'glossary'" (click)="sidebarTab.set('glossary')">Glossary</button>
+      </div>
+
+      @if (sidebarTab() === 'quest') {
+        <app-quest-panel
+          [quest]="questEngine.currentQuest()"
+          [availableQuests]="questEngine.availableQuests()"
+          [allQuests]="questEngine.allQuests()"
+          [completedQuestIds]="questEngine.completedQuestIds()"
+          [evaluation]="evaluation()"
+          [isEvaluating]="isEvaluating()"
+          (questSelected)="onQuestSelected($event)"
+          (conceptClicked)="onConceptClicked($event)"
+        />
+      } @else {
+        <app-glossary
+          [activeQuest]="questEngine.currentQuest()"
+          [highlightTerm]="glossaryHighlight()"
+          (copyToEditor)="onCopyToEditor($event)"
+        />
+      }
     </aside>
 
     <!-- Right: editor + output -->
