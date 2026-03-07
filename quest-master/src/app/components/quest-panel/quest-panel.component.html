@@ -98,9 +98,14 @@
 
     <!-- ── Available quests list ──────────────── -->
     <div class="quest-section quest-list-section">
-      <div class="section-label">Quests</div>
+      <div class="section-label">
+        <span>Quests</span>
+        @if (selectedBranch()) {
+          <span class="branch-filter-tag">{{ selectedBranch() }}</span>
+        }
+      </div>
       <ul class="quest-list">
-        @for (q of availableQuests(); track q.id) {
+        @for (q of filteredQuests(); track q.id) {
           <li
             class="quest-list-item"
             [class.active]="q.id === quest()!.id"
@@ -114,8 +119,19 @@
             <span class="quest-list-xp">{{ q.xpReward }} XP</span>
           </li>
         }
+        @if (filteredQuests().length === 0) {
+          <li class="quest-list-empty">No quests in this branch yet.</li>
+        }
       </ul>
     </div>
+
+    <!-- ── Skill tree ──────────────────────────── -->
+    <app-skill-tree
+      [allQuests]="allQuests()"
+      [completedQuestIds]="completedQuestIds()"
+      [selectedBranchId]="selectedBranch()"
+      (branchSelected)="selectedBranch.set($event)"
+    />
 
   </div>
 } @else {

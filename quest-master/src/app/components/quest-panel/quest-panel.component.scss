@@ -356,6 +356,25 @@
   color: #5a5070;
 }
 
+.quest-list-empty {
+  padding: 8px 4px;
+  color: #4a4060;
+  font-size: 0.75rem;
+  font-style: italic;
+  list-style: none;
+}
+
+.branch-filter-tag {
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: #8070c0;
+  background: #1e1838;
+  border: 1px solid #3a2a60;
+  padding: 1px 6px;
+  border-radius: 10px;
+  text-transform: capitalize;
+}
+
 // ── Empty state ──────────────────────────────────────────
 .quest-empty {
   display: flex;
