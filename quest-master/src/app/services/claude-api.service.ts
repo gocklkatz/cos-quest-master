@@ -78,10 +78,12 @@ Respond with a JSON object with exactly these fields — no markdown fences, no 
   "evaluationCriteria": "string",
   "prerequisites": ["completed quest IDs"],
   "starterCode": "string (valid ObjectScript)",
+  "starterCodeHint": "string (one-line comment orienting the player without revealing logic, e.g. '// Iterate ^MyGlobal with $ORDER and accumulate a total')",
   "conceptsIntroduced": ["string"],
   "docLinks": [{"label": "string", "url": "https://docs.intersystems.com/..."}]
 }
 
+For starterCodeHint, write a single-line comment that orients the player without giving away logic. Omit if the concept is too open-ended for a directional hint.
 For docLinks, include 1-3 links to relevant docs.intersystems.com pages for the concepts introduced. Use deep links to the specific page when known (e.g. $ORDER → KEY=RCOS_forder, WRITE → KEY=RCOS_cwrite, globals → KEY=GGBL_intro). Omit docLinks entirely if you are not confident in the URL.`;
 
     const user = `Generate the next quest for the "${currentBranch}" branch.`;

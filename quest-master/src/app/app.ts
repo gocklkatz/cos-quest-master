@@ -43,6 +43,7 @@ export class App implements OnInit {
   /** True when an Anthropic API key is configured. */
   readonly hasApiKey = computed(() => !!this.gameState.anthropicApiKey());
   readonly anthropicApiKey = computed(() => this.gameState.anthropicApiKey());
+  readonly challengeMode = computed(() => this.gameState.challengeMode());
 
   /** Current code in the editor. */
   editorCode = signal('// Write your ObjectScript here\nWRITE "Hello from IRIS!", !');
@@ -72,15 +73,10 @@ export class App implements OnInit {
     this.connectionSvc.startPolling(this.gameState.irisConfig());
     this.questEngine.initialize();
 
-    // Load starter code and chat history for the initial quest.
+      // Load starter code and chat history for the initial quest.
     const initial = this.questEngine.currentQuest();
-    if (initial?.starterCode) {
-      this.editorCode.set(initial.starterCode);
-    }
-    if (initial?.mode) {
-      this.editorMode.set(initial.mode);
-    }
     if (initial) {
+      this.loadQuestCode(initial);
       this.aiPair.loadForQuest(initial.id);
     }
   }
@@ -96,6 +92,28 @@ export class App implements OnInit {
 
   toggleChat(): void {
     this.showChat.update(v => !v);
+  }
+
+  onToggleChallengeMode(): void {
+    this.gameState.toggleChallengeMode();
+    // Does not reset current editor content — takes effect on next quest load.
+  }
+
+  onRestoreStarterCode(): void {
+    const quest = this.questEngine.currentQuest();
+    if (quest?.starterCode) {
+      this.editorCode.set(quest.starterCode);
+    }
+  }
+
+  /** Apply challengeMode logic when loading a quest into the editor. */
+  private loadQuestCode(quest: { starterCode?: string; starterCodeHint?: string; mode?: QuestMode }): void {
+    this.editorCode.set(
+      this.gameState.challengeMode()
+        ? (quest.starterCodeHint ?? '')
+        : (quest.starterCode ?? ''),
+    );
+    this.editorMode.set(quest.mode ?? 'snippet');
   }
 
   onModeChanged(mode: QuestMode): void {
@@ -229,8 +247,7 @@ export class App implements OnInit {
         if (this.editorMode() === 'class') {
           this.classQuest.cleanupLastClass(this.gameState.irisConfig());
         }
-        this.editorCode.set(next.starterCode ?? '');
-        this.editorMode.set(next.mode ?? 'snippet');
+        this.loadQuestCode(next);
         this.output.set(null);
         this.error.set(null);
         this.compileErrors.set([]);
@@ -250,8 +267,7 @@ export class App implements OnInit {
     }
     this.gameState.setCurrentQuest(questId);
     const q = this.questEngine.allQuests().find(q => q.id === questId);
-    this.editorCode.set(q?.starterCode ?? '');
-    this.editorMode.set(q?.mode ?? 'snippet');
+    if (q) this.loadQuestCode(q);
     this.output.set(null);
     this.error.set(null);
     this.compileErrors.set([]);

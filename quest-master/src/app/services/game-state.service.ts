@@ -21,6 +21,7 @@ export class GameStateService {
   readonly questLog = computed(() => this.state().questLog);
   readonly questBank = computed(() => this.state().questBank);
   readonly unlockedBranches = computed(() => this.state().unlockedBranches);
+  readonly challengeMode = computed(() => this.state().challengeMode);
 
   updateSettings(irisConfig: IRISConfig, anthropicApiKey: string, playerName?: string): void {
     this.state.update(s => ({
@@ -73,6 +74,11 @@ export class GameStateService {
 
   clearQuestBank(): void {
     this.state.update(s => ({ ...s, questBank: [] }));
+    this.persist();
+  }
+
+  toggleChallengeMode(): void {
+    this.state.update(s => ({ ...s, challengeMode: !s.challengeMode }));
     this.persist();
   }
 

@@ -30,8 +30,12 @@
         <app-code-editor
           [(code)]="editorCode"
           [questMode]="editorMode()"
+          [challengeMode]="challengeMode()"
+          [activeQuest]="questEngine.currentQuest()"
           (runRequested)="runCode()"
           (modeChanged)="onModeChanged($event)"
+          (toggleChallengeMode)="onToggleChallengeMode()"
+          (restoreStarterCode)="onRestoreStarterCode()"
         />
       </div>
 

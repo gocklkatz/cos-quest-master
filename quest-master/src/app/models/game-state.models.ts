@@ -23,6 +23,8 @@ export interface GameState {
   irisConfig: IRISConfig;
   anthropicApiKey: string;
   questBank: Quest[];
+  /** When true, new quests load with starterCodeHint (or empty) instead of starterCode. Default: false. */
+  challengeMode: boolean;
 }
 
 export const DEFAULT_IRIS_CONFIG: IRISConfig = {
@@ -44,4 +46,5 @@ export const DEFAULT_GAME_STATE: GameState = {
   irisConfig: DEFAULT_IRIS_CONFIG,
   anthropicApiKey: '',
   questBank: [],
+  challengeMode: false,
 };

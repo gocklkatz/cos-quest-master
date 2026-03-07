@@ -14,6 +14,22 @@
   @if (questMode() === 'class') {
     <span class="mode-hint">Define a complete Class block. Ctrl+Enter compiles &amp; runs.</span>
   }
+
+  <div class="toolbar-right">
+    <button
+      class="toolbar-btn"
+      [class.active]="challengeMode()"
+      (click)="toggleChallengeMode.emit()"
+      title="Challenge Mode — start quests with an empty editor"
+    >&#9876; Challenge</button>
+    @if (challengeMode() && activeQuest()?.starterCode) {
+      <button
+        class="toolbar-btn toolbar-btn--ghost"
+        (click)="restoreStarterCode.emit()"
+        title="Show the starter code for this quest"
+      >Show starter code</button>
+    }
+  </div>
 </div>
 
 <ngx-monaco-editor

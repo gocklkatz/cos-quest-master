@@ -24,6 +24,8 @@ export interface Quest {
   testHarness?: string;
   /** e.g. "Guild.Member" — required when mode is 'class'. */
   className?: string;
+  /** Shown instead of starterCode in challenge mode. A one-line orientation comment or skeleton. */
+  starterCodeHint?: string;
 }
 
 export interface CompileError {

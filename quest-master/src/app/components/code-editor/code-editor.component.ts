@@ -1,6 +1,6 @@
 import { Component, effect, input, model, output } from '@angular/core';
 import { EditorComponent } from 'ngx-monaco-editor-v2';
-import { QuestMode } from '../../models/quest.models';
+import { Quest, QuestMode } from '../../models/quest.models';
 
 @Component({
   selector: 'app-code-editor',
@@ -16,11 +16,23 @@ export class CodeEditorComponent {
   /** Current quest mode — controls toolbar display. */
   questMode = input<QuestMode>('snippet');
 
+  /** Whether challenge mode is active (no starter code on quest load). */
+  challengeMode = input(false);
+
+  /** The active quest — used to show/hide the "Show starter code" escape hatch. */
+  activeQuest = input<Quest | null>(null);
+
   /** Emitted when the user presses Ctrl+Enter or clicks Run. */
   runRequested = output<void>();
 
   /** Emitted when the user switches between snippet/class mode. */
   modeChanged = output<QuestMode>();
+
+  /** Emitted when the user toggles challenge mode. */
+  toggleChallengeMode = output<void>();
+
+  /** Emitted when the user clicks "Show starter code" in challenge mode. */
+  restoreStarterCode = output<void>();
 
   readonly editorOptions = {
     theme: 'objectscript-dark',

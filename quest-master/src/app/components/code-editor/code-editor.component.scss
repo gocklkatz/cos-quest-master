@@ -45,6 +45,46 @@
   font-style: italic;
 }
 
+.toolbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-btn {
+  padding: 2px 10px;
+  border: 1px solid #3a3a5a;
+  border-radius: 3px;
+  background: transparent;
+  color: #8888aa;
+  font-size: 11px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: #ccccee;
+    border-color: #5555aa;
+  }
+
+  &.active {
+    background: #3a1a2a;
+    color: #e08888;
+    border-color: #8a4444;
+  }
+
+  &--ghost {
+    color: #666688;
+    border-style: dashed;
+
+    &:hover {
+      color: #aaaacc;
+      border-color: #6666aa;
+      border-style: solid;
+    }
+  }
+}
+
 .monaco-host {
   display: block;
   width: 100%;

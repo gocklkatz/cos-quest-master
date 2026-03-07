@@ -29,6 +29,7 @@ export const STARTER_QUESTS: Quest[] = [
       'Code must execute without errors on IRIS. Any successful run proves the endpoint works.',
     prerequisites: [],
     starterCode: 'WRITE "Anvil ready!", !',
+    starterCodeHint: '// Write something to IRIS and check the output panel',
     conceptsIntroduced: ['WRITE', 'IRIS execution', 'REST endpoint'],
     docLinks: [
       { label: 'WRITE command', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_cwrite' },
@@ -66,6 +67,7 @@ export const STARTER_QUESTS: Quest[] = [
       'SET name = "Adventurer"\n\n' +
       '// Write a greeting that includes your name and "level 1"\n' +
       'WRITE "Greetings from the Guild! My name is " _ name _ ".", !',
+    starterCodeHint: '// SET a variable, then WRITE a greeting that includes your name and "level 1"',
     conceptsIntroduced: ['WRITE', 'SET', 'string concatenation', 'local variables'],
     docLinks: [
       { label: 'SET command', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_cset' },
@@ -112,6 +114,7 @@ export const STARTER_QUESTS: Quest[] = [
       '  QUIT:key=""\n' +
       '  WRITE ^Guild("members", key), !\n' +
       '}',
+    starterCodeHint: '// SET 3 subscripts in ^Guild("members", n), then iterate with $ORDER in a FOR loop',
     conceptsIntroduced: ['globals', 'SET ^global', '$ORDER', 'FOR loop', 'subscripts', 'QUIT:postcondition'],
     docLinks: [
       { label: 'Globals overview', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GGBL_intro' },
@@ -163,6 +166,7 @@ export const STARTER_QUESTS: Quest[] = [
       '  Quit ""\n' +
       '}\n\n' +
       '}',
+    starterCodeHint: '// Class Guild.Greeter — define a ClassMethod Greet(name As %String) that returns a greeting string',
     conceptsIntroduced: ['Class definition', 'ClassMethod', 'As %String', 'Quit (return)', '##class()'],
     docLinks: [
       { label: 'Defining classes', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_classes' },
@@ -220,6 +224,7 @@ export const STARTER_QUESTS: Quest[] = [
       'Property Name As %String;\n\n' +
       '// Add Rank property with default "Apprentice"\n\n' +
       '}',
+    starterCodeHint: '// Class Guild.Member Extends %Persistent — add Name (%String) and Rank (%String) properties',
     conceptsIntroduced: ['%Persistent', 'Property', '%Save', '%OpenId', '%Id', '$$$ISOK', 'InitialExpression'],
     docLinks: [
       { label: '%Persistent class', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_persobj' },
