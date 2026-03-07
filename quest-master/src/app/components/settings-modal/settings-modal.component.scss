@@ -151,6 +151,19 @@ input {
   &:hover { background: #2d2550; color: #e2d9f3; }
 }
 
+.btn-warning {
+  background: #451a03;
+  color: #fbbf24;
+  border: 1px solid #78350f;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s;
+
+  &:hover { background: #78350f; }
+}
+
 .btn-danger {
   background: #7f1d1d;
   color: #fca5a5;

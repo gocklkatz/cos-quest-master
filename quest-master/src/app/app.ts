@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { HeaderBarComponent } from './components/header-bar/header-bar.component';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
 import { CodeEditorComponent } from './components/code-editor/code-editor.component';
@@ -33,6 +33,9 @@ export class App implements OnInit {
 
   showSettings = signal(false);
 
+  /** True when an Anthropic API key is configured. */
+  readonly hasApiKey = computed(() => !!this.gameState.anthropicApiKey());
+
   /** Current code in the editor. */
   editorCode = signal('// Write your ObjectScript here\nWRITE "Hello from IRIS!", !');
 
@@ -40,6 +43,9 @@ export class App implements OnInit {
   output = signal<string | null>(null);
   error = signal<string | null>(null);
   isRunning = signal(false);
+
+  /** True while Claude is evaluating a submission. */
+  isEvaluating = signal(false);
 
   /** Last evaluation result (cleared when code is run again). */
   evaluation = signal<EvaluationResult | null>(null);
@@ -91,21 +97,38 @@ export class App implements OnInit {
     });
   }
 
-  submitCode(): void {
+  async submitCode(): Promise<void> {
     const quest = this.questEngine.currentQuest();
-    if (!quest || this.questEngine.currentQuestCompleted()) return;
+    if (!quest || this.questEngine.currentQuestCompleted() || this.isEvaluating()) return;
 
     if (this.output() === null && this.error() === null) {
-      // No run yet — show a prompt in the error slot.
       this.error.set('Run your code first, then submit.');
       return;
     }
 
-    const result = this.questEngine.evaluateSimple(
-      quest,
-      this.output() ?? '',
-      this.error() !== null,
-    );
+    let result: EvaluationResult;
+    const apiKey = this.gameState.anthropicApiKey();
+
+    if (apiKey) {
+      this.isEvaluating.set(true);
+      try {
+        result = await this.questEngine.evaluateWithClaude(
+          quest,
+          this.editorCode(),
+          this.output() ?? '',
+          this.error() ?? '',
+          apiKey,
+        );
+      } catch {
+        // Claude failed — fall back to simple evaluation
+        result = this.questEngine.evaluateSimple(quest, this.output() ?? '', this.error() !== null);
+      } finally {
+        this.isEvaluating.set(false);
+      }
+    } else {
+      result = this.questEngine.evaluateSimple(quest, this.output() ?? '', this.error() !== null);
+    }
+
     this.evaluation.set(result);
 
     if (result.passed) {
@@ -125,6 +148,11 @@ export class App implements OnInit {
         this.editorCode.set(next.starterCode ?? '');
         this.output.set(null);
         this.error.set(null);
+      }
+
+      // Generate next quest via Claude if few active quests remain.
+      if (apiKey && this.questEngine.activeQuests().length < 2) {
+        this.questEngine.generateNextQuest(quest.branch, apiKey);
       }
     }
   }

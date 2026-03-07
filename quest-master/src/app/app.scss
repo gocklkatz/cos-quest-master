@@ -5,6 +5,33 @@
   overflow: hidden;
 }
 
+/* ── AI disabled banner ──────────────────────────────── */
+.ai-disabled-banner {
+  background: #1a1530;
+  border-bottom: 1px solid #3a2f6a;
+  color: #a99dc8;
+  font-size: 0.8rem;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+
+  .ai-banner-icon { font-size: 1rem; }
+
+  .ai-banner-link {
+    background: none;
+    border: none;
+    color: #a78bfa;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    font-size: inherit;
+
+    &:hover { color: #c4b5fd; }
+  }
+}
+
 /* ── Two-panel workspace ─────────────────────────────── */
 .workspace {
   flex: 1;

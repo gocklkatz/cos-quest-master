@@ -60,8 +60,15 @@
       </div>
     }
 
+    <!-- ── AI evaluating indicator ───────────── -->
+    @if (isEvaluating()) {
+      <div class="quest-section evaluating-section">
+        <span class="spinner">&#8635;</span> AI is reviewing your code&hellip;
+      </div>
+    }
+
     <!-- ── Last evaluation result ─────────────── -->
-    @if (evaluation()) {
+    @if (evaluation() && !isEvaluating()) {
       <div class="quest-section evaluation-section" [class.passed]="evaluation()!.passed" [class.failed]="!evaluation()!.passed">
         <div class="eval-header">
           @if (evaluation()!.passed) {
@@ -73,8 +80,18 @@
           }
         </div>
         <p class="eval-feedback">{{ evaluation()!.feedback }}</p>
+        @if (evaluation()!.codeReview) {
+          <p class="eval-code-review"><strong>Code review:</strong> {{ evaluation()!.codeReview }}</p>
+        }
         @if (evaluation()!.passed) {
           <p class="eval-xp">+{{ evaluation()!.xpEarned }} XP earned</p>
+        }
+        @if (evaluation()!.bonusAchieved.length) {
+          <ul class="eval-bonus-list">
+            @for (b of evaluation()!.bonusAchieved; track $index) {
+              <li class="eval-bonus-item">&#11088; Bonus: {{ b }}</li>
+            }
+          </ul>
         }
       </div>
     }

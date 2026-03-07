@@ -38,6 +38,10 @@ export class SettingsModalComponent {
     this.closed.emit();
   }
 
+  clearQuestBank(): void {
+    this.gameState.clearQuestBank();
+  }
+
   confirmReset(): void {
     this.showResetConfirm.set(true);
   }

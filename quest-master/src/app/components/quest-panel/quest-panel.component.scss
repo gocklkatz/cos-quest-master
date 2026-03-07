@@ -202,6 +202,24 @@
   }
 }
 
+// ── Evaluating indicator ─────────────────────────────────
+.evaluating-section {
+  color: #8070c0;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .spinner {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 // ── Evaluation ───────────────────────────────────────────
 .evaluation-section {
   border-left: 3px solid #2e2848;
@@ -245,11 +263,33 @@
   font-size: 0.78rem;
 }
 
+.eval-code-review {
+  margin: 6px 0 0;
+  color: #8a7aaa;
+  font-size: 0.75rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
 .eval-xp {
   margin: 4px 0 0;
   font-weight: 700;
   color: #8070c0;
   font-size: 0.78rem;
+}
+
+.eval-bonus-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.eval-bonus-item {
+  font-size: 0.75rem;
+  color: #c8a040;
 }
 
 // ── Quest list ───────────────────────────────────────────

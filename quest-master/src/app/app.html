@@ -1,6 +1,15 @@
 <div class="app-shell">
   <app-header-bar (openSettings)="openSettings()" />
 
+  @if (!hasApiKey()) {
+    <div class="ai-disabled-banner">
+      <span class="ai-banner-icon">&#128274;</span>
+      AI features disabled. Add your Anthropic API key in
+      <button class="ai-banner-link" (click)="openSettings()">Settings</button>
+      to unlock quest generation and AI code review.
+    </div>
+  }
+
   <div class="workspace">
     <!-- Left: quest panel -->
     <aside class="quest-sidebar">
@@ -9,6 +18,7 @@
         [availableQuests]="questEngine.availableQuests()"
         [completedQuestIds]="questEngine.completedQuestIds()"
         [evaluation]="evaluation()"
+        [isEvaluating]="isEvaluating()"
         (questSelected)="onQuestSelected($event)"
       />
     </aside>
@@ -35,11 +45,13 @@
         <button
           class="submit-btn"
           (click)="submitCode()"
-          [disabled]="isRunning() || !questEngine.currentQuest() || questEngine.currentQuestCompleted()"
+          [disabled]="isRunning() || isEvaluating() || !questEngine.currentQuest() || questEngine.currentQuestCompleted()"
           [title]="questEngine.currentQuestCompleted() ? 'Quest already completed' : 'Submit your solution'"
         >
           @if (questEngine.currentQuestCompleted()) {
             &#10003; Completed
+          } @else if (isEvaluating()) {
+            <span class="spinner">&#8635;</span> Evaluating&hellip;
           } @else {
             &#128228; Submit
           }

@@ -45,6 +45,8 @@
 
       <section class="danger-zone">
         <h3>Danger Zone</h3>
+        <button class="btn-warning" (click)="clearQuestBank()">Clear AI-Generated Quests</button>
+        <p class="hint">Removes cached AI quests. Your XP and progress are kept.</p>
         @if (!showResetConfirm()) {
           <button class="btn-danger" (click)="confirmReset()">Reset All Progress</button>
         } @else {

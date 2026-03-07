@@ -12,6 +12,7 @@ export class QuestPanelComponent {
   availableQuests = input<Quest[]>([]);
   completedQuestIds = input<string[]>([]);
   evaluation = input<EvaluationResult | null>(null);
+  isEvaluating = input(false);
 
   questSelected = output<string>();
 

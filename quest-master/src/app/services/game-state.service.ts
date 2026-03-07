@@ -71,6 +71,11 @@ export class GameStateService {
     this.persist();
   }
 
+  clearQuestBank(): void {
+    this.state.update(s => ({ ...s, questBank: [] }));
+    this.persist();
+  }
+
   resetProgress(): void {
     this.state.set({ ...DEFAULT_GAME_STATE, irisConfig: this.state().irisConfig, anthropicApiKey: this.state().anthropicApiKey });
     this.persist();

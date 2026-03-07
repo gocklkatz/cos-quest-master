@@ -1,12 +1,15 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { GameStateService } from './game-state.service';
-import { Quest, EvaluationResult } from '../models/quest.models';
+import { ClaudeApiService } from './claude-api.service';
+import { Quest, EvaluationResult, QuestTier } from '../models/quest.models';
 import { QuestLogEntry } from '../models/game-state.models';
 import { STARTER_QUESTS } from '../data/starter-quests';
+import { calcLevel } from '../data/xp-table';
 
 @Injectable({ providedIn: 'root' })
 export class QuestEngineService {
   private gameState = inject(GameStateService);
+  private claude = inject(ClaudeApiService);
 
   /** All known quests: hard-coded starters + any AI-generated ones cached in state. */
   readonly allQuests = computed(() => [
@@ -76,6 +79,35 @@ export class QuestEngineService {
       codeReview: '',
       xpEarned,
     };
+  }
+
+  /**
+   * Evaluate a submission using Claude API.
+   */
+  async evaluateWithClaude(quest: Quest, code: string, output: string, errors: string, apiKey: string): Promise<EvaluationResult> {
+    return this.claude.evaluateSubmission(quest, code, output, errors, apiKey);
+  }
+
+  /**
+   * Generate the next quest via Claude and cache it in the quest bank.
+   * Returns the generated quest, or null if generation fails.
+   */
+  async generateNextQuest(branch: string, apiKey: string): Promise<Quest | null> {
+    const completedIds = this.gameState.completedQuests();
+    const coveredConcepts = this.gameState.coveredConcepts();
+    const tier: QuestTier = calcLevel(this.gameState.xp()) >= 13
+      ? 'master'
+      : calcLevel(this.gameState.xp()) >= 6
+        ? 'journeyman'
+        : 'apprentice';
+
+    try {
+      const quest = await this.claude.generateQuest(completedIds, coveredConcepts, branch, tier, apiKey);
+      this.gameState.addToQuestBank(quest);
+      return quest;
+    } catch {
+      return null;
+    }
   }
 
   /**
