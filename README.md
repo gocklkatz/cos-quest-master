@@ -10,9 +10,18 @@ Quest Master teaches ObjectScript through a quest-driven loop:
 2. **Write code** — in a Monaco editor directly in the browser
 3. **Execute on IRIS** — code is sent to a real IRIS Docker instance via REST, compiled and run
 4. **Get evaluated** — output is sent back to Claude for feedback and scoring
-5. **Earn XP** — level up and unlock the next quest
+5. **Earn XP** — level up, see animated XP gains, and unlock the next quest
 
-Claude evaluates not just correctness but idiomatic ObjectScript style. Quests progress through tiers: Apprentice → Journeyman → Master.
+**Features:**
+- Monaco editor with ObjectScript syntax
+- Live IRIS connection indicator with health polling
+- Quest system with hard-coded starter quests and AI-generated follow-ups
+- XP and level progression (Apprentice → Journeyman → Master)
+- Animated XP popups on quest completion
+- Skill tree: unlock branches as you level up
+- Quest log: full history of completed quests
+- Claude AI integration for quest generation and code evaluation (requires Anthropic API key; gracefully disabled without one)
+- Settings modal for IRIS connection and API key configuration
 
 ## Architecture
 
@@ -80,57 +89,39 @@ There is no separate backend server. All API calls are made directly from the br
 
 ## IRIS Setup
 
-### 1. Start IRIS in Docker
+### One-command setup
 
 ```bash
-docker run -d \
-  --name my-iris \
-  -p 52773:52773 \
-  -p 1972:1972 \
-  containers.intersystems.com/intersystems/iris-community:latest
+cd quest-master/iris
+./setup.sh
 ```
 
-Or with docker-compose (see `QUEST_MASTER_SPEC.md` for a full example).
+This script:
+1. Pulls `containers.intersystems.com/intersystems/iris-community:2025.1`
+2. Starts the container via Docker Compose (bind-mount for data persistence)
+3. Waits for the container to become healthy
+4. Sets the `_SYSTEM` password
+5. Deploys and compiles `QuestMaster.REST.Execute`
+6. Registers the `/api/quest/` web application
+7. Verifies the health endpoint
 
-### 2. Deploy the REST backend class
+Optional arguments: `./setup.sh [container-name] [password]` (defaults: `my-iris` / `password`).
 
-```bash
-# Copy the class into the container
-docker cp quest-master/iris/QuestMaster.REST.Execute.cls my-iris:/tmp/
-
-# Load and compile in IRIS (USER namespace)
-docker exec -i my-iris bash -c 'iris session IRIS -U USER' <<'EOF'
-Do ##class(%SYSTEM.OBJ).Load("/tmp/QuestMaster.REST.Execute.cls","ck-d")
-Halt
-EOF
-```
-
-### 3. Register the web application
-
-Open the IRIS Management Portal at `http://localhost:52773/csp/sys/UtilHome.csp` and create a web application:
-
-| Setting | Value |
-|---|---|
-| Path | `/api/quest` |
-| Namespace | `USER` |
-| Dispatch Class | `QuestMaster.REST.Execute` |
-| Authentication | Password (Basic Auth) |
-
-Or via ObjectScript:
-
-```objectscript
-Set props("DispatchClass") = "QuestMaster.REST.Execute"
-Set props("NameSpace") = "USER"
-Set props("Enabled") = 1
-Set props("AutheEnabled") = 32
-Do ##class(Security.Applications).Create("/api/quest/", .props)
-```
-
-### 4. Verify
+### Verify
 
 ```bash
 curl -u _SYSTEM:password http://localhost:52773/api/quest/health
 # → {"status":"ok","namespace":"USER"}
+```
+
+### Redeploying after changes to the REST class
+
+```bash
+docker cp quest-master/iris/QuestMaster.REST.Execute.cls my-iris:/tmp/
+docker exec -i my-iris bash -c 'iris session IRIS -U USER' <<'EOF'
+Do ##class(%SYSTEM.OBJ).Load("/tmp/QuestMaster.REST.Execute.cls","ck-d")
+Halt
+EOF
 ```
 
 ## Frontend Setup

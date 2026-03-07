@@ -1,6 +1,6 @@
 services:
   iris:
-    image: containers.intersystems.com/intersystems/iris-community:latest
+    image: containers.intersystems.com/intersystems/iris-community:2025.1
     container_name: my-iris
     ports:
       - "1972:1972"   # SuperServer (Studio, VS Code extension)
@@ -8,13 +8,10 @@ services:
     environment:
       - ISC_DATA_DIRECTORY=/dur/iconfig
     volumes:
-      - iris-data:/dur/iconfig
+      - ./iris-data:/dur/iconfig
     healthcheck:
-      test: ["CMD", "iris", "status", "IRIS"]
+      test: ["CMD", "iris", "stat", "IRIS"]
       interval: 15s
       timeout: 10s
       retries: 5
       start_period: 30s
-
-volumes:
-  iris-data:
