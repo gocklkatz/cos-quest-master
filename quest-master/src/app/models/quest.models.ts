@@ -16,6 +16,7 @@ export interface Quest {
   prerequisites: string[];
   starterCode?: string;
   conceptsIntroduced: string[];
+  docLinks?: { label: string; url: string }[];
 }
 
 export interface EvaluationResult {

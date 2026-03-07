@@ -198,6 +198,39 @@
   margin: 4px 0 0;
 }
 
+.doc-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.doc-links-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5a5070;
+}
+
+.doc-link {
+  font-size: 0.68rem;
+  color: #7060a8;
+  background: #1a1630;
+  border: 1px solid #2a2048;
+  border-radius: 10px;
+  padding: 2px 8px;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+
+  &:hover {
+    color: #b0a0e0;
+    border-color: #5040a0;
+    background: #22193a;
+  }
+}
+
 // ── Bonus ────────────────────────────────────────────────
 .bonus-list {
   list-style: none;

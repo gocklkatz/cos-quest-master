@@ -30,6 +30,10 @@ export const STARTER_QUESTS: Quest[] = [
     prerequisites: [],
     starterCode: 'WRITE "Anvil ready!", !',
     conceptsIntroduced: ['WRITE', 'IRIS execution', 'REST endpoint'],
+    docLinks: [
+      { label: 'WRITE command', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_cwrite' },
+      { label: 'ObjectScript overview', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GCOS_intro' },
+    ],
   },
   {
     id: 'commands-01',
@@ -63,6 +67,11 @@ export const STARTER_QUESTS: Quest[] = [
       '// Write a greeting that includes your name and "level 1"\n' +
       'WRITE "Greetings from the Guild! My name is " _ name _ ".", !',
     conceptsIntroduced: ['WRITE', 'SET', 'string concatenation', 'local variables'],
+    docLinks: [
+      { label: 'SET command', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_cset' },
+      { label: 'WRITE command', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_cwrite' },
+      { label: 'Local variables', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GCOS_variables' },
+    ],
   },
   {
     id: 'globals-01',
@@ -104,5 +113,10 @@ export const STARTER_QUESTS: Quest[] = [
       '  WRITE ^Guild("members", key), !\n' +
       '}',
     conceptsIntroduced: ['globals', 'SET ^global', '$ORDER', 'FOR loop', 'subscripts', 'QUIT:postcondition'],
+    docLinks: [
+      { label: 'Globals overview', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GGBL_intro' },
+      { label: '$ORDER function', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_forder' },
+      { label: 'FOR command', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_cfor' },
+    ],
   },
 ];

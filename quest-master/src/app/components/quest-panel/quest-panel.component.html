@@ -43,6 +43,15 @@
       } @else if (quest()!.hints.length > 0) {
         <p class="hints-exhausted">All hints revealed.</p>
       }
+
+      @if (quest()!.docLinks?.length) {
+        <div class="doc-links">
+          <span class="doc-links-label">Docs:</span>
+          @for (link of quest()!.docLinks!; track $index) {
+            <a class="doc-link" [href]="link.url" target="_blank" rel="noopener">{{ link.label }}</a>
+          }
+        </div>
+      }
     </div>
 
     <!-- ── Bonus objectives ───────────────────── -->
