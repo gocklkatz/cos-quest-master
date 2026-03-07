@@ -78,8 +78,11 @@ Respond with a JSON object with exactly these fields — no markdown fences, no 
   "evaluationCriteria": "string",
   "prerequisites": ["completed quest IDs"],
   "starterCode": "string (valid ObjectScript)",
-  "conceptsIntroduced": ["string"]
-}`;
+  "conceptsIntroduced": ["string"],
+  "docLinks": [{"label": "string", "url": "https://docs.intersystems.com/..."}]
+}
+
+For docLinks, include 1-3 links to relevant docs.intersystems.com pages for the concepts introduced. Use deep links to the specific page when known (e.g. $ORDER → KEY=RCOS_forder, WRITE → KEY=RCOS_cwrite, globals → KEY=GGBL_intro). Omit docLinks entirely if you are not confident in the URL.`;
 
     const user = `Generate the next quest for the "${currentBranch}" branch.`;
     const resp = await this.callClaude(system, user, apiKey);
