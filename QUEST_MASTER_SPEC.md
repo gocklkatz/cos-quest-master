@@ -938,13 +938,16 @@ Build in this order:
 
 ## 14. Testing Checklist
 
-- [ ] Can connect to IRIS Docker from browser (via proxy or direct)
-- [ ] Can execute WRITE "Hello" and see output
-- [ ] Quest Zero instructions are clear and completable
-- [ ] Hard-coded quests render correctly
-- [ ] Code evaluation works with Claude API
-- [ ] Quest generation produces valid quests
-- [ ] XP and level persist across page reloads
-- [ ] App is usable without Claude API key (fallback mode)
-- [ ] CORS / proxy errors are handled gracefully with helpful messages
-- [ ] Skill tree shows correct unlock state
+- [x] Can connect to IRIS Docker from browser (via proxy or direct)
+- [x] Can execute WRITE "Hello" and see output
+- [x] Quest Zero instructions are clear and completable
+- [x] Hard-coded quests render correctly
+- [x] Code evaluation works with Claude API
+- [x] Quest generation produces valid quests
+- [x] XP and level persist across page reloads
+- [x] App is usable without Claude API key (fallback mode)
+- [x] CORS / proxy errors are handled gracefully with helpful messages
+- [x] Skill tree shows correct unlock state
+- [x] Quest log displays completed quests and earned XP correctly
+- [x] XP gain animation plays on quest completion
+- [x] IRIS setup scripts run cleanly (`docker compose up -d` + `setup.sh` complete without errors)

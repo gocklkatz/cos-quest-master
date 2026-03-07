@@ -1,4 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as dotenv from 'dotenv';
+
+// Load .env from the quest-master directory (ignored by git).
+// Variables defined here are available as process.env.* in all tests.
+dotenv.config();
 
 export default defineConfig({
   testDir: './e2e',

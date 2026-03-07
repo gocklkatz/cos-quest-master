@@ -25,7 +25,7 @@ export class IrisApiService {
     return this.http
       .post<ExecuteResult>(`/api/quest/execute`, { code }, { headers: this.getHeaders(config) })
       .pipe(
-        catchError(err => of({ success: false, error: err.message ?? 'Request failed' }))
+        catchError(err => of({ success: false, error: this.friendlyError(err) }))
       );
   }
 
@@ -33,7 +33,7 @@ export class IrisApiService {
     return this.http
       .post<ExecuteResult>(`/api/quest/compile`, { className, source }, { headers: this.getHeaders(config) })
       .pipe(
-        catchError(err => of({ success: false, error: err.message ?? 'Request failed' }))
+        catchError(err => of({ success: false, error: this.friendlyError(err) }))
       );
   }
 
@@ -45,8 +45,21 @@ export class IrisApiService {
         { headers: this.getHeaders(config) }
       )
       .pipe(
-        catchError(err => of({ success: false, error: err.message ?? 'Request failed' }))
+        catchError(err => of({ success: false, error: this.friendlyError(err) }))
       );
+  }
+
+  private friendlyError(err: { status?: number; message?: string }): string {
+    if (err.status === 0) {
+      return 'Could not reach IRIS. Check that Docker is running and the dev-server proxy is configured correctly.';
+    }
+    if (err.status === 401 || err.status === 403) {
+      return `IRIS authentication failed (${err.status}). Check your username and password in Settings.`;
+    }
+    if (err.status != null && err.status >= 500) {
+      return `IRIS returned an error (${err.status}). The server may be starting up — try again in a moment.`;
+    }
+    return err.message ?? 'Request failed';
   }
 
   private getHeaders(config: IRISConfig): HttpHeaders {
