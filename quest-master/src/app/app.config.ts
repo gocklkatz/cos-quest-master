@@ -2,7 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideHttpClient } from '@angular/common/http';
 import { provideMonacoEditor } from 'ngx-monaco-editor-v2';
 
-function registerObjectScript(): void {
+export function registerObjectScript(): void {
   const monaco = (window as any).monaco;
   if (!monaco) return;
 
@@ -21,7 +21,9 @@ function registerObjectScript(): void {
     tokenizer: {
       root: [
         [/\/\/.*$/, 'comment'],
-        [/;.*$/, 'comment'],
+        [/;[ \t]*$/, 'delimiter'],   // trailing ; (class-mode terminator) — not a comment
+        [/;(?=\s*\/\/)/, 'delimiter'], // ; followed by a // comment
+        [/;.+$/, 'comment'],         // ; with text after = inline comment (routine mode)
         [/#;.*$/, 'comment'],
         [/\^[%A-Za-z][A-Za-z0-9.]*/, 'variable.predefined'],
         [/\$\$[%A-Za-z][A-Za-z0-9]*/, 'identifier'],

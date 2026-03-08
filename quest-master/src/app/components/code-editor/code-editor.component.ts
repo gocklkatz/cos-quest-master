@@ -1,6 +1,7 @@
 import { Component, effect, input, model, output } from '@angular/core';
 import { EditorComponent } from 'ngx-monaco-editor-v2';
 import { Quest, QuestMode } from '../../models/quest.models';
+import { registerObjectScript } from '../../app.config';
 
 @Component({
   selector: 'app-code-editor',
@@ -70,6 +71,13 @@ export class CodeEditorComponent {
   onEditorInit(editor: any): void {
     this.editor = editor;
 
+    // Re-register language/theme in case HMR caused onMonacoLoad to be skipped.
+    // (ngx-monaco-editor-v2 skips onMonacoLoad when window.monaco already exists.)
+    const monaco = (window as any).monaco;
+    registerObjectScript();
+    monaco.editor.setTheme('objectscript-dark');
+    monaco.editor.setModelLanguage(editor.getModel(), 'objectscript');
+
     // Set initial value (effect() runs before editor exists on first load).
     const initialCode = this.code();
     if (initialCode) {
@@ -82,7 +90,6 @@ export class CodeEditorComponent {
     });
 
     // Ctrl+Enter → run code.
-    const monaco = (window as any).monaco;
     editor.addAction({
       id: 'run-on-iris',
       label: 'Run on IRIS',
