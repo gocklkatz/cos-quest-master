@@ -42,7 +42,7 @@
 | 4 | Challenge Mode (Less Pre-Filled Code) | phase2-high | ✅ Complete | [feature-04-challenge-mode.md](feature-04-challenge-mode.md) |
 | 5 | Concept Glossary & Documentation Links | phase2-mid | ✅ Complete | [feature-05-concept-glossary.md](feature-05-concept-glossary.md) |
 | 6 | Unified File-Tab Quest Interface | phase2-mid | ✅ Complete | [feature-06-unified-file-tabs.md](feature-06-unified-file-tabs.md) |
-| 7 | Achievement System | phase2-mid | ⬜ Not started | [feature-07-achievement-system.md](feature-07-achievement-system.md) |
+| 7 | Achievement System | phase2-mid | ✅ Complete | [feature-07-achievement-system.md](feature-07-achievement-system.md) |
 | 8 | Resizable Panes | phase2-mid | ✅ Complete | [feature-08-resizable-panes.md](feature-08-resizable-panes.md) |
 
 ---
@@ -130,4 +130,4 @@ quest-master/
 | 5 | **Concept glossary** — starter data, quest-linked popover, sidebar tab | phase2-mid | ✅ Complete |
 | 6 | **Resizable panes** — drag dividers for sidebar, editor/output, output/chat | phase2-mid | ⬜ Not started |
 | 7 | **Unified file-tab quest interface** — replace snippet/class modes with `files[]`, single Run + Submit | phase2-mid | ✅ Complete |
-| 8 | **Achievement system** — unlock logic, overlay animation, starter achievements | phase2-mid | ⬜ Not started |
+| 8 | **Achievement system** — unlock logic, overlay animation, starter achievements | phase2-mid | ✅ Complete |

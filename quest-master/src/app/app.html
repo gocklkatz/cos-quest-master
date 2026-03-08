@@ -28,6 +28,7 @@
           [isEvaluating]="isEvaluating()"
           (questSelected)="onQuestSelected($event)"
           (conceptClicked)="onConceptClicked($event)"
+          (hintRevealed)="onHintRevealed()"
         />
       } @else {
         <app-glossary
@@ -157,5 +158,10 @@
     [xpEarned]="xpAnimAmount()"
     [leveledUp]="xpAnimLeveledUp()"
     [newLevel]="xpAnimNewLevel()"
+  />
+
+  <app-achievement-overlay
+    [trigger]="achievementAnimTrigger()"
+    [achievement]="achievementAnimItem()"
   />
 </div>

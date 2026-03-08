@@ -5,6 +5,7 @@ import { CodeEditorComponent } from './components/code-editor/code-editor.compon
 import { OutputPanelComponent } from './components/output-panel/output-panel.component';
 import { QuestPanelComponent } from './components/quest-panel/quest-panel.component';
 import { XpAnimationComponent } from './components/xp-animation/xp-animation.component';
+import { AchievementOverlayComponent } from './components/achievement-overlay/achievement-overlay.component';
 import { AiPairChatComponent } from './components/ai-pair-chat/ai-pair-chat.component';
 import { GlossaryComponent } from './components/glossary/glossary.component';
 import { GameStateService } from './services/game-state.service';
@@ -13,7 +14,9 @@ import { QuestEngineService } from './services/quest-engine.service';
 import { ClassQuestService } from './services/class-quest.service';
 import { AiPairService } from './services/ai-pair.service';
 import { PaneSizeService } from './services/pane-size.service';
+import { AchievementService } from './services/achievement.service';
 import { ResizableDividerDirective } from './directives/resizable-divider.directive';
+import { Achievement } from './models/achievement.models';
 import { CompileError, EvaluationResult, QuestFile } from './models/quest.models';
 
 @Component({
@@ -26,6 +29,7 @@ import { CompileError, EvaluationResult, QuestFile } from './models/quest.models
     OutputPanelComponent,
     QuestPanelComponent,
     XpAnimationComponent,
+    AchievementOverlayComponent,
     AiPairChatComponent,
     GlossaryComponent,
     ResizableDividerDirective,
@@ -39,6 +43,7 @@ export class App implements OnInit {
   private classQuest = inject(ClassQuestService);
   private aiPair = inject(AiPairService);
   private paneSizes = inject(PaneSizeService);
+  private achievementSvc = inject(AchievementService);
   readonly questEngine = inject(QuestEngineService);
 
   showSettings = signal(false);
@@ -85,6 +90,16 @@ export class App implements OnInit {
   xpAnimAmount = signal(0);
   xpAnimLeveledUp = signal(false);
   xpAnimNewLevel = signal(1);
+
+  /** Achievement overlay — drives the achievement-overlay component. */
+  achievementAnimTrigger = signal(0);
+  achievementAnimItem = signal<Achievement | null>(null);
+
+  /** Timestamp (ms) when the current quest was loaded — used for the speed-run check. */
+  private questStartedAt = 0;
+
+  /** Whether any hint was revealed for the current quest — used for the no-hints check. */
+  hintsShownForCurrentQuest = signal(false);
 
   onSidebarResize(px: number): void {
     this.sidebarWidth.set(px);
@@ -147,8 +162,14 @@ export class App implements OnInit {
     }
   }
 
+  onHintRevealed(): void {
+    this.hintsShownForCurrentQuest.set(true);
+  }
+
   /** Load a quest's files into the editor, respecting challenge mode. */
   private loadQuestCode(quest: { files: QuestFile[] }): void {
+    this.questStartedAt = Date.now();
+    this.hintsShownForCurrentQuest.set(false);
     this.fileCodeBuffers.clear();
     const files = quest.files ?? [];
     this.questFiles.set(files);
@@ -301,10 +322,20 @@ export class App implements OnInit {
       this.questEngine.completeQuest(quest, allCode, result);
       const levelAfter = this.gameState.level();
 
+      this.gameState.updateNoHintsStreak(this.hintsShownForCurrentQuest());
+
       this.xpAnimAmount.set(result.xpEarned);
       this.xpAnimLeveledUp.set(levelAfter > levelBefore);
       this.xpAnimNewLevel.set(levelAfter);
       this.xpAnimTrigger.update(n => n + 1);
+
+      const newAchievements = this.achievementSvc.check(
+        quest.id,
+        result.score,
+        this.questStartedAt,
+        this.questEngine.allQuests(),
+      );
+      this.showAchievements(newAchievements);
 
       const next = this.questEngine.currentQuest();
       if (next && next.id !== quest.id) {
@@ -320,6 +351,16 @@ export class App implements OnInit {
         this.questEngine.generateNextQuest(quest.branch, apiKey);
       }
     }
+  }
+
+  /** Show unlocked achievements sequentially, each after a 3.5 s gap. */
+  private showAchievements(achievements: Achievement[]): void {
+    achievements.forEach((ach, index) => {
+      setTimeout(() => {
+        this.achievementAnimItem.set(ach);
+        this.achievementAnimTrigger.update(n => n + 1);
+      }, index * 4000);
+    });
   }
 
   onQuestSelected(questId: string): void {

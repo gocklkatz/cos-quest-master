@@ -25,6 +25,10 @@ export interface GameState {
   questBank: Quest[];
   /** When true, new quests load with starterCodeHint (or empty) instead of starterCode. Default: false. */
   challengeMode: boolean;
+  /** IDs of achievements the player has unlocked. */
+  unlockedAchievements: string[];
+  /** Number of consecutive quests completed without revealing any hints. */
+  noHintsStreak: number;
 }
 
 export const DEFAULT_IRIS_CONFIG: IRISConfig = {
@@ -47,4 +51,6 @@ export const DEFAULT_GAME_STATE: GameState = {
   anthropicApiKey: '',
   questBank: [],
   challengeMode: false,
+  unlockedAchievements: [],
+  noHintsStreak: 0,
 };

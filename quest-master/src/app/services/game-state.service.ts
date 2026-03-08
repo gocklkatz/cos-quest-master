@@ -22,6 +22,8 @@ export class GameStateService {
   readonly questBank = computed(() => this.state().questBank);
   readonly unlockedBranches = computed(() => this.state().unlockedBranches);
   readonly challengeMode = computed(() => this.state().challengeMode);
+  readonly unlockedAchievements = computed(() => this.state().unlockedAchievements);
+  readonly snapshot = computed(() => this.state());
 
   updateSettings(irisConfig: IRISConfig, anthropicApiKey: string, playerName?: string): void {
     this.state.update(s => ({
@@ -74,6 +76,27 @@ export class GameStateService {
 
   clearQuestBank(): void {
     this.state.update(s => ({ ...s, questBank: [] }));
+    this.persist();
+  }
+
+  unlockAchievement(id: string, xpBonus: number): void {
+    this.state.update(s => {
+      const newXp = s.xp + xpBonus;
+      return {
+        ...s,
+        xp: newXp,
+        level: calcLevel(newXp),
+        unlockedAchievements: [...s.unlockedAchievements, id],
+      };
+    });
+    this.persist();
+  }
+
+  updateNoHintsStreak(hintsShown: boolean): void {
+    this.state.update(s => ({
+      ...s,
+      noHintsStreak: hintsShown ? 0 : s.noHintsStreak + 1,
+    }));
     this.persist();
   }
 

@@ -36,6 +36,7 @@ export class QuestPanelComponent {
 
   questSelected = output<string>();
   conceptClicked = output<string>();
+  hintRevealed = output<void>();
 
   /** How many hints have been revealed. Reset when quest changes. */
   hintsRevealed = signal(0);
@@ -69,6 +70,7 @@ export class QuestPanelComponent {
   revealHint(): void {
     if (this.canRevealMore()) {
       this.hintsRevealed.update(n => n + 1);
+      this.hintRevealed.emit();
     }
   }
 

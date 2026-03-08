@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase2-mid |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Depends On | — |
 
 ---
@@ -51,16 +51,22 @@ interface Achievement {
 **Trigger**: `AchievementService.check(state)` called after every quest completion and XP gain. Unlock animation overlays the XP animation.
 
 **Files changed:**
-- `quest-master/src/app/models/achievement.models.ts` — new model file
-- `quest-master/src/app/services/achievement.service.ts` — new service with `check()` and unlock logic
-- `quest-master/src/app/components/achievement-overlay/` — new overlay component + animation
-- `quest-master/src/app/app.ts` — wire `AchievementService.check()` after quest completion
+- `quest-master/src/app/models/achievement.models.ts` — new: `Achievement` interface, `AchievementRarity` type
+- `quest-master/src/app/models/game-state.models.ts` — added `unlockedAchievements: string[]` and `noHintsStreak: number`
+- `quest-master/src/app/services/game-state.service.ts` — added `unlockAchievement()`, `updateNoHintsStreak()`, `unlockedAchievements` computed, `snapshot` computed
+- `quest-master/src/app/services/achievement.service.ts` — new: `ACHIEVEMENTS` array and `AchievementService.check()` with all 7 starter conditions
+- `quest-master/src/app/components/achievement-overlay/achievement-overlay.component.ts` — new overlay component
+- `quest-master/src/app/components/achievement-overlay/achievement-overlay.component.html` — new overlay template
+- `quest-master/src/app/components/achievement-overlay/achievement-overlay.component.scss` — new overlay styles with rarity colour variants
+- `quest-master/src/app/components/quest-panel/quest-panel.component.ts` — added `hintRevealed` output, emitted from `revealHint()`
+- `quest-master/src/app/app.ts` — inject `AchievementService`; track `questStartedAt` and `hintsShownForCurrentQuest`; call `check()` post-completion; queue overlay display
+- `quest-master/src/app/app.html` — wire `(hintRevealed)` on quest-panel; add `<app-achievement-overlay>`
 
 ---
 
 ## Open Questions
 
-- [ ] Where are unlocked achievements persisted — inside the existing `GameState` object (and thus the same localStorage key) or a separate `qm.achievements` key?
-- [ ] Should the XP bonus from an achievement be retroactively awarded if the player already met the condition before this feature shipped? (e.g. player already completed Quest Zero before `first-quest` existed.)
-- [ ] Should locked achievements be visible to the player (showing name + requirement) or hidden until unlocked? (Visible gives motivation; hidden gives a discovery moment.)
-- [ ] Should the unlock animation block user input or run non-blocking in the corner?
+- ~~[ ] Where are unlocked achievements persisted — inside the existing `GameState` object (and thus the same localStorage key) or a separate `qm.achievements` key?~~ **Inside `GameState`** (`unlockedAchievements: string[]`, `noHintsStreak: number`), serialised under the existing `questmaster` localStorage key.
+- ~~[ ] Should the XP bonus from an achievement be retroactively awarded if the player already met the condition before this feature shipped?~~ **No** — bonuses are only awarded at the moment of unlock.
+- ~~[ ] Should locked achievements be visible to the player (showing name + requirement) or hidden until unlocked?~~ **Out of scope for now** — only the unlock notification overlay is shipped. A full achievements panel is backlog.
+- ~~[ ] Should the unlock animation block user input or run non-blocking in the corner?~~ **Non-blocking** — slides up from the bottom-right corner (z-index 1100, above the XP overlay), auto-dismisses after 3.5 s. Multiple unlocks queue with 4 s gaps.

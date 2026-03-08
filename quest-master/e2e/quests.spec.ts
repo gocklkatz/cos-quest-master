@@ -345,10 +345,12 @@ test('State: XP and level persist across a page reload', async ({ page }) => {
   await submitCode(page);
   await expect(page.locator('.evaluation-section')).toHaveClass(/passed/);
 
-  // Capture the XP value shown in the header after completing the quest.
+  // Capture the XP and level shown in the header after completing the quest.
   const xpLabelText = await page.locator('.xp-label').textContent();
   const xp = parseInt(xpLabelText?.match(/XP:\s*(\d+)/)?.[1] ?? '0');
   expect(xp).toBeGreaterThan(0);
+  const levelText = await page.locator('.level-badge').textContent();
+  expect(levelText).toMatch(/Level \d+/);
 
   // Reload — this clears in-memory state and forces the app to read from localStorage.
   await page.reload();
@@ -356,7 +358,7 @@ test('State: XP and level persist across a page reload', async ({ page }) => {
 
   // XP and level must be restored from localStorage.
   await expect(page.locator('.xp-label')).toContainText(`XP: ${xp}`);
-  await expect(page.locator('.level-badge')).toContainText('Level 2');
+  await expect(page.locator('.level-badge')).toContainText(levelText!);
 });
 
 // ---------------------------------------------------------------------------
