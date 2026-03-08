@@ -43,7 +43,7 @@
 | 5 | Concept Glossary & Documentation Links | phase2-mid | ✅ Complete | [feature-05-concept-glossary.md](feature-05-concept-glossary.md) |
 | 6 | Unified File-Tab Quest Interface | phase2-mid | ✅ Complete | [feature-06-unified-file-tabs.md](feature-06-unified-file-tabs.md) |
 | 7 | Achievement System | phase2-mid | ⬜ Not started | [feature-07-achievement-system.md](feature-07-achievement-system.md) |
-| 8 | Resizable Panes | phase2-mid | ⬜ Not started | [feature-08-resizable-panes.md](feature-08-resizable-panes.md) |
+| 8 | Resizable Panes | phase2-mid | ✅ Complete | [feature-08-resizable-panes.md](feature-08-resizable-panes.md) |
 
 ---
 

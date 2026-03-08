@@ -12,6 +12,8 @@ import { IrisConnectionService } from './services/iris-connection.service';
 import { QuestEngineService } from './services/quest-engine.service';
 import { ClassQuestService } from './services/class-quest.service';
 import { AiPairService } from './services/ai-pair.service';
+import { PaneSizeService } from './services/pane-size.service';
+import { ResizableDividerDirective } from './directives/resizable-divider.directive';
 import { CompileError, EvaluationResult, QuestFile } from './models/quest.models';
 
 @Component({
@@ -26,6 +28,7 @@ import { CompileError, EvaluationResult, QuestFile } from './models/quest.models
     XpAnimationComponent,
     AiPairChatComponent,
     GlossaryComponent,
+    ResizableDividerDirective,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -35,11 +38,17 @@ export class App implements OnInit {
   private connectionSvc = inject(IrisConnectionService);
   private classQuest = inject(ClassQuestService);
   private aiPair = inject(AiPairService);
+  private paneSizes = inject(PaneSizeService);
   readonly questEngine = inject(QuestEngineService);
 
   showSettings = signal(false);
   showChat = signal(false);
   sidebarTab = signal<'quest' | 'glossary'>('quest');
+
+  /** Resizable pane sizes (px), persisted in localStorage. */
+  sidebarWidth = signal(this.paneSizes.get('sidebar'));
+  outputHeight = signal(this.paneSizes.get('editorOutput'));
+  chatHeight = signal(this.paneSizes.get('outputChat'));
   glossaryHighlight = signal<string | null>(null);
 
   /** True when an Anthropic API key is configured. */
@@ -76,6 +85,21 @@ export class App implements OnInit {
   xpAnimAmount = signal(0);
   xpAnimLeveledUp = signal(false);
   xpAnimNewLevel = signal(1);
+
+  onSidebarResize(px: number): void {
+    this.sidebarWidth.set(px);
+    this.paneSizes.set('sidebar', px);
+  }
+
+  onOutputResize(px: number): void {
+    this.outputHeight.set(px);
+    this.paneSizes.set('editorOutput', px);
+  }
+
+  onChatResize(px: number): void {
+    this.chatHeight.set(px);
+    this.paneSizes.set('outputChat', px);
+  }
 
   ngOnInit(): void {
     this.connectionSvc.startPolling(this.gameState.irisConfig());

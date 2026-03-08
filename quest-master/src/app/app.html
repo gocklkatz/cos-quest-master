@@ -12,7 +12,7 @@
 
   <div class="workspace">
     <!-- Left: quest panel / glossary -->
-    <aside class="quest-sidebar">
+    <aside class="quest-sidebar" [style.width.px]="sidebarWidth()">
       <div class="sidebar-tabs">
         <button class="sidebar-tab" [class.active]="sidebarTab() === 'quest'" (click)="sidebarTab.set('quest')">Quest</button>
         <button class="sidebar-tab" [class.active]="sidebarTab() === 'glossary'" (click)="sidebarTab.set('glossary')">Glossary</button>
@@ -37,6 +37,17 @@
         />
       }
     </aside>
+
+    <!-- Sidebar ↔ content vertical divider -->
+    <div class="resize-divider resize-divider--vertical"
+         appResizableDivider
+         orientation="vertical"
+         [currentSize]="sidebarWidth()"
+         [minSize]="180"
+         [maxSize]="600"
+         (sizeChange)="onSidebarResize($event)">
+      <span class="resize-divider__glyph">&#8942;</span>
+    </div>
 
     <!-- Right: editor + output -->
     <section class="editor-area">
@@ -91,7 +102,19 @@
         >&#128172; Pair</button>
       </div>
 
-      <div class="output-pane">
+      <!-- Editor ↔ output horizontal divider -->
+      <div class="resize-divider resize-divider--horizontal"
+           appResizableDivider
+           orientation="horizontal"
+           [invertDelta]="true"
+           [currentSize]="outputHeight()"
+           [minSize]="80"
+           [maxSize]="600"
+           (sizeChange)="onOutputResize($event)">
+        <span class="resize-divider__glyph">&#8943;</span>
+      </div>
+
+      <div class="output-pane" [style.height.px]="outputHeight()">
         <app-output-panel
           [output]="output()"
           [error]="error()"
@@ -101,7 +124,19 @@
       </div>
 
       @if (showChat()) {
-        <div class="chat-pane">
+        <!-- Output ↔ chat horizontal divider -->
+        <div class="resize-divider resize-divider--horizontal"
+             appResizableDivider
+             orientation="horizontal"
+             [invertDelta]="true"
+             [currentSize]="chatHeight()"
+             [minSize]="60"
+             [maxSize]="500"
+             (sizeChange)="onChatResize($event)">
+          <span class="resize-divider__glyph">&#8943;</span>
+        </div>
+
+        <div class="chat-pane" [style.height.px]="chatHeight()">
           <app-ai-pair-chat
             [quest]="questEngine.currentQuest()"
             [currentCode]="editorCode()"

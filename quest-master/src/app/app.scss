@@ -69,12 +69,10 @@
   }
 }
 
-/* ── Quest sidebar (left, fixed width) ───────────────── */
+/* ── Quest sidebar (left, resizable) ─────────────────── */
 .quest-sidebar {
-  width: 300px;
   flex-shrink: 0;
   background: #110f1e;
-  border-right: 1px solid #2a2040;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -201,9 +199,8 @@
   color: #4a4060;
 }
 
-/* ── Output pane (bottom, fixed height) ──────────────── */
+/* ── Output pane (bottom, resizable) ────────────────── */
 .output-pane {
-  height: 200px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -234,12 +231,57 @@
   }
 }
 
-/* ── AI pair chat pane ───────────────────────────────── */
+/* ── AI pair chat pane (resizable) ──────────────────── */
 .chat-pane {
-  height: 280px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-top: 1px solid #2a2040;
+}
+
+/* ── Resize dividers ─────────────────────────────────── */
+.resize-divider {
+  flex-shrink: 0;
+  background: #1a1530;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  user-select: none;
+  z-index: 10;
+
+  &:hover,
+  &.is-dragging {
+    background: #6b52c0;
+  }
+
+  &__glyph {
+    color: #4a3a7a;
+    font-size: 0.8rem;
+    line-height: 1;
+    pointer-events: none;
+    transition: color 0.15s;
+  }
+
+  &:hover &__glyph,
+  &.is-dragging &__glyph {
+    color: #c4b5fd;
+  }
+}
+
+.resize-divider--vertical {
+  width: 4px;
+  cursor: col-resize;
+  flex-direction: column;
+
+  .resize-divider__glyph {
+    writing-mode: vertical-rl;
+  }
+}
+
+.resize-divider--horizontal {
+  height: 4px;
+  cursor: row-resize;
+  flex-direction: row;
 }
