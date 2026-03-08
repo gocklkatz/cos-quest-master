@@ -128,6 +128,6 @@ quest-master/
 | 3 | **Documentation links in hints** — `docLinks` field, badge UI in quest panel, starter quest data | phase2-high | ✅ Complete |
 | 4 | **Challenge Mode** — `starterCodeHint` field, `challengeMode` GameState flag, toolbar toggle + restore button, starter quest hints | phase2-high | ✅ Complete |
 | 5 | **Concept glossary** — starter data, quest-linked popover, sidebar tab | phase2-mid | ✅ Complete |
-| 6 | **Resizable panes** — drag dividers for sidebar, editor/output, output/chat | phase2-mid | ⬜ Not started |
+| 6 | **Resizable panes** — drag dividers for sidebar, editor/output, output/chat | phase2-mid | ✅ Complete |
 | 7 | **Unified file-tab quest interface** — replace snippet/class modes with `files[]`, single Run + Submit | phase2-mid | ✅ Complete |
 | 8 | **Achievement system** — unlock logic, overlay animation, starter achievements | phase2-mid | ✅ Complete |

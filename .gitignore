@@ -20,3 +20,7 @@ dist/
 
 # IDE
 .idea/
+
+# Test results
+test-results/
+**/test-results/
