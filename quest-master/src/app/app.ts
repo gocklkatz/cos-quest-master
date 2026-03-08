@@ -55,6 +55,9 @@ export class App implements OnInit {
   /** Active editor mode — driven by the current quest's mode field, or manually toggled. */
   editorMode = signal<QuestMode>('snippet');
 
+  /** Per-mode code buffers so switching tabs preserves each tab's content. */
+  private modeCodeBuffers = new Map<QuestMode, string>();
+
   /** Execution state. */
   output = signal<string | null>(null);
   error = signal<string | null>(null);
@@ -121,6 +124,7 @@ export class App implements OnInit {
 
   /** Apply challengeMode logic when loading a quest into the editor. */
   private loadQuestCode(quest: { starterCode?: string; starterCodeHint?: string; mode?: QuestMode }): void {
+    this.modeCodeBuffers.clear();
     this.editorCode.set(
       this.gameState.challengeMode()
         ? (quest.starterCodeHint ?? '')
@@ -130,7 +134,14 @@ export class App implements OnInit {
   }
 
   onModeChanged(mode: QuestMode): void {
+    // Save current code into the outgoing mode's buffer before switching.
+    this.modeCodeBuffers.set(this.editorMode(), this.editorCode());
     this.editorMode.set(mode);
+    // Restore saved code for the incoming mode, if any.
+    const saved = this.modeCodeBuffers.get(mode);
+    if (saved !== undefined) {
+      this.editorCode.set(saved);
+    }
     this.output.set(null);
     this.error.set(null);
     this.compileErrors.set([]);

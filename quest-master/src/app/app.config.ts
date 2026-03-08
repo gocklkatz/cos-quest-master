@@ -17,6 +17,8 @@ export function registerObjectScript(): void {
       'new', 'kill', 'hang', 'open', 'close', 'use', 'read', 'try', 'catch',
       'throw', 'lock', 'merge', 'xecute', 'goto', 'job', 'halt', 'break',
       's', 'w', 'i', 'e', 'f', 'd', 'q', 'n', 'k', 'h',
+      'Class', 'Property', 'Method', 'ClassMethod', 'Parameter', 'Extends', 'As',
+      'Relationship', 'Index', 'Trigger', 'Query', 'Storage',
     ],
     tokenizer: {
       root: [
@@ -38,10 +40,6 @@ export function registerObjectScript(): void {
               '@default': 'identifier',
             },
           },
-        ],
-        [
-          /\b(Class|Property|Method|Parameter|ClassMethod|Relationship|Index|Trigger|Query|Storage)\b/,
-          'keyword',
         ],
         [/##class/i, 'keyword'],
         [/[{}()\[\]]/, 'delimiter.bracket'],
