@@ -1,6 +1,6 @@
 # ObjectScript Quest Master — Phase 2 Specification
 
-> **Purpose**: This document defines Phase 2 extensions to the Quest Master app. Phase 1 delivered the full core loop (editor → IRIS execute → Claude evaluate → XP). Phase 2 deepens the content, improves the developer experience, and lays groundwork for social/multiplayer features.
+> **Purpose**: This document defines Phase 2 extensions to the Quest Master app. Phase 1 delivered the full core loop (editor → IRIS execute → Claude evaluate → XP). Phase 2 deepens the content, improves the developer experience, and lays groundwork for future features.
 
 ---
 
@@ -28,9 +28,7 @@
 | Priority | Theme |
 |---|---|
 | **P1 — High value, low complexity** | Class-based quests, AI pair programmer mode, documentation links in hints |
-| **P2 — High value, medium complexity** | Multi-file project quests, concept glossary, streaming output |
-| **P3 — Strategic, higher complexity** | Multiplayer/social, backend persistence, instructor mode |
-| **Backlog — deferred** | Global/SQL Explorers, real-time streaming, code history & diff, interoperability track |
+| **P2 — High value, medium complexity** | Multi-file project quests, concept glossary |
 
 ---
 
@@ -47,6 +45,8 @@
 3. Executes a test harness via `POST /api/quest/execute` (e.g., `WRITE ##class(MyClass).MyMethod()`)
 4. Returns combined compile errors + execution output for evaluation
 
+**Class cleanup**: Compiled classes persist in the USER namespace until the player loads a different class quest. On quest switch, `ClassQuestService` issues `DELETE /api/atelier/v1/USER/doc/{previousClassName}.cls` before compiling the new class. This keeps the namespace tidy without a separate cleanup endpoint. Classes persist within a session so players can re-run test harnesses without re-compiling. A manual **"Clean up my classes"** button in Settings can call the delete endpoint for any classes matching a `Guild.*` or `QM.Player.*` prefix.
+
 **New skill branches unlocked:**
 
 ```
@@ -62,23 +62,15 @@ oop-patterns/
   └── Class queries
 ```
 
-**UI changes needed:**
-- Toggle in CodeEditorComponent: `[Snippet mode]` vs `[Class mode]`
-- In class mode, the editor shows a full `.cls` scaffold and the run button triggers the compile + test-harness flow
-- Compile errors are rendered separately from runtime output (red vs grey)
-- Class mode quests display the class name and a separate "test code" block that is auto-run after compile
-
-**New `Quest` interface fields:**
+**Quest model fields** (all quests — snippet and class alike — use this shape; see Feature #6 for the unified file-tab UI):
 ```typescript
 interface Quest {
   // ... existing fields ...
-  mode: 'snippet' | 'class' | 'project';  // NEW — full union; defaults to 'snippet' for backwards compat
-  testHarness?: string;                    // NEW — ObjectScript snippet to run after class compiles
-  className?: string;                      // NEW — e.g. "Guild.Member"
+  testHarness?: string;   // ObjectScript snippet run after all files compile; used for evaluation
 }
 ```
 
-> **Note on `mode` union**: All three mode values live on the base `Quest` interface. `ProjectQuest` (Feature #5) uses `Omit<Quest, 'mode'>` to re-declare `mode: 'project'` as a narrowed type without conflicting with the base union.
+> **Note on mode**: The `mode: 'snippet' | 'class' | 'project'` toggle from the initial class implementation is superseded by the unified file-tab model introduced in Feature #6. The editor no longer shows a snippet/class toggle; instead, quests define their files explicitly, and the editor always shows file tabs. See Feature #6 for the full model.
 
 **Compile error response schema:**
 
@@ -269,44 +261,7 @@ Claude must return it as part of the quest JSON alongside `starterCode`.
 
 ---
 
-### 5. Multi-File Project Quests
-
-**The problem**: Real IRIS development involves multiple related classes (e.g., a persistent class + a REST dispatch class + a data validator). Single-file quests cannot teach this coordination.
-
-**The solution**: Add a `ProjectQuest` variant that bundles multiple files:
-
-```typescript
-// Omit<Quest, 'mode'> avoids conflicting with the base union — 'project' is a valid
-// narrowing of 'snippet' | 'class' | 'project' without overriding the base type.
-interface ProjectQuest extends Omit<Quest, 'mode'> {
-  mode: 'project';
-  files: ProjectFile[];   // ordered list of files to create/edit
-}
-
-interface ProjectFile {
-  className: string;          // e.g. "Inventory.Item"
-  filename: string;           // e.g. "Inventory.Item.cls"
-  description: string;        // shown in file tab label
-  starterCode?: string;
-  readOnly?: boolean;         // true for provided utility classes
-  dependsOn?: string[];       // classNames this file must be compiled after
-                              // e.g. ["Inventory.Item"] for a REST class that references it
-}
-```
-
-`ClassQuestService` topologically sorts `files` by `dependsOn` before issuing Atelier compile calls sequentially. Circular dependencies are a quest-authoring error — a validation step in `starter-quests.ts` (or a build-time lint rule) should detect them before they reach the user.
-
-**UI changes**:
-- File tabs appear above the editor when a project quest is active
-- Each tab is independently editable
-- "Compile All" compiles all files in dependency order (determined by prerequisites field)
-- Test harness runs after all files compile successfully
-
-**Example capstone project quest**: Build a REST API for a `Library.Book` persistent class with search, create, and delete endpoints — all in one coordinated project.
-
----
-
-### 6. Concept Glossary & Documentation Links
+### 5. Concept Glossary & Documentation Links
 
 **The problem**: When a quest introduces `$ZSTRIP` or `%JSON.Adaptor`, the player has no in-app reference. They must alt-tab to browser docs.
 
@@ -337,17 +292,97 @@ export interface GlossaryEntry {
 
 ---
 
-### 7. Leaderboard & Achievements
+### 6. Unified File-Tab Quest Interface
 
-**Depends on**: P3 Backend (#10)
+**The problem**: The original class quest implementation introduced a snippet/class mode toggle. This creates friction: players must write class code in the class pane, run it, then switch to the snippet pane to write calling code and run again. The two-pane/two-mode model is unnecessarily complex.
 
-**Leaderboard**:
-- Opt-in ranking by XP (display name set by player)
-- Filterable by tier (Apprentice / Journeyman / Master)
-- Shows: rank, name, XP, level, quests completed, highest score
-- Weekly reset option for competitive classroom use
+**The solution**: Replace the snippet/class mode distinction with a unified file-tab interface. Every quest defines an ordered list of files. Each file is an independently editable tab. There is one **"Run in IRIS"** button and one **"Submit"** button that operate across all open files at once.
 
-**Achievement system** — new `Achievement` type:
+**Quest model — unified file-based shape:**
+
+```typescript
+interface QuestFile {
+  id: string;               // e.g. "model", "main", "rest"
+  filename: string;         // e.g. "Library.Book.cls" or "solution.script"
+  fileType: 'cls' | 'script';  // determines compile-via-Atelier vs XECUTE flow
+  label: string;            // shown in the file tab
+  starterCode?: string;
+  starterCodeHint?: string; // shown in challenge mode instead of starterCode
+  readOnly?: boolean;       // true for provided utility/scaffold files
+  dependsOn?: string[];     // file IDs that must be compiled before this one
+}
+
+interface Quest {
+  // ... existing fields (id, title, objective, hints, docLinks, etc.) ...
+  files: QuestFile[];       // always at least one file; replaces starterCode + mode + className
+  testHarness?: string;     // ObjectScript snippet auto-run after all files execute/compile
+}
+```
+
+**Run behavior ("Run in IRIS" button):**
+1. Process files in dependency order (topological sort on `dependsOn`)
+2. For each `.cls` file: `PUT` to Atelier + `POST /compile` — display compile errors inline
+3. For each `.script` file: `POST /api/quest/execute` via XECUTE
+4. If a `testHarness` is defined and all files succeeded: run it and display output
+5. Combined output (compile results + execution output) shown in the output panel
+
+**Submit behavior ("Submit" button):**
+1. Run all files (same as "Run in IRIS")
+2. If no compile errors: send code + output to Claude for evaluation
+3. Award XP on pass
+
+**Migration**: Existing quests in `starter-quests.ts` that use the old `starterCode` + `mode: 'snippet'` shape are migrated to `files: [{ id: 'main', filename: 'solution.script', fileType: 'script', label: 'Solution', starterCode: '...' }]`. Existing class quests (mode: 'class') migrate similarly with `fileType: 'cls'`. The legacy `mode`, `className`, and top-level `starterCode` fields on `Quest` are removed after migration.
+
+**UI changes:**
+- File tabs always shown above the editor (even for single-file quests — one tab is fine)
+- No snippet/class mode toggle in the toolbar
+- Active file tab is independently editable in Monaco
+- Compile errors from `.cls` files are shown as red inline markers
+- "Run in IRIS" and "Submit" buttons in the toolbar operate on all files
+
+**Challenge Mode compatibility**: When `challengeMode` is active, each tab opens with its `starterCodeHint` (or empty). The "Show starter code" button restores the active tab's `starterCode`.
+
+**Example capstone project quest**: Build a REST API for a `Library.Book` persistent class with search, create, and delete endpoints.
+
+```typescript
+// Example multi-file quest
+{
+  files: [
+    {
+      id: 'model',
+      filename: 'Library.Book.cls',
+      fileType: 'cls',
+      label: 'Library.Book',
+      starterCode: '// Define the persistent class here',
+      dependsOn: []
+    },
+    {
+      id: 'rest',
+      filename: 'Library.BookREST.cls',
+      fileType: 'cls',
+      label: 'BookREST',
+      starterCode: '// Define the REST dispatch class here',
+      dependsOn: ['model']
+    }
+  ],
+  testHarness: 'WRITE ##class(Library.Book).%OpenId(1).Title'
+}
+```
+
+**Files changed:**
+- `quest-master/src/app/models/quest.models.ts` — replace `mode`/`className`/`ProjectFile`/`ProjectQuest` with `QuestFile` and updated `Quest`
+- `quest-master/src/app/data/starter-quests.ts` — migrate all quests to `files[]` shape
+- `quest-master/src/app/components/code-editor/code-editor.component.*` — file tabs UI, remove mode toggle
+- `quest-master/src/app/services/class-quest.service.ts` — update to iterate `files[]`, topological sort
+- `quest-master/src/app/app.ts` — update quest-load effect to use first file's starterCode/Hint
+
+---
+
+### 7. Achievement System
+
+**Note**: The leaderboard component (opt-in ranking, weekly resets) depends on a shared backend and is deferred to the backlog. The achievement system is fully local and can be shipped independently.
+
+**Achievement type:**
 
 ```typescript
 interface Achievement {
@@ -361,7 +396,7 @@ interface Achievement {
 }
 ```
 
-Starter achievements:
+**Starter achievements:**
 
 | ID | Name | Condition | Rarity |
 |---|---|---|---|
@@ -377,7 +412,7 @@ Achievement unlock triggers: `AchievementService.check(state)` called after ever
 
 ---
 
-### 8. Make panes resizable
+### 8. Resizable Panes
 
 **The problem**: The Quest Master layout uses fixed-size panels. The quest sidebar, code editor, output panel, and AI Pair Programmer chat each have a hard-coded height or width. Players with small screens can't see enough output; players with large screens waste space. Power users want a bigger editor; beginners want a bigger hint/quest pane.
 
@@ -418,25 +453,23 @@ Achievement unlock triggers: `AchievementService.check(state)` called after ever
 
 ---
 
-## New Architecture Additions
+## Architecture Overview (Phase 2)
 
-### Updated Dependency Diagram (Phase 2)
-
-> **Legend**: `[P1]` = Phase 2 high priority (current), `[P2]` = Phase 2 medium priority, `[P3]` = Phase 3 future, `[backlog]` = deferred, not in current Phase 2 scope.
+> **Legend**: `[P1]` = Phase 2 high priority (complete or current), `[P2]` = Phase 2 medium priority, `[backlog]` = deferred.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      Browser (Angular App)                          │
 │                                                                     │
-│  QuestPanel    │  CodeEditor    │  GlobalExplorer [backlog]         │
-│  AIPairChat[P1]│  OutputPanel   │  SQLExplorer [backlog]            │
-│  GlossaryTab[P2]               │  DiffViewer [backlog]             │
+│  QuestPanel    │  CodeEditor (file tabs) │                          │
+│  AIPairChat[P1]│  OutputPanel            │                          │
+│  GlossaryTab[P2]                         │                          │
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
 │  │  Services                                                    │   │
 │  │  GameState  QuestEngine  ClaudeAPI  IRISApi  AIPair[P1]     │   │
-│  │  Achievement[P3]  History[backlog]  Glossary[P2]            │   │
-│  │  StreamingExec[backlog]                                      │   │
+│  │  Glossary[P2]  Achievement[P2]                               │   │
+│  │  History[backlog]  StreamingExec[backlog]                    │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 └───────┬──────────────────────────────┬──────────────────────────────┘
         │                              │
@@ -446,63 +479,13 @@ Achievement unlock triggers: `AchievementService.check(state)` called after ever
                                ├── /api/quest/compile       (existing)
                                ├── /api/quest/health        (existing)
                                ├── /api/atelier/...         (existing)
-                               ├── /api/explore/globals     (NEW [backlog])
-                               ├── /api/explore/globals/tree(NEW [backlog])
-                               ├── /api/explore/sql         (NEW [backlog])
-                               ├── /api/explore/sql/tables  (NEW [backlog])
-                               ├── /api/explore/classes     (NEW [backlog])
-                               └── /api/quest/stream        (NEW [backlog])
-        │
-        ▼ (P3 only)
-  localhost:3001 (Bun backend)
-  ├── /auth/...
-  ├── /progress/...
-  ├── /leaderboard
-  └── /quest-bank/...
 ```
-
----
-
-## New IRIS Class: `QuestMaster.REST.Explorer` *(Backlog — not in current Phase 2)*
-
-This class is defined here for reference but is deferred to the backlog. It will be implemented when the Global Explorer and SQL Explorer components are promoted from backlog.
-
-```objectscript
-Class QuestMaster.REST.Explorer Extends %CSP.REST
-{
-Parameter HandleCorsRequest = 1;
-Parameter CONTENTTYPE = "application/json";
-
-XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
-{
-<Routes>
-  <Route Url="/globals" Method="GET" Call="ListGlobals"/>
-  <Route Url="/globals/tree" Method="GET" Call="GetGlobalTree"/>
-  <Route Url="/sql" Method="POST" Call="RunSQL"/>
-  <Route Url="/sql/tables" Method="GET" Call="ListTables"/>
-  <Route Url="/classes" Method="GET" Call="ListClasses"/>
-</Routes>
-}
-
-// ... implementations ...
-}
-```
-
-Register at `/api/explore/` in IRIS web applications. When implemented, add a matching proxy entry to `proxy.conf.json`:
-```json
-"/api/explore": {
-  "target": "http://localhost:52773",
-  "secure": false,
-  "changeOrigin": true
-}
-```
-All Explorer endpoints are therefore reachable at `/api/explore/globals`, `/api/explore/sql`, etc. — consistent with the architecture diagram above.
 
 ---
 
 ## Updated File Structure (Phase 2 additions only)
 
-> **Label key**: `(phase2-high)` = P1 priority, `(phase2-mid)` = P2 priority, `(phase3)` = future, `(backlog)` = deferred.
+> **Label key**: `(phase2-high)` = P1 priority, `(phase2-mid)` = P2 priority, `(backlog)` = deferred.
 
 ```
 quest-master/
@@ -510,34 +493,15 @@ quest-master/
 │   ├── components/
 │   │   ├── ai-pair-chat/            # NEW (phase2-high)
 │   │   ├── glossary/                # NEW (phase2-mid)
-│   │   ├── global-explorer/         # NEW (backlog)
-│   │   ├── sql-explorer/            # NEW (backlog)
-│   │   ├── diff-viewer/             # NEW (backlog)
-│   │   ├── achievement-overlay/     # NEW (phase3)
-│   │   └── leaderboard/             # NEW (phase3)
+│   │   └── achievement-overlay/     # NEW (phase2-mid)
 │   ├── services/
 │   │   ├── ai-pair.service.ts          # NEW (phase2-high)
 │   │   ├── glossary.service.ts         # NEW (phase2-mid)
-│   │   ├── global-explorer.service.ts  # NEW (backlog)
-│   │   ├── sql-explorer.service.ts     # NEW (backlog)
-│   │   ├── attempt-history.service.ts  # NEW (backlog)
-│   │   ├── streaming-exec.service.ts   # NEW (backlog)
-│   │   ├── achievement.service.ts      # NEW (phase3)
-│   │   └── sync.service.ts             # NEW (phase3)
+│   │   ├── achievement.service.ts      # NEW (phase2-mid)
 │   ├── models/
-│   │   ├── project-quest.models.ts  # NEW (phase2-mid)
-│   │   └── achievement.models.ts    # NEW (phase3)
+│   │   └── achievement.models.ts    # NEW (phase2-mid)
 │   └── data/
 │       └── glossary.ts              # NEW (phase2-mid)
-├── iris/
-│   ├── QuestMaster.REST.Execute.cls       # MODIFIED (backlog — async/streaming)
-│   └── QuestMaster.REST.Explorer.cls      # NEW (backlog — globals, SQL, classes)
-└── backend/                               # NEW (phase3)
-    ├── server.ts                          # Bun HTTP server
-    ├── routes/auth.ts
-    ├── routes/progress.ts
-    └── routes/leaderboard.ts
-```
 
 ---
 
@@ -545,26 +509,11 @@ quest-master/
 
 | # | Feature | Priority | Status |
 |---|---|---|---|
-| 1 | **Class-based quest infrastructure** — Atelier compile flow, `mode` field, compile error rendering | phase2-high | ✅ Complete |
+| 1 | **Class-based quest infrastructure** — Atelier compile flow, compile error rendering | phase2-high | ✅ Complete |
 | 2 | **AI Pair Programmer** — chat panel wired to Claude with quest context | phase2-high | ✅ Complete |
 | 3 | **Documentation links in hints** — `docLinks` field, badge UI in quest panel, starter quest data | phase2-high | ✅ Complete |
 | 4 | **Challenge Mode** — `starterCodeHint` field, `challengeMode` GameState flag, toolbar toggle + restore button, starter quest hints | phase2-high | ✅ Complete |
 | 5 | **Concept glossary** — starter data, quest-linked popover, sidebar tab | phase2-mid | ✅ Complete |
-| 6 | **Multi-file project quests** — file tabs, project mode compile flow | phase2-mid | ⬜ Not started |
-| 7 | **Leaderboard & achievements** — opt-in ranking, unlock logic, overlay animation | phase3 | ⬜ Not started |
-
----
-
-## Open Questions for Phase 2 Planning
-
-1. **Class cleanup**: ~~Do compiled classes persist between sessions?~~
-
-   **Decision**: Classes compiled during class-mode quests persist in the USER namespace until the player loads a *different* class-mode quest. On quest switch, `ClassQuestService` issues `DELETE /api/atelier/v1/USER/doc/{previousClassName}.cls` before compiling the new class. This keeps the namespace tidy without a separate cleanup endpoint. Classes persist within a session so players can re-run test harnesses without re-compiling. A manual **"Clean up my classes"** button in Settings can call the delete endpoint for any classes matching a `Guild.*` or `QM.Player.*` prefix.
-
-2. **XECUTE vs class mode trade-off**: Should snippet-mode quests eventually be converted to class-mode (defining a method and calling it), or kept as-is? Class mode is more idiomatic but XECUTE is simpler to grade deterministically.
-
-3. **Streaming complexity**: Full SSE streaming from IRIS is architecturally complex. The polling-based approach (JOB + GET) is simpler but adds latency. For Phase 2, recommend polling first, SSE as a later optimization.
-
-4. **Backend hosting**: For classroom use, the Bun backend needs to be accessible by students. Does this imply a cloud deployment, or is this always local? Recommend keeping Phase 2 backend local-first (Docker Compose service) and treating cloud deployment as Phase 3.
-
-5. **Interop prerequisites**: Enabling Interoperability in IRIS requires System Management privileges and a licensed namespace. Should Interop quests be optional (an advanced extension pack) rather than part of the main skill tree?
+| 6 | **Resizable panes** — drag dividers for sidebar, editor/output, output/chat | phase2-mid | ⬜ Not started |
+| 7 | **Unified file-tab quest interface** — replace snippet/class modes with `files[]`, single Run + Submit | phase2-mid | ⬜ Not started |
+| 8 | **Achievement system** — unlock logic, overlay animation, starter achievements | phase2-mid | ⬜ Not started |
