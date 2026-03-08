@@ -162,13 +162,67 @@ ClassMethod Execute() As %Status
 ClassMethod Compile() As %Status
 {
   Do %response.SetHeader("Content-Type","application/json")
+  Set tSrcFile = ""
+  Set tDiagFile = ""
+  Set tOldIO = $IO
   Try {
     Set tBody = ##class(%DynamicObject).%FromJSON(%request.Content)
     Set tClass = tBody.className
     Set tSource = tBody.source
-    Set tStream = ##class(%Stream.TmpCharacter).%New()
-    Do tStream.Write(tSource)
-    Set sc = ##class(%SYSTEM.OBJ).LoadStream(tStream, tClass_".cls", "ck-d")
+
+    // ── 1. Strip leading // comment lines ─────────────────────────────────
+    //
+    // %SYSTEM.OBJ.Load() uses the first non-whitespace bytes to detect the
+    // file format.  When the file starts with "//" it cannot detect UDL and
+    // returns error #5840 "not a supported type".  Strip leading comment-only
+    // lines so the file always starts with the "Class …" declaration.
+    Set tStripped = ""
+    Set tFoundClass = 0
+    Set tLines = $Length(tSource, $C(10))
+    For i = 1:1:tLines {
+      Set tLine = $Translate($Piece(tSource, $C(10), i), $C(13), "")
+      If 'tFoundClass {
+        If $Extract($ZStrip(tLine, "<W"), 1, 2) = "//" { Continue }
+        Set tFoundClass = 1
+      }
+      Set tStripped = tStripped _ tLine _ $C(10)
+    }
+
+    // ── 2. Write UDL source to a temp .cls file ───────────────────────────
+    //
+    // %SYSTEM.OBJ.Load() handles UDL .cls files correctly once the leading
+    // comments are removed.  %Stream.FileCharacter writes the content verbatim.
+    Set tSrcFile = ##class(%File).TempFilename("cls")
+    Set tFileStream = ##class(%Stream.FileCharacter).%New()
+    Set tFileStream.Filename = tSrcFile
+    Do tFileStream.Write(tStripped)
+    Set sc = tFileStream.%Save()
+    If $$$ISERR(sc) {
+      Set tResp = ##class(%DynamicObject).%New()
+      Do tResp.%Set("success", 0)
+      Do tResp.%Set("error", "Could not write source file: " _ $System.Status.GetErrorText(sc))
+      Do tResp.%ToJSON()
+      Quit
+    }
+
+    // ── 3. Load and compile, suppressing diagnostic output ─────────────────
+    Set tDiagFile = ##class(%File).TempFilename("txt")
+    Open tDiagFile:"WNS":5
+    If '$Test {
+      Do ##class(%File).Delete(tSrcFile)  Set tSrcFile = ""
+      Set tResp = ##class(%DynamicObject).%New()
+      Do tResp.%Set("success", 0)
+      Do tResp.%Set("error", "Could not open temp file for IO capture")
+      Do tResp.%ToJSON()
+      Quit
+    }
+    Use tDiagFile
+    Set sc = ##class(%SYSTEM.OBJ).Load(tSrcFile, "ck-d")
+    Close tDiagFile
+    Use tOldIO
+    Do ##class(%File).Delete(tDiagFile)  Set tDiagFile = ""
+    Do ##class(%File).Delete(tSrcFile)   Set tSrcFile = ""
+
     Set tResp = ##class(%DynamicObject).%New()
     If $$$ISOK(sc) {
       Do tResp.%Set("success", 1)
@@ -178,6 +232,9 @@ ClassMethod Compile() As %Status
     }
     Do tResp.%ToJSON()
   } Catch tEx {
+    Try { Close tDiagFile } Catch {}
+    Try { Use tOldIO } Catch {}
+    If tSrcFile '= "" { Do ##class(%File).Delete(tSrcFile) }
     Set tErr = ##class(%DynamicObject).%New()
     Do tErr.%Set("success", 0)
     Do tErr.%Set("error", tEx.DisplayString())

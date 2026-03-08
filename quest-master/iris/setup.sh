@@ -9,10 +9,6 @@ CONTAINER="${1:-my-iris}"
 NEW_PASSWORD="${2:-password}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# ── 0. Ensure bind-mount directory exists with correct permissions ────────────
-mkdir -p "$SCRIPT_DIR/iris-data"
-chmod 777 "$SCRIPT_DIR/iris-data"
-
 # ── 1. Pull image and start container ────────────────────────────────────────
 echo "Pulling IRIS image..."
 docker compose -f "$SCRIPT_DIR/docker-compose.yml" pull
