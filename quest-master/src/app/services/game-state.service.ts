@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { GameState, DEFAULT_GAME_STATE, QuestLogEntry } from '../models/game-state.models';
 import { IRISConfig } from '../models/iris.models';
-import { Quest } from '../models/quest.models';
+import { Quest, normalizeQuest } from '../models/quest.models';
 import { calcLevel } from '../data/xp-table';
 
 const STORAGE_KEY = 'questmaster';
@@ -91,7 +91,12 @@ export class GameStateService {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        return { ...DEFAULT_GAME_STATE, ...JSON.parse(raw) };
+        const parsed = JSON.parse(raw);
+        // Normalize any questBank entries from the pre-Feature-6 shape.
+        if (Array.isArray(parsed.questBank)) {
+          parsed.questBank = parsed.questBank.map(normalizeQuest);
+        }
+        return { ...DEFAULT_GAME_STATE, ...parsed };
       }
     } catch {
       // ignore parse errors

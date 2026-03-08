@@ -16,33 +16,39 @@
   flex-shrink: 0;
 }
 
-.mode-btn {
-  padding: 2px 12px;
+.file-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
+}
+
+.file-tab {
+  padding: 2px 14px;
   border: 1px solid #3a3a5a;
-  border-radius: 3px;
+  border-radius: 3px 3px 0 0;
+  border-bottom-color: transparent;
   background: transparent;
   color: #8888aa;
   font-size: 12px;
   cursor: pointer;
+  white-space: nowrap;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 
   &:hover {
     color: #ccccee;
     border-color: #5555aa;
+    border-bottom-color: transparent;
   }
 
   &.active {
-    background: #2a2a5a;
+    background: #1e1e3a;
     color: #aaaaff;
     border-color: #6666cc;
+    border-bottom-color: #1e1e3a;
   }
-}
-
-.mode-hint {
-  margin-left: 8px;
-  font-size: 11px;
-  color: #666688;
-  font-style: italic;
 }
 
 .toolbar-right {

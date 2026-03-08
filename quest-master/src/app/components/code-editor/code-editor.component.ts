@@ -1,6 +1,6 @@
-import { Component, effect, input, model, output } from '@angular/core';
+import { Component, computed, effect, input, model, output } from '@angular/core';
 import { EditorComponent } from 'ngx-monaco-editor-v2';
-import { Quest, QuestMode } from '../../models/quest.models';
+import { QuestFile } from '../../models/quest.models';
 import { registerObjectScript } from '../../app.config';
 
 @Component({
@@ -14,26 +14,31 @@ export class CodeEditorComponent {
   /** Two-way bindable: parent sets starter code; child emits user edits. */
   code = model('');
 
-  /** Current quest mode — controls toolbar display. */
-  questMode = input<QuestMode>('snippet');
+  /** Files for the current quest — shown as tabs above the editor. */
+  files = input<QuestFile[]>([]);
+
+  /** ID of the currently active file tab. */
+  activeFileId = input<string>('');
 
   /** Whether challenge mode is active (no starter code on quest load). */
   challengeMode = input(false);
 
-  /** The active quest — used to show/hide the "Show starter code" escape hatch. */
-  activeQuest = input<Quest | null>(null);
-
   /** Emitted when the user presses Ctrl+Enter or clicks Run. */
   runRequested = output<void>();
 
-  /** Emitted when the user switches between snippet/class mode. */
-  modeChanged = output<QuestMode>();
+  /** Emitted when the user clicks a different file tab. */
+  fileSelected = output<string>();
 
   /** Emitted when the user toggles challenge mode. */
   toggleChallengeMode = output<void>();
 
   /** Emitted when the user clicks "Show starter code" in challenge mode. */
   restoreStarterCode = output<void>();
+
+  /** Active QuestFile derived from files + activeFileId. */
+  protected readonly activeFile = computed(() =>
+    this.files().find(f => f.id === this.activeFileId()) ?? null
+  );
 
   readonly editorOptions = {
     theme: 'objectscript-dark',
@@ -84,7 +89,7 @@ export class CodeEditorComponent {
       editor.setValue(initialCode);
     }
 
-    // Forward user edits to the model() signal — no ngModel in the loop.
+    // Forward user edits to the model() signal.
     editor.onDidChangeModelContent(() => {
       this.code.set(editor.getValue());
     });
@@ -98,9 +103,9 @@ export class CodeEditorComponent {
     });
   }
 
-  switchMode(mode: QuestMode): void {
-    if (mode !== this.questMode()) {
-      this.modeChanged.emit(mode);
+  selectFile(fileId: string): void {
+    if (fileId !== this.activeFileId()) {
+      this.fileSelected.emit(fileId);
     }
   }
 }

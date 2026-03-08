@@ -1,5 +1,15 @@
 export type QuestTier = 'apprentice' | 'journeyman' | 'master';
-export type QuestMode = 'snippet' | 'class' | 'project';
+
+export interface QuestFile {
+  id: string;
+  filename: string;        // e.g. "Library.Book.cls" or "solution.script"
+  fileType: 'cls' | 'script';
+  label: string;           // shown in the file tab
+  starterCode?: string;
+  starterCodeHint?: string;
+  readOnly?: boolean;
+  dependsOn?: string[];    // file IDs that must be compiled before this one
+}
 
 export interface Quest {
   id: string;
@@ -15,17 +25,12 @@ export interface Quest {
   expectedOutput?: string | null;
   evaluationCriteria: string;
   prerequisites: string[];
-  starterCode?: string;
   conceptsIntroduced: string[];
   docLinks?: { label: string; url: string }[];
-  /** Defaults to 'snippet' for backwards compatibility. */
-  mode?: QuestMode;
-  /** ObjectScript snippet run after class compiles (class mode only). */
+  /** Ordered list of files; always at least one. Replaces top-level starterCode/mode/className. */
+  files: QuestFile[];
+  /** ObjectScript snippet auto-run after all files execute/compile successfully. */
   testHarness?: string;
-  /** e.g. "Guild.Member" — required when mode is 'class'. */
-  className?: string;
-  /** Shown instead of starterCode in challenge mode. A one-line orientation comment or skeleton. */
-  starterCodeHint?: string;
 }
 
 export interface CompileError {
@@ -38,8 +43,14 @@ export interface CompileError {
 export interface CompileResult {
   hasErrors: boolean;
   errors: CompileError[];
-  /** Runtime output from the test harness; empty string if compile failed or no harness. */
+  /** Runtime output from execution / test harness. */
   output: string;
+  /**
+   * 'compile' — errors came from .cls compilation (shown in the COMPILE ERRORS section).
+   * 'execution' — errors came from script execution or network failure (shown in the error section).
+   * Undefined when hasErrors is false.
+   */
+  errorKind?: 'compile' | 'execution';
 }
 
 export interface EvaluationResult {
@@ -49,4 +60,28 @@ export interface EvaluationResult {
   feedback: string;
   codeReview: string;
   xpEarned: number;
+}
+
+/**
+ * Upgrade a quest from the pre-Feature-6 shape (top-level starterCode/mode/className)
+ * to the unified files[] shape. Safe to call on already-migrated quests.
+ */
+export function normalizeQuest(raw: any): Quest {
+  if (Array.isArray(raw.files) && raw.files.length > 0) {
+    return raw as Quest;
+  }
+  const isCls = raw.mode === 'class';
+  const filename = isCls
+    ? `${raw.className ?? 'Solution'}.cls`
+    : 'solution.script';
+  const file: QuestFile = {
+    id: 'main',
+    filename,
+    fileType: isCls ? 'cls' : 'script',
+    label: isCls ? (raw.className ?? 'Class') : 'Solution',
+    starterCode: raw.starterCode,
+    starterCodeHint: raw.starterCodeHint,
+  };
+  const { mode: _m, className: _c, starterCode: _s, starterCodeHint: _sh, ...rest } = raw;
+  return { ...rest, files: [file] } as Quest;
 }

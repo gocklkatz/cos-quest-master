@@ -1,19 +1,14 @@
 <div class="editor-toolbar">
-  <button
-    class="mode-btn"
-    [class.active]="questMode() === 'snippet'"
-    (click)="switchMode('snippet')"
-    title="Snippet mode — run ObjectScript commands directly via XECUTE"
-  >Snippet</button>
-  <button
-    class="mode-btn"
-    [class.active]="questMode() === 'class'"
-    (click)="switchMode('class')"
-    title="Class mode — compile a full .cls file and run a test harness"
-  >Class</button>
-  @if (questMode() === 'class') {
-    <span class="mode-hint">Define a complete Class block. Ctrl+Enter compiles &amp; runs.</span>
-  }
+  <div class="file-tabs">
+    @for (file of files(); track file.id) {
+      <button
+        class="file-tab"
+        [class.active]="file.id === activeFileId()"
+        (click)="selectFile(file.id)"
+        [title]="file.filename"
+      >{{ file.label }}</button>
+    }
+  </div>
 
   <div class="toolbar-right">
     <button
@@ -22,11 +17,11 @@
       (click)="toggleChallengeMode.emit()"
       title="Challenge Mode — start quests with an empty editor"
     >&#9876; Challenge</button>
-    @if (challengeMode() && activeQuest()?.starterCode) {
+    @if (challengeMode() && activeFile()?.starterCode) {
       <button
         class="toolbar-btn toolbar-btn--ghost"
         (click)="restoreStarterCode.emit()"
-        title="Show the starter code for this quest"
+        title="Show the starter code for this file"
       >Show starter code</button>
     }
   </div>

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase2-mid |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Depends On | [Feature 1](feature-01-class-quest-track.md) |
 
 ---
@@ -106,7 +106,7 @@ interface Quest {
 
 ## Open Questions
 
-- [ ] What is the migration path for quest progress already stored in player localStorage under the old `starterCode`/`mode` shape? (Silent discard, a migration function, or a version flag in `GameState`?)
-- [ ] Should file tabs be reorderable by the player (drag-to-reorder), or always fixed to the quest-defined order?
-- [ ] When multiple files have compile errors, should error output be merged into one panel or shown per-file in collapsible sections?
-- [ ] Should `dependsOn` cycles be validated at data-load time (dev error) or at run time (user-facing error)?
+- ~~[ ] What is the migration path for quest progress already stored in player localStorage under the old `starterCode`/`mode` shape?~~ **Resolved**: `normalizeQuest()` in `quest.models.ts` converts old-format quests to `files[]` on load. Applied in `game-state.service.ts` `loadFromStorage()` and in `claude-api.service.ts` after parse.
+- ~~[ ] Should file tabs be reorderable by the player (drag-to-reorder), or always fixed to the quest-defined order?~~ **Resolved**: Fixed to quest-defined order — no drag-to-reorder.
+- ~~[ ] When multiple files have compile errors, should error output be merged into one panel or shown per-file in collapsible sections?~~ **Resolved**: Merged into one output panel.
+- ~~[ ] Should `dependsOn` cycles be validated at data-load time (dev error) or at run time (user-facing error)?~~ **Resolved**: Detected at run time; `topoSort()` in `ClassQuestService` returns `null` on cycle and surfaces a user-facing error message.

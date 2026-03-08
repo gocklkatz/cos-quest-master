@@ -28,8 +28,16 @@ export const STARTER_QUESTS: Quest[] = [
     evaluationCriteria:
       'Code must execute without errors on IRIS. Any successful run proves the endpoint works.',
     prerequisites: [],
-    starterCode: 'WRITE "Anvil ready!", !',
-    starterCodeHint: '// Write something to IRIS and check the output panel',
+    files: [
+      {
+        id: 'main',
+        filename: 'solution.script',
+        fileType: 'script',
+        label: 'Solution',
+        starterCode: 'WRITE "Anvil ready!", !',
+        starterCodeHint: '// Write something to IRIS and check the output panel',
+      },
+    ],
     conceptsIntroduced: ['WRITE', 'IRIS execution', 'REST endpoint'],
     docLinks: [
       { label: 'WRITE command', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_cwrite' },
@@ -62,12 +70,20 @@ export const STARTER_QUESTS: Quest[] = [
       'Code must use SET and WRITE. Output must include a greeting, a name stored in a variable, ' +
       'and "level 1". Bonus if level is also stored in a variable.',
     prerequisites: ['quest-zero'],
-    starterCode:
-      '// Store your name in a variable\n' +
-      'SET name = "Adventurer"\n\n' +
-      '// Write a greeting that includes your name and "level 1"\n' +
-      'WRITE "Greetings from the Guild! My name is " _ name _ ".", !',
-    starterCodeHint: '// SET a variable, then WRITE a greeting that includes your name and "level 1"',
+    files: [
+      {
+        id: 'main',
+        filename: 'solution.script',
+        fileType: 'script',
+        label: 'Solution',
+        starterCode:
+          '// Store your name in a variable\n' +
+          'SET name = "Adventurer"\n\n' +
+          '// Write a greeting that includes your name and "level 1"\n' +
+          'WRITE "Greetings from the Guild! My name is " _ name _ ".", !',
+        starterCodeHint: '// SET a variable, then WRITE a greeting that includes your name and "level 1"',
+      },
+    ],
     conceptsIntroduced: ['WRITE', 'SET', 'string concatenation', 'local variables'],
     docLinks: [
       { label: 'SET command', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_cset' },
@@ -103,18 +119,26 @@ export const STARTER_QUESTS: Quest[] = [
       'Must use SET to create ^Guild global with numeric subscripts. ' +
       'Must use $ORDER in a FOR loop to traverse. Output should list all 3 names.',
     prerequisites: ['quest-zero'],
-    starterCode:
-      '// Create guild member globals\n' +
-      'SET ^Guild("members", 1) = "Aldric"\n' +
-      '// Add two more members below...\n\n\n' +
-      '// Iterate with $ORDER\n' +
-      'SET key = ""\n' +
-      'FOR {\n' +
-      '  SET key = $ORDER(^Guild("members", key))\n' +
-      '  QUIT:key=""\n' +
-      '  WRITE ^Guild("members", key), !\n' +
-      '}',
-    starterCodeHint: '// SET 3 subscripts in ^Guild("members", n), then iterate with $ORDER in a FOR loop',
+    files: [
+      {
+        id: 'main',
+        filename: 'solution.script',
+        fileType: 'script',
+        label: 'Solution',
+        starterCode:
+          '// Create guild member globals\n' +
+          'SET ^Guild("members", 1) = "Aldric"\n' +
+          '// Add two more members below...\n\n\n' +
+          '// Iterate with $ORDER\n' +
+          'SET key = ""\n' +
+          'FOR {\n' +
+          '  SET key = $ORDER(^Guild("members", key))\n' +
+          '  QUIT:key=""\n' +
+          '  WRITE ^Guild("members", key), !\n' +
+          '}',
+        starterCodeHint: '// SET 3 subscripts in ^Guild("members", n), then iterate with $ORDER in a FOR loop',
+      },
+    ],
     conceptsIntroduced: ['globals', 'SET ^global', '$ORDER', 'FOR loop', 'subscripts', 'QUIT:postcondition'],
     docLinks: [
       { label: 'Globals overview', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GGBL_intro' },
@@ -132,8 +156,6 @@ export const STARTER_QUESTS: Quest[] = [
     tier: 'apprentice',
     xpReward: 120,
     bonusXP: 40,
-    mode: 'class',
-    className: 'Guild.Greeter',
     narrative:
       'A master craftsman does not merely issue commands — he designs tools that endure. ' +
       'In IRIS, a Class is a blueprint: properties hold state, methods define behaviour, ' +
@@ -157,16 +179,24 @@ export const STARTER_QUESTS: Quest[] = [
       'Class must compile without errors. Test harness output must contain "Welcome to the Guild, Hero".',
     prerequisites: ['quest-zero'],
     testHarness: 'WRITE ##class(Guild.Greeter).Greet("Hero"), !',
-    starterCode:
-      'Class Guild.Greeter\n' +
-      '{\n\n' +
-      'ClassMethod Greet(name As %String) As %String\n' +
-      '{\n' +
-      '  // Return a greeting string\n' +
-      '  Quit ""\n' +
-      '}\n\n' +
-      '}',
-    starterCodeHint: '// Class Guild.Greeter — define a ClassMethod Greet(name As %String) that returns a greeting string',
+    files: [
+      {
+        id: 'main',
+        filename: 'Guild.Greeter.cls',
+        fileType: 'cls',
+        label: 'Guild.Greeter',
+        starterCode:
+          'Class Guild.Greeter\n' +
+          '{\n\n' +
+          'ClassMethod Greet(name As %String) As %String\n' +
+          '{\n' +
+          '  // Return a greeting string\n' +
+          '  Quit ""\n' +
+          '}\n\n' +
+          '}',
+        starterCodeHint: '// Class Guild.Greeter — define a ClassMethod Greet(name As %String) that returns a greeting string',
+      },
+    ],
     conceptsIntroduced: ['Class definition', 'ClassMethod', 'As %String', 'Quit (return)', '##class()'],
     docLinks: [
       { label: 'Defining classes', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_classes' },
@@ -182,8 +212,6 @@ export const STARTER_QUESTS: Quest[] = [
     tier: 'journeyman',
     xpReward: 200,
     bonusXP: 60,
-    mode: 'class',
-    className: 'Guild.Member',
     narrative:
       'Commands vanish when the session ends; globals persist but lack structure. ' +
       'A %Persistent class gives you both — structured objects that survive across sessions, ' +
@@ -218,13 +246,21 @@ export const STARTER_QUESTS: Quest[] = [
       '} ELSE {\n' +
       '  WRITE "Save failed: ", $SYSTEM.Status.GetErrorText(sc), !\n' +
       '}',
-    starterCode:
-      'Class Guild.Member Extends %Persistent\n' +
-      '{\n\n' +
-      'Property Name As %String;\n\n' +
-      '// Add Rank property with default "Apprentice"\n\n' +
-      '}',
-    starterCodeHint: '// Class Guild.Member Extends %Persistent — add Name (%String) and Rank (%String) properties',
+    files: [
+      {
+        id: 'main',
+        filename: 'Guild.Member.cls',
+        fileType: 'cls',
+        label: 'Guild.Member',
+        starterCode:
+          'Class Guild.Member Extends %Persistent\n' +
+          '{\n\n' +
+          'Property Name As %String;\n\n' +
+          '// Add Rank property with default "Apprentice"\n\n' +
+          '}',
+        starterCodeHint: '// Class Guild.Member Extends %Persistent — add Name (%String) and Rank (%String) properties',
+      },
+    ],
     conceptsIntroduced: ['%Persistent', 'Property', '%Save', '%OpenId', '%Id', '$$$ISOK', 'InitialExpression'],
     docLinks: [
       { label: '%Persistent class', url: 'https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_persobj' },

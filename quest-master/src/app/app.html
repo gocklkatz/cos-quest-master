@@ -43,11 +43,11 @@
       <div class="editor-pane">
         <app-code-editor
           [(code)]="editorCode"
-          [questMode]="editorMode()"
+          [files]="questFiles()"
+          [activeFileId]="activeFileId()"
           [challengeMode]="challengeMode()"
-          [activeQuest]="questEngine.currentQuest()"
           (runRequested)="runCode()"
-          (modeChanged)="onModeChanged($event)"
+          (fileSelected)="onFileSelected($event)"
           (toggleChallengeMode)="onToggleChallengeMode()"
           (restoreStarterCode)="onRestoreStarterCode()"
         />

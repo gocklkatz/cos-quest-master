@@ -9,11 +9,10 @@ import { AiPairChatComponent } from './components/ai-pair-chat/ai-pair-chat.comp
 import { GlossaryComponent } from './components/glossary/glossary.component';
 import { GameStateService } from './services/game-state.service';
 import { IrisConnectionService } from './services/iris-connection.service';
-import { IrisApiService } from './services/iris-api.service';
 import { QuestEngineService } from './services/quest-engine.service';
 import { ClassQuestService } from './services/class-quest.service';
 import { AiPairService } from './services/ai-pair.service';
-import { CompileError, EvaluationResult, QuestMode } from './models/quest.models';
+import { CompileError, EvaluationResult, QuestFile } from './models/quest.models';
 
 @Component({
   selector: 'app-root',
@@ -34,7 +33,6 @@ import { CompileError, EvaluationResult, QuestMode } from './models/quest.models
 export class App implements OnInit {
   private gameState = inject(GameStateService);
   private connectionSvc = inject(IrisConnectionService);
-  private irisApi = inject(IrisApiService);
   private classQuest = inject(ClassQuestService);
   private aiPair = inject(AiPairService);
   readonly questEngine = inject(QuestEngineService);
@@ -49,14 +47,17 @@ export class App implements OnInit {
   readonly anthropicApiKey = computed(() => this.gameState.anthropicApiKey());
   readonly challengeMode = computed(() => this.gameState.challengeMode());
 
-  /** Current code in the editor. */
+  /** Current code in the active file tab. */
   editorCode = signal('// Write your ObjectScript here\nWRITE "Hello from IRIS!", !');
 
-  /** Active editor mode — driven by the current quest's mode field, or manually toggled. */
-  editorMode = signal<QuestMode>('snippet');
+  /** Files for the current quest — drives the file tabs in the editor toolbar. */
+  questFiles = signal<QuestFile[]>([]);
 
-  /** Per-mode code buffers so switching tabs preserves each tab's content. */
-  private modeCodeBuffers = new Map<QuestMode, string>();
+  /** ID of the currently active file tab. */
+  activeFileId = signal<string>('');
+
+  /** Per-file code buffers so switching tabs preserves each tab's content. */
+  private fileCodeBuffers = new Map<string, string>();
 
   /** Execution state. */
   output = signal<string | null>(null);
@@ -116,43 +117,71 @@ export class App implements OnInit {
   }
 
   onRestoreStarterCode(): void {
-    const quest = this.questEngine.currentQuest();
-    if (quest?.starterCode) {
-      this.editorCode.set(quest.starterCode);
+    const file = this.questFiles().find(f => f.id === this.activeFileId());
+    if (file?.starterCode) {
+      this.editorCode.set(file.starterCode);
     }
   }
 
-  /** Apply challengeMode logic when loading a quest into the editor. */
-  private loadQuestCode(quest: { starterCode?: string; starterCodeHint?: string; mode?: QuestMode }): void {
-    this.modeCodeBuffers.clear();
+  /** Load a quest's files into the editor, respecting challenge mode. */
+  private loadQuestCode(quest: { files: QuestFile[] }): void {
+    this.fileCodeBuffers.clear();
+    const files = quest.files ?? [];
+    this.questFiles.set(files);
+    const firstFile = files[0] ?? null;
+    this.activeFileId.set(firstFile?.id ?? '');
     this.editorCode.set(
-      this.gameState.challengeMode()
-        ? (quest.starterCodeHint ?? '')
-        : (quest.starterCode ?? ''),
+      firstFile
+        ? (this.gameState.challengeMode()
+            ? (firstFile.starterCodeHint ?? '')
+            : (firstFile.starterCode ?? ''))
+        : '',
     );
-    this.editorMode.set(quest.mode ?? 'snippet');
+    // Pre-populate buffers for non-active files.
+    for (const file of files.slice(1)) {
+      this.fileCodeBuffers.set(
+        file.id,
+        this.gameState.challengeMode()
+          ? (file.starterCodeHint ?? '')
+          : (file.starterCode ?? ''),
+      );
+    }
   }
 
-  onModeChanged(mode: QuestMode): void {
-    // Save current code into the outgoing mode's buffer before switching.
-    this.modeCodeBuffers.set(this.editorMode(), this.editorCode());
-    this.editorMode.set(mode);
-    // Restore saved code for the incoming mode, if any.
-    const saved = this.modeCodeBuffers.get(mode);
+  onFileSelected(fileId: string): void {
+    // Save current editor state into the outgoing file's buffer.
+    this.fileCodeBuffers.set(this.activeFileId(), this.editorCode());
+    this.activeFileId.set(fileId);
+    // Restore the incoming file's buffer (or its starter code as fallback).
+    const saved = this.fileCodeBuffers.get(fileId);
     if (saved !== undefined) {
       this.editorCode.set(saved);
+    } else {
+      const file = this.questFiles().find(f => f.id === fileId);
+      this.editorCode.set(
+        file
+          ? (this.gameState.challengeMode()
+              ? (file.starterCodeHint ?? '')
+              : (file.starterCode ?? ''))
+          : '',
+      );
     }
-    this.output.set(null);
-    this.error.set(null);
-    this.compileErrors.set([]);
-    this.evaluation.set(null);
+  }
+
+  /** Collect current code for all files into a map (active file from editorCode signal). */
+  private collectFileCode(): Map<string, string> {
+    const map = new Map(this.fileCodeBuffers);
+    map.set(this.activeFileId(), this.editorCode());
+    return map;
   }
 
   runCode(): void {
     if (this.isRunning()) return;
 
-    const code = this.editorCode();
-    if (!code.trim()) return;
+    const files = this.questFiles();
+    const fileCodeMap = this.collectFileCode();
+    const hasAnyCode = files.some(f => (fileCodeMap.get(f.id) ?? '').trim());
+    if (!hasAnyCode) return;
 
     this.isRunning.set(true);
     this.output.set(null);
@@ -160,42 +189,28 @@ export class App implements OnInit {
     this.compileErrors.set([]);
     this.evaluation.set(null);
 
-    if (this.editorMode() === 'class') {
-      this.runClassMode(code);
-    } else {
-      this.irisApi.executeCode(this.gameState.irisConfig(), code).subscribe(result => {
-        this.isRunning.set(false);
-        if (result.success) {
-          this.output.set(result.output ?? '');
-        } else {
-          this.error.set(result.error ?? 'Unknown error');
-        }
-      });
-    }
+    this.runAllFiles(files, fileCodeMap);
   }
 
-  private async runClassMode(source: string): Promise<void> {
+  private async runAllFiles(files: QuestFile[], fileCodeMap: Map<string, string>): Promise<void> {
     const quest = this.questEngine.currentQuest();
-    const className = quest?.className ?? this.inferClassName(source);
-
-    if (!className) {
-      this.isRunning.set(false);
-      this.error.set('Could not determine class name. Make sure your code starts with "Class ClassName".');
-      return;
-    }
-
     try {
-      const result = await this.classQuest.runClassQuest(
+      const result = await this.classQuest.runQuestFiles(
         this.gameState.irisConfig(),
-        className,
-        source,
+        files,
+        fileCodeMap,
         quest?.testHarness,
       );
       this.isRunning.set(false);
       if (result.hasErrors) {
-        this.compileErrors.set(result.errors);
+        if (result.errorKind === 'compile') {
+          this.compileErrors.set(result.errors);
+          this.error.set(null);
+        } else {
+          this.compileErrors.set([]);
+          this.error.set(result.errors[0]?.text ?? 'Unknown error');
+        }
         this.output.set(null);
-        this.error.set(null);
       } else {
         this.compileErrors.set([]);
         this.output.set(result.output);
@@ -203,14 +218,8 @@ export class App implements OnInit {
       }
     } catch (e: any) {
       this.isRunning.set(false);
-      this.error.set(e?.message ?? 'Unexpected error during class compile');
+      this.error.set(e?.message ?? 'Unexpected error');
     }
-  }
-
-  /** Extract class name from "Class Foo.Bar Extends ..." header. */
-  private inferClassName(source: string): string | null {
-    const match = source.match(/^\s*Class\s+([\w.]+)/im);
-    return match ? match[1] : null;
   }
 
   async submitCode(): Promise<void> {
@@ -226,20 +235,28 @@ export class App implements OnInit {
     let result: EvaluationResult;
     const apiKey = this.gameState.anthropicApiKey();
 
-    // For class mode, build a combined output/error string for evaluation.
-    const effectiveOutput = this.editorMode() === 'class'
-      ? this.buildClassOutput()
+    const effectiveOutput = this.compileErrors().length > 0
+      ? this.compileErrors().map(e => e.line > 0 ? `Line ${e.line}:${e.col} ${e.text}` : e.text).join('\n')
       : (this.output() ?? '');
-    const effectiveError = this.editorMode() === 'class'
-      ? this.buildClassError()
+    const effectiveError = this.compileErrors().length > 0
+      ? 'Compile failed'
       : (this.error() ?? '');
+
+    // Collect all files' code for the submission (for Claude evaluation context).
+    const fileCodeMap = this.collectFileCode();
+    const allCode = this.questFiles()
+      .map(f => {
+        const code = fileCodeMap.get(f.id) ?? '';
+        return this.questFiles().length > 1 ? `// --- ${f.label} (${f.filename}) ---\n${code}` : code;
+      })
+      .join('\n\n');
 
     if (apiKey) {
       this.isEvaluating.set(true);
       try {
         result = await this.questEngine.evaluateWithClaude(
           quest,
-          this.editorCode(),
+          allCode,
           effectiveOutput,
           effectiveError,
           apiKey,
@@ -257,7 +274,7 @@ export class App implements OnInit {
 
     if (result.passed) {
       const levelBefore = this.gameState.level();
-      this.questEngine.completeQuest(quest, this.editorCode(), result);
+      this.questEngine.completeQuest(quest, allCode, result);
       const levelAfter = this.gameState.level();
 
       this.xpAnimAmount.set(result.xpEarned);
@@ -267,10 +284,7 @@ export class App implements OnInit {
 
       const next = this.questEngine.currentQuest();
       if (next && next.id !== quest.id) {
-        // Clean up the compiled class before switching away.
-        if (this.editorMode() === 'class') {
-          this.classQuest.cleanupLastClass(this.gameState.irisConfig());
-        }
+        this.classQuest.cleanupLastClass(this.gameState.irisConfig());
         this.loadQuestCode(next);
         this.output.set(null);
         this.error.set(null);
@@ -285,10 +299,7 @@ export class App implements OnInit {
   }
 
   onQuestSelected(questId: string): void {
-    const prev = this.questEngine.currentQuest();
-    if (prev && this.editorMode() === 'class') {
-      this.classQuest.cleanupLastClass(this.gameState.irisConfig());
-    }
+    this.classQuest.cleanupLastClass(this.gameState.irisConfig());
     this.gameState.setCurrentQuest(questId);
     const q = this.questEngine.allQuests().find(q => q.id === questId);
     if (q) this.loadQuestCode(q);
@@ -297,17 +308,5 @@ export class App implements OnInit {
     this.compileErrors.set([]);
     this.evaluation.set(null);
     this.aiPair.loadForQuest(questId);
-  }
-
-  private buildClassOutput(): string {
-    const errors = this.compileErrors();
-    if (errors.length > 0) {
-      return errors.map(e => e.line > 0 ? `Line ${e.line}:${e.col} ${e.text}` : e.text).join('\n');
-    }
-    return this.output() ?? '';
-  }
-
-  private buildClassError(): string {
-    return this.compileErrors().length > 0 ? 'Compile failed' : (this.error() ?? '');
   }
 }

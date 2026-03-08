@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Quest, EvaluationResult, QuestTier } from '../models/quest.models';
+import { Quest, EvaluationResult, QuestTier, normalizeQuest } from '../models/quest.models';
 
 function stripJsonFences(text: string): string {
   return text.replace(/^```(?:json)?\s*/m, '').replace(/\s*```\s*$/m, '').trim();
@@ -54,13 +54,12 @@ Generate the NEXT quest in this branch. It should:
 5. Include 1-2 bonus objectives for extra XP
 6. Specify evaluation criteria for code review
 
-CRITICAL CONSTRAINT — starterCode execution model:
-- Code is sent directly to IRIS via XECUTE (line by line)
-- It runs as plain ObjectScript commands, NOT inside a class or method
-- DO NOT use ClassMethod, Method, Class, or any class-definition syntax
-- DO NOT use curly-brace method bodies { ... }
-- Valid: SET, WRITE, FOR, IF, DO, XECUTE, $ORDER, globals, etc.
-- Invalid: ClassMethod Foo() { ... } — this causes a compile error
+CRITICAL CONSTRAINT — file execution model:
+- Each quest defines a "files" array. Generated quests for command/globals/snippet branches use a single script file.
+- Script files (fileType: "script") run as plain ObjectScript commands via XECUTE — NOT inside a class or method.
+- DO NOT use ClassMethod, Method, Class, or class-definition syntax in script files.
+- Valid in script files: SET, WRITE, FOR, IF, DO, XECUTE, $ORDER, globals, etc.
+- Invalid in script files: ClassMethod Foo() { ... } — this causes a compile error
 
 Respond with a JSON object with exactly these fields — no markdown fences, no extra commentary:
 {
@@ -77,8 +76,16 @@ Respond with a JSON object with exactly these fields — no markdown fences, no 
   "expectedOutput": null,
   "evaluationCriteria": "string",
   "prerequisites": ["completed quest IDs"],
-  "starterCode": "string (valid ObjectScript)",
-  "starterCodeHint": "string (one-line comment orienting the player without revealing logic, e.g. '// Iterate ^MyGlobal with $ORDER and accumulate a total')",
+  "files": [
+    {
+      "id": "main",
+      "filename": "solution.script",
+      "fileType": "script",
+      "label": "Solution",
+      "starterCode": "string (valid ObjectScript commands)",
+      "starterCodeHint": "string (one-line comment orienting the player without revealing logic)"
+    }
+  ],
   "conceptsIntroduced": ["string"],
   "docLinks": [{"label": "string", "url": "https://docs.intersystems.com/..."}]
 }
@@ -89,7 +96,7 @@ For docLinks, include 1-3 links to relevant docs.intersystems.com pages for the 
     const user = `Generate the next quest for the "${currentBranch}" branch.`;
     const resp = await this.callClaude(system, user, apiKey);
     const text: string = resp.content?.[0]?.text ?? '';
-    return JSON.parse(stripJsonFences(text)) as Quest;
+    return normalizeQuest(JSON.parse(stripJsonFences(text)));
   }
 
   async evaluateSubmission(
