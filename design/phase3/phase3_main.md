@@ -25,7 +25,7 @@
 
 | Priority | Theme | Pedagogical Rationale |
 |---|---|---|
-| **P1 — High value, low complexity** | AI Elaborative Interrogation, Error Hunter Track | Metacognition & Productive Failure |
+| **P1 — High value, low complexity** | Dynamic Quest Regeneration, AI Elaborative Interrogation, Monaco Scaffolding Hints | Metacognition & Varied Practice |
 | **P2 — High value, medium complexity** | Global Tree Visualizer, Unified Spiral Quests | Dual Coding & Spiral Curriculum |
 | **P3 — Future / High complexity** | Code Prediction Quests (Parables) | Worked Example Effect |
 
@@ -37,7 +37,6 @@
 |---|---|---|---|---|
 | 1 | **Dynamic Quest Regeneration** | phase3-high | Prevents rote memorization via fresh content | [feature-01-dynamic-quest-regeneration.md](feature-01-dynamic-quest-regeneration.md) |
 | 2 | **AI Elaborative Interrogation** | phase3-high | Forces "Why" vs "How" thinking | [feature-02-ai-elaborative-interrogation.md](feature-02-ai-elaborative-interrogation.md) |
-| 3 | **Error Hunter Track** | phase3-high | Builds resilience to IRIS error codes | [feature-03-error-hunter-track.md](feature-03-error-hunter-track.md) |
 | 4 | **Global Tree Visualizer** | phase3-mid | Visual mental model of persistent data | [feature-04-global-tree-visualizer.md](feature-04-global-tree-visualizer.md) |
 | 5 | **Unified "Spiral" Quests** | phase3-mid | Bridges OO and Procedural layers | [feature-05-unified-spiral-quests.md](feature-05-unified-spiral-quests.md) |
 | 6 | **Code Prediction Quests** | phase3-low | Reduces cognitive load via reading | [feature-06-code-prediction-quests.md](feature-06-code-prediction-quests.md) |
@@ -58,13 +57,11 @@
 
 ```mermaid
 graph TD
-    F1[Dynamic Quest Regeneration] --> F2[AI Elaborative Interrogation]
+    C1[Remove Glossary] --> F1[Dynamic Quest Regeneration]
+    F1 --> F2[AI Elaborative Interrogation]
     F2 --> F5[Unified Spiral Quests]
-    F7[Monaco Scaffolding Hints] --> F3[Error Hunter Track]
+    F2 --> F6[Code Prediction Quests]
     F4[Global Tree Visualizer] --> F5
-    F6[Code Prediction Quests] --> F2
-    F8[Quest Time Tracking] --> F7
-    C1[Remove Glossary] --> F1
 ```
 
 ---
@@ -77,32 +74,29 @@ Complete removal of the Glossary component, service, and data. Documentation lin
 - **Implementation**: Delete `glossary.component`, `glossary.service.ts`, and `glossary.ts`. Update `QuestPanel` to ensure links are still accessible via hints.
 
 ### F1: Dynamic Quest Regeneration
-Ensures that pressing "Reset All Progress" triggers the AI to generate a completely new, unique set of starter and follow-up quests rather than reverting to hard-coded defaults.
+Only `quest-zero` ("Forge the Anvil") remains static. After Reset All Progress, the next quest is generated in the background by Claude while the player works through `quest-zero`.
 - **Goal**: Encourage variation and prevent "answer-key" reliance.
-- **Implementation**: Hook into `GameStateService.resetProgress()` to clear cached quest definitions and force a re-generation via `ClaudeApiService`.
+- **Implementation**: `SettingsModal` calls `resetProgress()` then immediately fires `generateNextQuest('setup', apiKey)` as a background task (fire-and-forget).
 
 ### F2: AI Elaborative Interrogation
 Upgrade the `ClaudeApiService` evaluation prompt. Instead of just a "Pass/Fail," Claude must ask a follow-up question that requires the user to explain a specific design choice (e.g., "Why did you use $PIECE instead of $EXTRACT here?"). 
 - **Goal**: Metacognitive reinforcement.
 - **Implementation**: New `evaluationResponse` model field to store the follow-up question.
 
-### F3: Error Hunter Track
-A quest series where the user is given *broken* code. The objective is not to "fix it" immediately, but to **trigger a specific IRIS error** (e.g., `<UNDEFINED>`) and then explain what caused it before fixing it.
-- **Goal**: Transform "scary" legacy errors into diagnostic tools.
-
 ### F4: Global Tree Visualizer
-A live-updating SVG/D3.js tree in the sidebar that shows the state of globals in the `USER` namespace.
+An SVG/D3.js tree in the sidebar that shows the state of globals in the `USER` namespace, refreshed each time the user clicks Run.
 - **Goal**: Dual Coding (Visual + Verbal).
-- **Implementation**: New IRIS endpoint `/api/quest/globals` that returns a JSON representation of a global tree (limited depth).
+- **Implementation**: New IRIS endpoint `GET /api/quest/globals` returns a depth-limited JSON tree (max 3 levels, `USER` namespace only, no system globals).
 
 ### F5: Unified "Spiral" Quests
-Advanced quests that require the user to interact with the same data via multiple paradigms: Object (Class), SQL, and Raw Global access.
+Three separate linked quests (`capstone-01/02/03`) that interact with the same `GuildMember` record via Objects, SQL, and Raw Globals respectively.
 - **Goal**: Break down the "magic" of IRIS persistence.
-- **Example**: Create a Member object, query it with SQL, and then find the raw subscript in `^Guild.MemberD` using `$ORDER`.
+- **Implementation**: Static quest definitions in `starter-quests.ts` chained with `prerequisites`. No Quest model changes required.
 
 ### F6: Code Prediction Quests (Parables)
-Quests where the editor is read-only. The user must predict the output of a complex routine or method by selecting from multiple-choice options.
+AI-generated quests where the editor is read-only. The user selects the predicted output from multiple-choice options generated by Claude alongside the routine.
 - **Goal**: Build "code literacy" without the cognitive load of production.
+- **Implementation**: Optional `questType`, `choices`, and `correctAnswer` fields on `Quest`; graded locally without a Claude call.
 
 ### F7: Monaco "Scaffolding" Hints
 Custom Monaco "CodeLens" or "Markers" for common ObjectScript pitfalls (e.g., "Missing space after SET," "Two spaces required after FOR").
@@ -149,6 +143,6 @@ Tracks active time spent on quests and allows users to set daily and weekly goal
 3.  **Metacognitive Loop**: Update Claude evaluation prompts (F2).
 4.  **Syntax Guardrails**: Implement Monaco syntax markers for ObjectScript quirks (F7).
 5.  **Habit Formation**: Build the Quest Time Tracking & Goal System (F8).
-6.  **Error Resilience**: Add "Error Hunter" starter quests (F3).
-7.  **Mental Model Visualization**: Build the Global Tree Visualizer (F4).
-8.  **Multi-Paradigm Mastery**: Design "Spiral" quests (F5).
+6.  **Mental Model Visualization**: Build the Global Tree Visualizer (F4).
+7.  **Multi-Paradigm Mastery**: Design "Spiral" capstone quests (F5).
+8.  **Code Literacy**: Implement Code Prediction quest type (F6).

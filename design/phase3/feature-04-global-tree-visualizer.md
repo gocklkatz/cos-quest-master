@@ -5,12 +5,12 @@
 | Priority | phase3-mid |
 | Status | ⬜ Not started |
 | Pedagogical Principle | Dual Coding |
-| Depends On | Feature 05 |
+| Depends On | — |
 
 ---
 
 ## Task Prompt
-Build a live-updating visualizer that renders the structure of IRIS globals as an interactive tree.
+Build a visualizer that renders the structure of IRIS globals as an interactive tree, refreshed each time the user clicks Run.
 
 ---
 
@@ -21,17 +21,37 @@ Build a live-updating visualizer that renders the structure of IRIS globals as a
 ---
 
 ## Implementation Details
-- **Frontend**: 
-    - New `GlobalVisualizer` component using D3.js or a simple SVG tree.
-    - Sidebar tab to toggle the visualizer.
-- **IRIS Backend**: 
-    - Add `/api/quest/globals` endpoint to `QuestMaster.REST.Execute`.
-    - Implement a safe, depth-limited global walker using `$ORDER`.
+- **Frontend**:
+    - New `GlobalVisualizerComponent` using D3.js or a lightweight SVG tree.
+    - Sidebar tab to toggle the visualizer panel.
+    - Refresh triggered by the existing "Run" event — after a successful execute call, `GlobalService.refresh()` is called.
+    - No auto-polling; no timer.
+- **IRIS Backend**:
+    - Add `GET /api/quest/globals` route to `QuestMaster.REST.Execute`.
+    - Implement a safe, depth-limited global walker using `$ORDER` (max depth: 3 levels).
+    - Response schema:
+      ```json
+      {
+        "globals": [
+          {
+            "name": "^MyGlobal",
+            "children": [
+              { "key": "1", "value": "Hello", "children": [] },
+              { "key": "2", "value": null, "children": [
+                  { "key": "data", "value": "World", "children": [] }
+              ]}
+            ]
+          }
+        ]
+      }
+      ```
+    - Limit scope to globals in the `USER` namespace whose names start with `^` (exclude system globals like `^%`).
 - **AI Prompts**: —
 
 ---
 
 ## Verification Plan
-1. Run `SET ^Test(1, "data") = "Hello"`.
-2. Verify the `GlobalVisualizer` reflects the new node in the tree.
-3. Run `KILL ^Test` and verify the tree clears.
+1. Run `SET ^Test(1, "data") = "Hello"` and click Run.
+2. Verify the `GlobalVisualizerComponent` reflects the new node in the tree without a manual page refresh.
+3. Run `KILL ^Test` and click Run again — verify the tree clears.
+4. Verify system globals (`^%`) do not appear in the tree.

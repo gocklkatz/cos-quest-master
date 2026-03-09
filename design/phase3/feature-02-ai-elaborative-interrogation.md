@@ -4,32 +4,38 @@
 |---|---|
 | Priority | phase3-high |
 | Status | ⬜ Not started |
-| Pedagogical Principle | Elaborative Interrogation |
+| Pedagogical Principle | Metacognition |
 | Depends On | Feature 01 |
 
 ---
 
 ## Task Prompt
-Enhance the quest evaluation loop so Claude asks a follow-up "Why" question upon successful completion. The user must provide a brief explanation to fully "seal" the quest rewards.
+Upgrade the Claude evaluation prompt so that passing a quest no longer ends the interaction. Claude must ask a single follow-up question that forces the user to explain *why* they made a specific design decision in their code.
 
 ---
 
 ## Pedagogical Design
-**The Learning Problem**: Passive completion. Users can "stumble" upon a solution without understanding why it worked.
-**The Cognitive Solution**: Elaborative Interrogation (Pressley) involves asking "why" a fact or process is true. This forces the learner to integrate the new knowledge with their existing mental model.
+**The Learning Problem**: Surface-level completion. A student can pass a quest by producing correct output without understanding *why* it worked. "Code Production" without reflection leads to brittle knowledge.
+**The Cognitive Solution**: Elaborative Interrogation (King). Asking "Why does this work?" forces the learner to connect new knowledge to existing mental models, improving retention and transfer.
 
 ---
 
 ## Implementation Details
-- **Frontend**: 
-    - Update `QuestPanel` to display a follow-up question after success.
-    - Add a "Reflection" text area for the user's response.
+- **Frontend**:
+    - Add `followUpQuestion?: string` field to `EvaluationResult` in `quest.models.ts`.
+    - Update `QuestPanel` to render the follow-up question below the feedback block after a pass.
+    - Add a free-text input for the user's answer (no AI grading required — the act of answering is the benefit).
 - **IRIS Backend**: —
-- **AI Prompts**: Update `ClaudeApiService.evaluateCode()` prompt to return an `elaborativeQuestion` field in the JSON response.
+- **AI Prompts**:
+    - Update `ClaudeApiService.evaluateSubmission()` system prompt to include a `followUpQuestion` field in the JSON response.
+    - The question must reference a specific line or construct in the player's *actual* submitted code (not generic praise).
+    - Example: "You used `$PIECE` with a comma delimiter — why would `$EXTRACT` be a poor substitute here?"
 
 ---
 
 ## Verification Plan
-1. Complete a quest successfully.
-2. Verify that a follow-up question appears (e.g., "Why did you use a post-conditional here?").
-3. Confirm that submitting the reflection updates the quest state to "Fully Complete."
+1. Complete a quest with a passing submission.
+2. Verify that a follow-up question appears below the feedback text.
+3. Confirm the question references a specific construct from the submitted code (not boilerplate).
+4. Type an answer and verify the input is accepted (no further AI call required).
+5. Verify `ng build` succeeds with the new `followUpQuestion` field.

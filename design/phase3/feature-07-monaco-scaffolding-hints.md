@@ -1,37 +1,38 @@
-# Feature 06: Code Prediction Quests (Phase 3)
+# Feature 07: Monaco "Scaffolding" Hints (Phase 3)
 
 | Field | Value |
 |---|---|
-| Priority | phase3-low |
+| Priority | phase3-high |
 | Status | ⬜ Not started |
-| Pedagogical Principle | Worked Example Effect |
-| Depends On | Feature 02 |
+| Pedagogical Principle | Scaffolding |
+| Depends On | — |
 
 ---
 
 ## Task Prompt
-Implement a quest type where the user is presented with a complex routine and must predict the output using multiple-choice options, rather than writing code.
+Implement real-time syntax "guardrails" in the Monaco editor to identify common ObjectScript whitespace and operator mistakes before the code is executed.
 
 ---
 
 ## Pedagogical Design
-**The Learning Problem**: High Cognitive Load. Writing code from scratch (production) is much harder than reading and understanding code (comprehension).
-**The Cognitive Solution**: The Worked Example Effect (Sweller). Studying completed examples reduces the burden on working memory, allowing the student to focus on the underlying logic of $PIECE, $EXTRACT, and $ORDER.
+**The Learning Problem**: Semantic Noise. Beginners get frustrated by non-logic errors, like forgetting the space after `SET` or using `+` instead of `_` for strings.
+**The Cognitive Solution**: Scaffolding (Wood et al.). Providing temporary support that prevents frustration and allows the learner to focus on the higher-level logic. This support "fades" as the learner's level increases.
 
 ---
 
 ## Implementation Details
-- **Frontend**: 
-    - New `QuestType`: `prediction`.
-    - Update `QuestPanel` to render radio buttons for multiple-choice answers.
-    - Set Monaco editor to `readOnly`.
+- **Frontend**:
+    - Use `monaco.editor.setModelMarkers` to add real-time warnings.
+    - Define a set of "Beginner Pitfalls" (whitespace, operators, case sensitivity).
+    - Implement "Fading": Disable certain hints once the user reaches Level 5+.
 - **IRIS Backend**: —
-- **AI Prompts**: Train Claude to generate "Code Parables"—complex but readable routines with clear, predictable outputs.
+- **AI Prompts**: —
 
 ---
 
 ## Verification Plan
-1. Load a "Code Prediction" quest.
-2. Verify the editor is read-only.
-3. Select the correct output from the choices.
-4. Verify XP is awarded for a correct prediction.
+1. Type `SETx=1` (missing space).
+2. Verify a yellow warning appears in Monaco.
+3. Type `"Hello" + name`.
+4. Verify a warning suggests using `_` for concatenation.
+5. Reach Level 5 and verify the basic whitespace hints are disabled (faded).
