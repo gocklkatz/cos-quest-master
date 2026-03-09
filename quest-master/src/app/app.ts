@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HeaderBarComponent } from './components/header-bar/header-bar.component';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
 import { CodeEditorComponent } from './components/code-editor/code-editor.component';
@@ -94,6 +94,13 @@ export class App implements OnInit {
   /** Timestamp (ms) when the current quest was loaded — used for the speed-run check. */
   private questStartedAt = 0;
 
+  /**
+   * ID of the last quest whose code was loaded into the editor.
+   * Used to guard against double-loading when both the manual call and the reactive
+   * effect would fire for the same quest.
+   */
+  private lastLoadedQuestId: string | null = null;
+
   /** Whether any hint was revealed for the current quest — used for the no-hints check. */
   hintsShownForCurrentQuest = signal(false);
 
@@ -112,6 +119,31 @@ export class App implements OnInit {
     this.paneSizes.set('outputChat', px);
   }
 
+  constructor() {
+    /**
+     * React to unexpected current-quest changes — e.g. when background generation
+     * completes and auto-advances currentQuestId after the player finished quest-zero
+     * before the AI response arrived (race condition).
+     *
+     * Manual code paths (ngOnInit, submitCode, onQuestSelected, onReset) update
+     * lastLoadedQuestId before calling loadQuestCode, so the guard skips them.
+     */
+    effect(() => {
+      const quest = this.questEngine.currentQuest();
+      if (quest && quest.id !== this.lastLoadedQuestId) {
+        untracked(() => {
+          this.lastLoadedQuestId = quest.id;
+          this.loadQuestCode(quest);
+          this.output.set(null);
+          this.error.set(null);
+          this.compileErrors.set([]);
+          this.evaluation.set(null);
+          this.aiPair.loadForQuest(quest.id);
+        });
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.connectionSvc.startPolling(this.gameState.irisConfig());
     this.questEngine.initialize();
@@ -119,6 +151,7 @@ export class App implements OnInit {
       // Load starter code and chat history for the initial quest.
     const initial = this.questEngine.currentQuest();
     if (initial) {
+      this.lastLoadedQuestId = initial.id;
       this.loadQuestCode(initial);
       this.aiPair.loadForQuest(initial.id);
     }
@@ -131,6 +164,27 @@ export class App implements OnInit {
   closeSettings(): void {
     this.showSettings.set(false);
     this.connectionSvc.startPolling(this.gameState.irisConfig());
+  }
+
+  /**
+   * Called when the player confirms "Reset All Progress" in the settings modal.
+   * The modal has already called resetProgress() + questEngine.initialize(), so
+   * quest-zero is already set as currentQuestId. We just need to close the modal
+   * and reload quest-zero's code into the editor.
+   */
+  onReset(): void {
+    this.showSettings.set(false);
+    this.connectionSvc.startPolling(this.gameState.irisConfig());
+    this.evaluation.set(null);
+    this.output.set(null);
+    this.error.set(null);
+    this.compileErrors.set([]);
+    const quest = this.questEngine.currentQuest();
+    if (quest) {
+      this.lastLoadedQuestId = quest.id;
+      this.loadQuestCode(quest);
+      this.aiPair.loadForQuest(quest.id);
+    }
   }
 
   toggleChat(): void {
@@ -330,6 +384,7 @@ export class App implements OnInit {
 
       const next = this.questEngine.currentQuest();
       if (next && next.id !== quest.id) {
+        this.lastLoadedQuestId = next.id;
         this.classQuest.cleanupLastClass(this.gameState.irisConfig());
         this.loadQuestCode(next);
         this.output.set(null);
@@ -356,6 +411,7 @@ export class App implements OnInit {
 
   onQuestSelected(questId: string): void {
     this.classQuest.cleanupLastClass(this.gameState.irisConfig());
+    this.lastLoadedQuestId = questId;
     this.gameState.setCurrentQuest(questId);
     const q = this.questEngine.allQuests().find(q => q.id === questId);
     if (q) this.loadQuestCode(q);

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase3-high |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Pedagogical Principle | Varied Practice |
 | Depends On | Change 01 |
 
@@ -28,6 +28,18 @@ After "Reset All Progress," keep `quest-zero` ("Forge the Anvil") as the only st
     - All quests after `quest-zero` are AI-generated and served from `questBank`.
 - **IRIS Backend**: —
 - **AI Prompts**: When `completedQuests` is empty or contains only `quest-zero`, the generation prompt must emphasise `apprentice` tier / Level 1 concepts.
+
+---
+
+## Files Changed
+
+- `quest-master/src/app/data/starter-quests.ts` — removed all static quests except `quest-zero`
+- `quest-master/src/app/services/claude-api.service.ts` — added early-stage guidance to `generateQuest` prompt (apprentice emphasis + `quest-zero` prerequisite)
+- `quest-master/src/app/components/settings-modal/settings-modal.component.ts` — injected `QuestEngineService`; `doReset()` fires `generateNextQuest('setup', apiKey)` without await
+- `quest-master/src/app/components/settings-modal/settings-modal.component.spec.ts` — new unit tests verifying fire-and-forget call and guard on empty API key
+- `quest-master/src/app/services/quest-engine.service.ts` — `generateNextQuest` auto-advances `currentQuestId` when current quest is already completed (race-condition recovery)
+- `quest-master/src/app/app.ts` — added `lastLoadedQuestId` guard, constructor effect watching `currentQuest()` for async changes, `onReset()` handler that reloads quest-zero code after reset
+- `quest-master/src/app/app.html` — added `(reset)="onReset()"` binding on `<app-settings-modal>`
 
 ---
 

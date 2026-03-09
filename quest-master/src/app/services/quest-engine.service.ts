@@ -104,6 +104,20 @@ export class QuestEngineService {
     try {
       const quest = await this.claude.generateQuest(completedIds, coveredConcepts, branch, tier, apiKey);
       this.gameState.addToQuestBank(quest);
+
+      // Race-condition recovery: if the player finished the current quest while we were
+      // generating (i.e. currentQuestId now points to a completed quest), and the new
+      // quest's prerequisites are satisfied, advance automatically.  The effect in
+      // AppComponent will then load the quest into the editor reactively.
+      const currentId = this.gameState.currentQuestId();
+      const completed = this.gameState.completedQuests();
+      if (currentId && completed.includes(currentId)) {
+        const prereqsMet = quest.prerequisites.every(p => completed.includes(p));
+        if (prereqsMet) {
+          this.gameState.setCurrentQuest(quest.id);
+        }
+      }
+
       return quest;
     } catch {
       return null;

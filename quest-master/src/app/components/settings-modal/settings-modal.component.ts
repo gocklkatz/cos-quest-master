@@ -2,6 +2,7 @@ import { Component, inject, signal, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GameStateService } from '../../services/game-state.service';
 import { IrisConnectionService } from '../../services/iris-connection.service';
+import { QuestEngineService } from '../../services/quest-engine.service';
 import { IRISConfig } from '../../models/iris.models';
 
 @Component({
@@ -13,9 +14,12 @@ import { IRISConfig } from '../../models/iris.models';
 })
 export class SettingsModalComponent {
   closed = output<void>();
+  /** Emitted (instead of `closed`) when the player confirms a full progress reset. */
+  reset = output<void>();
 
   private gameState = inject(GameStateService);
   private connectionSvc = inject(IrisConnectionService);
+  private questEngine = inject(QuestEngineService);
 
   baseUrl = signal(this.gameState.irisConfig().baseUrl);
   namespace = signal(this.gameState.irisConfig().namespace);
@@ -48,8 +52,16 @@ export class SettingsModalComponent {
 
   doReset(): void {
     this.gameState.resetProgress();
+    // Re-select quest-zero immediately so the panel isn't empty.
+    this.questEngine.initialize();
+    // Fire-and-forget: pre-generate the first AI quest so it is ready when quest-zero completes.
+    const apiKey = this.anthropicApiKey();
+    if (apiKey) {
+      this.questEngine.generateNextQuest('setup', apiKey);
+    }
     this.showResetConfirm.set(false);
-    this.closed.emit();
+    // Emit reset (not closed) so AppComponent can reload the editor for quest-zero.
+    this.reset.emit();
   }
 
   cancel(): void {

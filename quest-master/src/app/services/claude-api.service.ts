@@ -39,13 +39,23 @@ export class ClaudeApiService {
     tier: QuestTier,
     apiKey: string,
   ): Promise<Quest> {
+    const isEarlyStage = completedQuests.length === 0 || (completedQuests.length === 1 && completedQuests[0] === 'quest-zero');
+    const earlyStageGuidance = isEarlyStage
+      ? `\nIMPORTANT — EARLY LEARNER: The player is at Level 1 / apprentice tier. This quest MUST:
+- Target absolute beginners with zero prior ObjectScript knowledge
+- Introduce only the most fundamental concept (e.g. WRITE, SET, or a single built-in function)
+- Set "prerequisites": ["quest-zero"] (the player has only completed the connection test)
+- Keep the objective narrow and achievable in under 10 lines of code
+- Use "tier": "apprentice" and award modest XP (20–50 base)`
+      : '';
+
     const system = `You are the Quest Master for an ObjectScript learning game. Generate quests that teach InterSystems ObjectScript (COS) concepts progressively.
 
 The player has completed these quests: ${completedQuests.join(', ') || 'none'}
 They have covered these concepts: ${coveredConcepts.join(', ') || 'none'}
 Their current tier is: ${tier}
 Their current skill branch is: ${currentBranch}
-
+${earlyStageGuidance}
 Generate the NEXT quest in this branch. It should:
 1. Introduce 1-2 new concepts while reinforcing previously learned ones
 2. Have a clear, testable objective
