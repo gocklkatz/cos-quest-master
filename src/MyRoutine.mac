@@ -1,0 +1,40 @@
+ROUTINE MyRoutine
+
+#include %occStatus
+
+Test
+    SET sampleAttrs = $LISTBUILD(1, "COLOR", "css", "hex", "red", 2, "XREFLABEL", "meta", "id", "TargetValue")
+    
+    ; Note the dot (.) before 'foundText'. This passes it by reference.
+    SET st = $$ExtractLabel(sampleAttrs, .foundText)
+    
+    IF $$$ISERR(st) {
+        ; Now this only runs if 'st' is a real error status
+        WRITE "Error: ", $System.Status.GetErrorText(st), !
+    } ELSE {
+        ; Now we safely use the variable that was updated inside the function
+        WRITE "Found: ", foundText, !
+    }
+    QUIT
+
+/// Logic updated to return a %Status and output the result via 'text'
+ExtractLabel(attrs, text)
+    SET text = "" ; Initialize the output variable
+    SET status = $$$OK
+    
+    FOR i=1:5:$LISTLENGTH(attrs)
+    {
+        IF ($ZCONVERT($LIST(attrs, (i + 1)), "U") = "XREFLABEL")
+        {
+            SET text = $LIST(attrs, (i + 4))
+            QUIT
+        }
+    }
+    
+    IF (text = "")
+    {
+        ; Return a formal error status
+        SET status = $$$ERROR($$$GeneralError, "Missing xreflabel value")
+    }
+    
+    QUIT status

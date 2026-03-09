@@ -12,7 +12,7 @@
     "objectscript.conn": {
         "server": "local-iris",
         "ns": "USER",
-        "active": false
+        "active": true
     },
     "objectscript.export.folder": "src"
 }
