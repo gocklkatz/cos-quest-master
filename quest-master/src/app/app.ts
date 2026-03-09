@@ -7,7 +7,6 @@ import { QuestPanelComponent } from './components/quest-panel/quest-panel.compon
 import { XpAnimationComponent } from './components/xp-animation/xp-animation.component';
 import { AchievementOverlayComponent } from './components/achievement-overlay/achievement-overlay.component';
 import { AiPairChatComponent } from './components/ai-pair-chat/ai-pair-chat.component';
-import { GlossaryComponent } from './components/glossary/glossary.component';
 import { GameStateService } from './services/game-state.service';
 import { IrisConnectionService } from './services/iris-connection.service';
 import { QuestEngineService } from './services/quest-engine.service';
@@ -31,7 +30,6 @@ import { CompileError, EvaluationResult, QuestFile } from './models/quest.models
     XpAnimationComponent,
     AchievementOverlayComponent,
     AiPairChatComponent,
-    GlossaryComponent,
     ResizableDividerDirective,
   ],
   templateUrl: './app.html',
@@ -48,13 +46,11 @@ export class App implements OnInit {
 
   showSettings = signal(false);
   showChat = signal(false);
-  sidebarTab = signal<'quest' | 'glossary'>('quest');
 
   /** Resizable pane sizes (px), persisted in localStorage. */
   sidebarWidth = signal(this.paneSizes.get('sidebar'));
   outputHeight = signal(this.paneSizes.get('editorOutput'));
   chatHeight = signal(this.paneSizes.get('outputChat'));
-  glossaryHighlight = signal<string | null>(null);
 
   /** True when an Anthropic API key is configured. */
   readonly hasApiKey = computed(() => !!this.gameState.anthropicApiKey());
@@ -139,11 +135,6 @@ export class App implements OnInit {
 
   toggleChat(): void {
     this.showChat.update(v => !v);
-  }
-
-  onConceptClicked(term: string): void {
-    this.sidebarTab.set('glossary');
-    this.glossaryHighlight.set(term);
   }
 
   onCopyToEditor(code: string): void {

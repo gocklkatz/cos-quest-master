@@ -136,37 +136,6 @@
   margin: 0;
 }
 
-// ── Concept badges ───────────────────────────────────────
-.concepts-section {
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
-.concept-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 4px;
-}
-
-.concept-badge {
-  font-size: 0.68rem;
-  font-family: 'Courier New', monospace;
-  color: #7a68a8;
-  background: #18152c;
-  border: 1px solid #2e2648;
-  border-radius: 10px;
-  padding: 2px 8px;
-  cursor: pointer;
-  transition: color 0.12s, border-color 0.12s, background 0.12s;
-
-  &:hover {
-    color: #b0a0e0;
-    border-color: #5040a0;
-    background: #22193a;
-  }
-}
-
 // ── Hints ────────────────────────────────────────────────
 .hints-label {
   justify-content: space-between;
