@@ -15,232 +15,170 @@ XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
 </Routes>
 }
 
+/// Simple health check using modern JSON syntax.
 ClassMethod Health() As %Status
 {
   Do %response.SetHeader("Content-Type","application/json")
-  Write "{""status"":""ok"",""namespace"":""" _ $Namespace _ """}"
+  Write {"status":"ok","namespace":($Namespace)}.%ToJSON()
   Quit $$$OK
 }
 
 /// Execute arbitrary ObjectScript code submitted as JSON {"code": "..."}.
-/// 
-/// The code is wrapped in a temporary class method (ProcedureBlock = 1 by default),
-/// compiled, and executed. This supports the full ObjectScript block syntax:
-///   FOR { ... }  WHILE { ... }  IF { } ELSE { }  TRY { } CATCH { }
-/// The temp class is deleted after execution regardless of outcome.
 ClassMethod Execute() As %Status
 {
   Do %response.SetHeader("Content-Type","application/json")
-  Set tClassName = ""
+  Set (tClassName, tFile) = "", tOldIO = $IO
   Try {
-    Set tBody = ##class(%DynamicObject).%FromJSON(%request.Content)
+    Set tBody = {}.%FromJSON(%request.Content)
     Set tCode = tBody.code
 
-    // ── 1. Build a unique temp class wrapping the user code ───────────────
-    //
-    // Each job gets a unique class name so concurrent requests don't collide.
+    // 1. Build a unique temp class wrapping the user code
     Set tClassName = "QMTmp" _ $Job
-
-    // Wrapping in a ClassMethod gives us ProcedureBlock = 1 automatically,
-    // which enables FOR { }, WHILE { }, IF { } ELSE { }, TRY { } CATCH { }.
-    //
-    // Every non-empty user code line is prefixed with a tab.  In UDL (.cls)
-    // format, column-0 lines are treated as labels — not statements — so
-    // indentation is required to place code in the method body context.
-    Set tSource = "Class " _ tClassName _ " {" _ $C(10)
-    Set tSource = tSource _ "ClassMethod Run() {" _ $C(10)
-    Set tLines = $Length(tCode, $C(10))
-    For i = 1:1:tLines {
-      Set tLine = $Translate($Piece(tCode, $C(10), i), $C(13), "")
-      If tLine '= "" {
-        Set tSource = tSource _ $C(9) _ tLine _ $C(10)
-      } Else {
-        Set tSource = tSource _ $C(10)
-      }
+    Set tSource = "Class " _ tClassName _ " {" _ $C(10) _
+                  "ClassMethod Run() [ ProcedureBlock = 1 ] {" _ $C(10)
+    
+    Set tCode = $Translate(tCode, $C(13), "") // Normalize CRLF
+    For i = 1:1:$Length(tCode, $C(10)) {
+      Set tLine = $Piece(tCode, $C(10), i)
+      Set tSource = tSource _ $Select(tLine'="":$C(9)_tLine, 1:"") _ $C(10)
     }
-    Set tSource = tSource _ "}" _ $C(10)
-    Set tSource = tSource _ "}" _ $C(10)
+    Set tSource = tSource _ "}" _ $C(10) _ "}" _ $C(10)
 
-    // ── 2. Redirect IO, then compile ──────────────────────────────────────
-    //
-    // LoadStream emits "Load started …" diagnostics to the current device
-    // even with the -d qualifier.  Redirect to a temp file first so those
-    // messages never reach the HTTP response body.
-    Set tOldIO = $IO
+    // 2. Compile class, capturing output
     Set tFile = ##class(%File).TempFilename("txt")
-    Open tFile:"WNS":5
-    If '$Test {
-      Set tErr = ##class(%DynamicObject).%New()
-      Do tErr.%Set("success", 0)
-      Do tErr.%Set("error", "Could not open temp file for IO capture")
-      Do tErr.%ToJSON()
-      Quit
-    }
+    Open tFile:"WNS":2
+    Else  Do ##class(%Exception.StatusException).CreateFromStatus($$$ERROR($$$FileCanNotOpen, tFile)).Throw()
     Use tFile
-
+    
     Set tStream = ##class(%Stream.TmpCharacter).%New()
     Do tStream.Write(tSource)
     Set tSC = ##class(%SYSTEM.OBJ).LoadStream(tStream, tClassName _ ".cls", "ck-d")
-
+    
     Close tFile
     Use tOldIO
-
+    
     If $$$ISERR(tSC) {
-      Do ##class(%File).Delete(tFile)
-      Set tFile = ""
-      Do ##class(%SYSTEM.OBJ).Delete(tClassName, "-d")
-      Set tClassName = ""
-      Set tErr = ##class(%DynamicObject).%New()
-      Do tErr.%Set("success", 0)
-      Do tErr.%Set("error", $System.Status.GetErrorText(tSC))
-      Do tErr.%ToJSON()
+      Set tErrResp = {"success": 0, "error": ($System.Status.GetErrorText(tSC))}
+      Write tErrResp.%ToJSON()
+      Do ..Cleanup(tClassName, tFile)
       Quit
     }
 
-    // ── 3. Reopen the file (truncate) and capture execution output ────────
-    //
-    // Reopening with "WNS" discards the compile diagnostics captured above,
-    // so only the user code's WRITE output appears in the response.
-    Open tFile:"WNS":5
-    If '$Test {
-      Do ##class(%File).Delete(tFile)
-      Set tFile = ""
-      Do ##class(%SYSTEM.OBJ).Delete(tClassName, "-d")
-      Set tClassName = ""
-      Set tErr = ##class(%DynamicObject).%New()
-      Do tErr.%Set("success", 0)
-      Do tErr.%Set("error", "Could not reopen temp file for execution output")
-      Do tErr.%ToJSON()
-      Quit
-    }
+    // 3. Execute method with a 5-second timeout
+    Open tFile:"WNS":2
+    Else  Do ##class(%Exception.StatusException).CreateFromStatus($$$ERROR($$$FileCanNotOpen, tFile)).Throw()
     Use tFile
-
     Try {
+      Do $SYSTEM.Alarm.Set(5)
       Do $ClassMethod(tClassName, "Run")
+      Do $SYSTEM.Alarm.Set(0)
     } Catch tInner {
-      Write "ERROR: " _ tInner.DisplayString(), !
+      Do $SYSTEM.Alarm.Set(0)
+      Write !,"RUNTIME ERROR: " _ tInner.DisplayString(), !
     }
-
     Close tFile
     Use tOldIO
 
-    // ── 4. Read captured output ───────────────────────────────────────────
+    // 4. Read captured output
     Set tOutput = ""
-    Open tFile:"RS":5
-    If $Test {
-      Use tFile
-      Try {
-        For { Read tLine  Set tOutput = tOutput _ tLine _ $C(10) }
-      } Catch {}
-      Close tFile
-      Use tOldIO
+    If ##class(%File).Exists(tFile) {
+      Set tResStream = ##class(%Stream.FileCharacter).%New()
+      Do tResStream.LinkToFile(tFile)
+      Set tOutput = tResStream.Read()
     }
-    Do ##class(%File).Delete(tFile)
-
-    // ── 5. Clean up temp class and respond ────────────────────────────────
-    Do ##class(%SYSTEM.OBJ).Delete(tClassName, "-d")
-    Set tClassName = ""
-
-    Set tResp = ##class(%DynamicObject).%New()
-    Do tResp.%Set("success", 1)
-    Do tResp.%Set("output", tOutput)
-    Do tResp.%ToJSON()
-
+    
+    Set tResp = {"success": 1, "output": (tOutput)}
+    Write tResp.%ToJSON()
+    Do ..Cleanup(tClassName, tFile)
   } Catch tEx {
-    If tClassName '= "" { Do ##class(%SYSTEM.OBJ).Delete(tClassName, "-d") }
-    If $Get(tFile) '= "" { Do ##class(%File).Delete(tFile) }
     Try { Use tOldIO } Catch {}
+    Do ..Cleanup($Get(tClassName), $Get(tFile))
     Set %response.Status = "500 Internal Server Error"
-    Set tErr = ##class(%DynamicObject).%New()
-    Do tErr.%Set("success", 0)
-    Do tErr.%Set("error", tEx.DisplayString())
-    Do tErr.%ToJSON()
+    Set tExResp = {"success": 0, "error": (tEx.DisplayString())}
+    Write tExResp.%ToJSON()
   }
   Quit $$$OK
 }
 
+/// Compile a class submitted as JSON {"source": "..."}.
 ClassMethod Compile() As %Status
 {
   Do %response.SetHeader("Content-Type","application/json")
-  Set tSrcFile = ""
-  Set tDiagFile = ""
-  Set tOldIO = $IO
+  Set (tSrcFile, tDiagFile) = "", tOldIO = $IO
   Try {
-    Set tBody = ##class(%DynamicObject).%FromJSON(%request.Content)
-    Set tClass = tBody.className
-    Set tSource = tBody.source
+    Set tBody = {}.%FromJSON(%request.Content), tSource = tBody.source
 
-    // ── 1. Strip leading // comment lines ─────────────────────────────────
-    //
-    // %SYSTEM.OBJ.Load() uses the first non-whitespace bytes to detect the
-    // file format.  When the file starts with "//" it cannot detect UDL and
-    // returns error #5840 "not a supported type".  Strip leading comment-only
-    // lines so the file always starts with the "Class …" declaration.
-    Set tStripped = ""
-    Set tFoundClass = 0
-    Set tLines = $Length(tSource, $C(10))
-    For i = 1:1:tLines {
-      Set tLine = $Translate($Piece(tSource, $C(10), i), $C(13), "")
+    // 1. Strip leading comments/whitespace for UDL detection
+    Set tStripped = "", tFoundClass = 0, tInBlockComment = 0, tCode = $Translate(tSource, $C(13), "")
+    For i = 1:1:$Length(tCode, $C(10)) {
+      Set tLine = $Piece(tCode, $C(10), i)
       If 'tFoundClass {
-        If $Extract($ZStrip(tLine, "<W"), 1, 2) = "//" { Continue }
+        Set tTrim = $ZStrip(tLine, "<W")
+        If tInBlockComment {
+          If tTrim [ "*/" { 
+            Set tInBlockComment = 0 
+            Set tAfter = $Piece(tTrim, "*/", 2)
+            If $ZStrip(tAfter, "<W") = "" { Continue }
+            // If there is code after */ on the same line, fall through to check it
+            Set tTrim = $ZStrip(tAfter, "<W")
+          } Else { Continue }
+        }
+        If tTrim = "" { Continue }
+        If $Extract(tTrim, 1, 2) = "//" { Continue }
+        If $Extract(tTrim, 1, 2) = "/*" {
+          Set tInBlockComment = 1
+          If tTrim [ "*/" { 
+            Set tInBlockComment = 0 
+            Set tAfter = $Piece(tTrim, "*/", 2, *)
+            If $ZStrip(tAfter, "<W") = "" { Continue }
+            Set tTrim = $ZStrip(tAfter, "<W")
+          } Else { Continue }
+        }
+        // Double check after possibly ending a block comment on this line
+        If (tTrim = "") || ($Extract(tTrim, 1, 2) = "//") || ($Extract(tTrim, 1, 2) = "/*") { 
+          // Re-evaluate if we started a new comment on the same line (unlikely but possible)
+          If $Extract(tTrim, 1, 2) = "/*" { Set tInBlockComment = 1 }
+          Continue 
+        }
         Set tFoundClass = 1
       }
       Set tStripped = tStripped _ tLine _ $C(10)
     }
 
-    // ── 2. Write UDL source to a temp .cls file ───────────────────────────
-    //
-    // %SYSTEM.OBJ.Load() handles UDL .cls files correctly once the leading
-    // comments are removed.  %Stream.FileCharacter writes the content verbatim.
+    // 2. Write to temp .cls file
     Set tSrcFile = ##class(%File).TempFilename("cls")
     Set tFileStream = ##class(%Stream.FileCharacter).%New()
     Set tFileStream.Filename = tSrcFile
     Do tFileStream.Write(tStripped)
     Set sc = tFileStream.%Save()
-    If $$$ISERR(sc) {
-      Set tResp = ##class(%DynamicObject).%New()
-      Do tResp.%Set("success", 0)
-      Do tResp.%Set("error", "Could not write source file: " _ $System.Status.GetErrorText(sc))
-      Do tResp.%ToJSON()
-      Quit
-    }
+    If $$$ISERR(sc) { Throw ##class(%Exception.StatusException).CreateFromStatus(sc) }
 
-    // ── 3. Load and compile, suppressing diagnostic output ─────────────────
+    // 3. Compile
     Set tDiagFile = ##class(%File).TempFilename("txt")
-    Open tDiagFile:"WNS":5
-    If '$Test {
-      Do ##class(%File).Delete(tSrcFile)  Set tSrcFile = ""
-      Set tResp = ##class(%DynamicObject).%New()
-      Do tResp.%Set("success", 0)
-      Do tResp.%Set("error", "Could not open temp file for IO capture")
-      Do tResp.%ToJSON()
-      Quit
-    }
+    Open tDiagFile:"WNS":2
+    Else  Do ##class(%Exception.StatusException).CreateFromStatus($$$ERROR($$$FileCanNotOpen, tDiagFile)).Throw()
     Use tDiagFile
     Set sc = ##class(%SYSTEM.OBJ).Load(tSrcFile, "ck-d")
     Close tDiagFile
     Use tOldIO
-    Do ##class(%File).Delete(tDiagFile)  Set tDiagFile = ""
-    Do ##class(%File).Delete(tSrcFile)   Set tSrcFile = ""
 
-    Set tResp = ##class(%DynamicObject).%New()
-    If $$$ISOK(sc) {
-      Do tResp.%Set("success", 1)
-    } Else {
-      Do tResp.%Set("success", 0)
-      Do tResp.%Set("error", $System.Status.GetErrorText(sc))
-    }
-    Do tResp.%ToJSON()
+    Set tResp = {"success": ($$$ISOK(sc))}
+    If $$$ISERR(sc) { Set tResp.error = $System.Status.GetErrorText(sc) }
+    Write tResp.%ToJSON()
   } Catch tEx {
-    Try { Close tDiagFile } Catch {}
     Try { Use tOldIO } Catch {}
-    If tSrcFile '= "" { Do ##class(%File).Delete(tSrcFile) }
-    Set tErr = ##class(%DynamicObject).%New()
-    Do tErr.%Set("success", 0)
-    Do tErr.%Set("error", tEx.DisplayString())
-    Do tErr.%ToJSON()
+    Set tExResp = {"success": 0, "error": (tEx.DisplayString())}
+    Write tExResp.%ToJSON()
   }
+  Do:($Get(tSrcFile)'="") ##class(%File).Delete(tSrcFile)
+  Do:($Get(tDiagFile)'="") ##class(%File).Delete(tDiagFile)
   Quit $$$OK
+}
+
+ClassMethod Cleanup(pClassName As %String = "", pFile As %String = "") [ Private ]
+{
+  If pClassName '= "" { Do ##class(%SYSTEM.OBJ).Delete(pClassName, "-d") }
+  If pFile '= "" { Try { Close pFile } Catch {} Do ##class(%File).Delete(pFile) }
 }
 
 }
