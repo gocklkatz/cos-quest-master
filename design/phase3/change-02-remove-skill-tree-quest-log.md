@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase3-high |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Pedagogical Principle | Cognitive Load Reduction |
 | Depends On | — |
 
@@ -31,9 +31,20 @@ Remove the Skill Tree and Quest Log panels from the left pane of the Angular app
 
 ---
 
+## Open Questions
+
+- ~~What should happen to branch selection/filtering in QuestPanel after the Skill Tree is removed?~~ Resolved: show all available quests at all times — `selectedBranch` signal and `filteredQuests` computed removed; template uses `availableQuests()` directly.
+
+---
+
 ## Files Changed
 
-- *(to be filled in during implementation)*
+- `src/app/components/quest-panel/quest-panel.component.ts` — removed `SkillTreeComponent`/`QuestLogComponent` imports, `allQuests` input, `selectedBranch` signal, `filteredQuests` computed, `questLog` computed, `GameStateService` inject
+- `src/app/components/quest-panel/quest-panel.component.html` — removed `<app-skill-tree>`, `<app-quest-log>`, branch-filter-tag; replaced `filteredQuests()` with `availableQuests()`
+- `src/app/app.html` — removed `[allQuests]` binding from `<app-quest-panel>`
+- `src/app/components/skill-tree/` — deleted (skill-tree.component.ts, .html, .scss)
+- `src/app/components/quest-log/` — deleted (quest-log.component.ts, .html, .scss)
+- `src/app/data/skill-tree.ts` — deleted
 
 ---
 
