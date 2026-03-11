@@ -118,6 +118,31 @@
         </div>
       }
 
+      <!-- ── Prediction choices ────────────────── -->
+      @if (quest()?.questType === 'prediction' && quest()?.choices?.length) {
+        <div class="quest-section prediction-section">
+          <div class="section-label">Predict the Output</div>
+          @for (choice of quest()!.choices!; track $index) {
+            <label class="prediction-choice" [class.selected]="selectedChoice() === choice" [class.answered]="predictionAnswered()">
+              <input
+                type="radio"
+                name="prediction-answer"
+                [value]="choice"
+                [checked]="selectedChoice() === choice"
+                [disabled]="predictionAnswered()"
+                (change)="selectedChoice.set(choice)"
+              />
+              <span class="prediction-choice-text">{{ choice }}</span>
+            </label>
+          }
+          <button
+            class="prediction-submit-btn"
+            [disabled]="!selectedChoice() || predictionAnswered()"
+            (click)="submitPrediction()"
+          >Submit Answer</button>
+        </div>
+      }
+
       <!-- ── AI evaluating indicator ───────────── -->
       @if (isEvaluating()) {
         <div class="quest-section evaluating-section">

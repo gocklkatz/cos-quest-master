@@ -173,8 +173,14 @@ export class QuestEngineService {
         ? 'journeyman'
         : 'apprentice';
 
+    const completedInBranch = this.allQuests().filter(
+      q => q.branch === targetBranch && completedIds.includes(q.id)
+    ).length;
+    const questType: 'standard' | 'prediction' =
+      completedInBranch >= 1 && completedInBranch % 4 === 3 ? 'prediction' : 'standard';
+
     try {
-      const quest = await this.claude.generateQuest(completedIds, coveredConcepts, targetBranch, tier, apiKey);
+      const quest = await this.claude.generateQuest(completedIds, coveredConcepts, targetBranch, tier, apiKey, questType);
       this.gameState.addToQuestBank(quest);
 
       // Race-condition recovery: if the player finished the current quest while we were

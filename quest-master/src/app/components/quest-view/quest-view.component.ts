@@ -58,6 +58,11 @@ export class QuestViewComponent implements OnInit, OnDestroy {
   readonly anthropicApiKey = computed(() => this.gameState.anthropicApiKey());
   readonly challengeMode = computed(() => this.gameState.challengeMode());
 
+  /** True when the current quest is a prediction (read-only multiple-choice) quest. */
+  readonly isPredictionQuest = computed(() =>
+    this.questEngine.currentQuest()?.questType === 'prediction'
+  );
+
   /** Current code in the active file tab. */
   editorCode = signal('// Write your ObjectScript here\nWRITE "Hello from IRIS!", !');
 
@@ -408,6 +413,66 @@ export class QuestViewComponent implements OnInit, OnDestroy {
     }
 
     // Show review modal for every result (pass and fail).
+    this.reviewEvaluation.set(result);
+  }
+
+  onPredictionSubmitted(choice: string): void {
+    const quest = this.questEngine.currentQuest();
+    if (!quest || this.questEngine.currentQuestCompleted()) return;
+
+    const isCorrect = choice === quest.correctAnswer;
+    const result: EvaluationResult = {
+      passed: isCorrect,
+      score: isCorrect ? 100 : 0,
+      bonusAchieved: [],
+      feedback: isCorrect
+        ? 'Correct prediction! Your mental model is sharp.'
+        : `Not quite — the correct answer was: ${quest.correctAnswer}`,
+      codeReview: quest.evaluationCriteria,
+      xpEarned: isCorrect ? quest.xpReward : 0,
+    };
+
+    this.evaluation.set(result);
+
+    if (result.passed) {
+      const levelBefore = this.gameState.level();
+      this.questEngine.completeQuest(quest, '', result);
+      const levelAfter = this.gameState.level();
+
+      this.gameState.updateNoHintsStreak(this.hintsShownForCurrentQuest());
+
+      this.xpAnimAmount.set(result.xpEarned);
+      this.xpAnimLeveledUp.set(levelAfter > levelBefore);
+      this.xpAnimNewLevel.set(levelAfter);
+      this.xpAnimTrigger.update(n => n + 1);
+
+      const newAchievements = this.achievementSvc.check(
+        quest.id,
+        result.score,
+        this.questStartedAt,
+        this.questEngine.allQuests(),
+      );
+      this.showAchievements(newAchievements);
+
+      const next = this.questEngine.currentQuest();
+      if (next && next.id !== quest.id) {
+        this.pendingNextQuest = () => {
+          this.lastLoadedQuestId = next.id;
+          this.classQuest.cleanupLastClass(this.gameState.irisConfig());
+          this.loadQuestCode(next);
+          this.output.set(null);
+          this.error.set(null);
+          this.compileErrors.set([]);
+          this.aiPair.loadForQuest(next.id);
+        };
+      }
+
+      const apiKey = this.gameState.anthropicApiKey();
+      if (apiKey && this.questEngine.activeQuests().length < 2) {
+        this.questEngine.generateNextQuest(quest.branch, apiKey);
+      }
+    }
+
     this.reviewEvaluation.set(result);
   }
 

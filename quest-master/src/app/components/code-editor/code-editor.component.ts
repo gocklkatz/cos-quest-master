@@ -23,6 +23,9 @@ export class CodeEditorComponent {
   /** Whether challenge mode is active (no starter code on quest load). */
   challengeMode = input(false);
 
+  /** When true, Monaco editor is read-only (used for prediction quests). */
+  readOnly = input(false);
+
   /** Emitted when the user presses Ctrl+Enter or clicks Run. */
   runRequested = output<void>();
 
@@ -71,6 +74,14 @@ export class CodeEditorComponent {
         }
       }
     });
+
+    // Propagate readOnly changes to Monaco after the editor has been initialised.
+    effect(() => {
+      const ro = this.readOnly();
+      if (this.editor) {
+        this.editor.updateOptions({ readOnly: ro });
+      }
+    });
   }
 
   onEditorInit(editor: any): void {
@@ -88,6 +99,9 @@ export class CodeEditorComponent {
     if (initialCode) {
       editor.setValue(initialCode);
     }
+
+    // Apply readOnly state that may have been set before the editor initialised.
+    editor.updateOptions({ readOnly: this.readOnly() });
 
     // Forward user edits to the model() signal.
     editor.onDidChangeModelContent(() => {

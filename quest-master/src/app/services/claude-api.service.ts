@@ -38,6 +38,7 @@ export class ClaudeApiService {
     currentBranch: string,
     tier: QuestTier,
     apiKey: string,
+    questType: 'standard' | 'prediction' = 'standard',
   ): Promise<Quest> {
     const isEarlyStage = completedQuests.length === 0 || (completedQuests.length === 1 && completedQuests[0] === 'quest-zero');
     const earlyStageGuidance = isEarlyStage
@@ -49,13 +50,34 @@ export class ClaudeApiService {
 - Use "tier": "apprentice" and award modest XP (20–50 base)`
       : '';
 
+    const isPrediction = questType === 'prediction';
+
+    const predictionGuidance = isPrediction ? `
+
+QUEST TYPE — PREDICTION (Code Reading):
+This is a "predict the output" quest. The player reads a completed routine and selects the correct output from multiple-choice options. Rules:
+- starterCode MUST be a complete, self-contained ObjectScript routine (no blanks to fill in).
+- The routine MUST be deterministic and SHORT (≤ 10 lines). No user input, no random values.
+- Focus on concepts that have a non-obvious output: string functions ($PIECE, $EXTRACT, $LENGTH), loop constructs, global reads, or type coercion.
+- Include 3–4 plausible choices. Add realistic distractors: off-by-one results, wrong delimiter splits, empty-string edge cases.
+- correctAnswer MUST exactly match one entry in choices.
+- evaluationCriteria: write a 1-2 sentence plain-English explanation of WHY the correct answer is right (shown to the player after answering).
+- hints: provide 1-2 hints that guide the player to trace the code mentally without revealing the answer.
+- bonusObjectives: leave as an empty array [].` : '';
+
+    const schemaExtra = isPrediction ? `
+  "questType": "prediction",
+  "choices": ["string", "string", "string", "string"],
+  "correctAnswer": "string (must match one entry in choices exactly)",` : `
+  "questType": "standard",`;
+
     const system = `You are the Quest Master for an ObjectScript learning game. Generate quests that teach InterSystems ObjectScript (COS) concepts progressively.
 
 The player has completed these quests: ${completedQuests.join(', ') || 'none'}
 They have covered these concepts: ${coveredConcepts.join(', ') || 'none'}
 Their current tier is: ${tier}
 Their current skill branch is: ${currentBranch}
-${earlyStageGuidance}
+${earlyStageGuidance}${predictionGuidance}
 Generate the NEXT quest in this branch. It should:
 1. Introduce 1-2 new concepts while reinforcing previously learned ones
 2. Have a clear, testable objective
@@ -75,7 +97,7 @@ Respond with a JSON object with exactly these fields — no markdown fences, no 
 {
   "id": "branch-NN (e.g. commands-02)",
   "title": "string",
-  "branch": "same as current branch",
+  "branch": "same as current branch",${schemaExtra}
   "tier": "apprentice | journeyman | master",
   "xpReward": number,
   "bonusXP": number,

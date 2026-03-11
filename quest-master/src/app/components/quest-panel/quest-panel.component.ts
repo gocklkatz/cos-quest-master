@@ -74,15 +74,25 @@ export class QuestPanelComponent {
 
   questSelected = output<string>();
   hintRevealed = output<void>();
+  /** Emitted when the player submits a prediction answer; carries the chosen string. */
+  predictionSubmitted = output<string>();
 
   /** How many hints have been revealed. Reset when quest changes. */
   hintsRevealed = signal(0);
 
+  /** The choice the player has selected for a prediction quest. */
+  selectedChoice = signal<string | null>(null);
+
+  /** True after the player has submitted their prediction (disables radio + button). */
+  predictionAnswered = signal(false);
+
   constructor() {
-    // Reset revealed hints whenever the active quest changes.
+    // Reset revealed hints and prediction state whenever the active quest changes.
     effect(() => {
       this.quest(); // track
       this.hintsRevealed.set(0);
+      this.selectedChoice.set(null);
+      this.predictionAnswered.set(false);
     });
 
     // Auto-dismiss the "Branch Unlocked" toast after 4 seconds.
@@ -125,6 +135,13 @@ export class QuestPanelComponent {
 
   retryGenerate(): void {
     this.questEngine.retryGenerate();
+  }
+
+  submitPrediction(): void {
+    const choice = this.selectedChoice();
+    if (!choice || this.predictionAnswered()) return;
+    this.predictionAnswered.set(true);
+    this.predictionSubmitted.emit(choice);
   }
 
   isCompleted(id: string): boolean {

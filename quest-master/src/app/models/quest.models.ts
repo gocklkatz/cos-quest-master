@@ -15,6 +15,12 @@ export interface Quest {
   id: string;
   title: string;
   branch: string;
+  /** Omitted / 'standard' for normal quests; 'prediction' for read-only multiple-choice quests. */
+  questType?: 'standard' | 'prediction';
+  /** For prediction quests: 3–4 possible output strings to choose from. */
+  choices?: string[];
+  /** For prediction quests: the entry in choices that is correct. */
+  correctAnswer?: string;
   tier: QuestTier;
   xpReward: number;
   bonusXP: number;

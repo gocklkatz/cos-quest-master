@@ -18,6 +18,7 @@
       [isEvaluating]="isEvaluating()"
       (questSelected)="onQuestSelected($event)"
       (hintRevealed)="onHintRevealed()"
+      (predictionSubmitted)="onPredictionSubmitted($event)"
     />
   </aside>
 
@@ -40,6 +41,7 @@
         [files]="questFiles()"
         [activeFileId]="activeFileId()"
         [challengeMode]="challengeMode()"
+        [readOnly]="isPredictionQuest()"
         (runRequested)="runCode()"
         (fileSelected)="onFileSelected($event)"
         (toggleChallengeMode)="onToggleChallengeMode()"
@@ -48,34 +50,36 @@
     </div>
 
     <div class="run-toolbar">
-      <button
-        class="run-btn"
-        (click)="runCode()"
-        [disabled]="isRunning() || questEngine.questGenerating()"
-      >
-        @if (isRunning()) {
-          <span class="spinner">&#8635;</span> Running&hellip;
-        } @else {
-          &#9654; Run on IRIS
-        }
-      </button>
+      @if (!isPredictionQuest()) {
+        <button
+          class="run-btn"
+          (click)="runCode()"
+          [disabled]="isRunning() || questEngine.questGenerating()"
+        >
+          @if (isRunning()) {
+            <span class="spinner">&#8635;</span> Running&hellip;
+          } @else {
+            &#9654; Run on IRIS
+          }
+        </button>
 
-      <button
-        class="submit-btn"
-        (click)="submitCode()"
-        [disabled]="isRunning() || isEvaluating() || questEngine.questGenerating() || !questEngine.currentQuest() || questEngine.currentQuestCompleted()"
-        [title]="questEngine.currentQuestCompleted() ? 'Quest already completed' : 'Submit your solution'"
-      >
-        @if (questEngine.currentQuestCompleted()) {
-          &#10003; Completed
-        } @else if (isEvaluating()) {
-          <span class="spinner">&#8635;</span> Evaluating&hellip;
-        } @else {
-          &#128228; Submit
-        }
-      </button>
+        <button
+          class="submit-btn"
+          (click)="submitCode()"
+          [disabled]="isRunning() || isEvaluating() || questEngine.questGenerating() || !questEngine.currentQuest() || questEngine.currentQuestCompleted()"
+          [title]="questEngine.currentQuestCompleted() ? 'Quest already completed' : 'Submit your solution'"
+        >
+          @if (questEngine.currentQuestCompleted()) {
+            &#10003; Completed
+          } @else if (isEvaluating()) {
+            <span class="spinner">&#8635;</span> Evaluating&hellip;
+          } @else {
+            &#128228; Submit
+          }
+        </button>
 
-      <span class="run-hint">Ctrl+Enter to run</span>
+        <span class="run-hint">Ctrl+Enter to run</span>
+      }
 
       <button
         class="chat-toggle-btn"

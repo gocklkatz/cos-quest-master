@@ -117,6 +117,34 @@
 
 ---
 
+### 2026-03-11: F6 — Prediction quest trigger: fixed ratio (every 4th quest per branch)
+**Context**: The spec said "extend `generateQuest()` with a `questType` parameter" but did not specify when `QuestEngineService` should pass `questType: 'prediction'`. Options ranged from a random probability to user-selectable mode to a fixed ratio.
+**Decision**: `QuestEngineService` generates a prediction quest when `completedInBranch >= 1 && completedInBranch % 4 === 3`. This is every 4th quest in a branch, starting from position 3 (the 4th). The minimum of 1 ensures the player has written at least one piece of code in a branch before being asked to read and predict.
+**Rejected alternatives**: Random probability — unpredictable; could cluster prediction quests or skip them entirely in a branch. User-selectable mode — adds UI complexity and reduces the worked-example effect (players would opt out). Branch-level config in `BRANCH_PROGRESSION` — over-engineering for a simple ratio.
+
+---
+
+### 2026-03-11: F6 — Completion flow: synthesise EvaluationResult, reuse ReviewModal
+**Context**: Normal quest completion flows through `evaluateSubmission()` (Claude API) → `EvaluationResult` → `ReviewModal` → XP award → next quest. Prediction quests grade locally — no Claude call — so a separate path was needed.
+**Decision**: Synthesise a minimal `EvaluationResult` with `passed`, `score`, `feedback` (correct/incorrect message), `codeReview` (evaluation criteria as explanation), and `xpEarned`. Pass it through the existing pipeline unchanged. `ReviewModal` and XP award are reused with no modifications.
+**Rejected alternatives**: A separate prediction-result modal — duplicates `ReviewModal` without benefit. Direct `GameStateService.addXp()` call bypassing the modal — player skips the explanation, defeating the pedagogical purpose.
+
+---
+
+### 2026-03-11: F6 — Wrong answer: no retry, treat as learning moment
+**Context**: After a wrong prediction, two options: (a) allow one retry after revealing the correct answer, or (b) reveal the answer and continue without retry.
+**Decision**: No retry. The `ReviewModal` shows the correct answer and explanation; the player dismisses and advances. XP is zero. The learning value is in reading the explanation, not in being allowed to "correct" the choice.
+**Rejected alternatives**: One retry — adds state complexity (tracking "is this a retry?") and creates a trivial second chance that undermines the worked-example goal of studying the code carefully before answering.
+
+---
+
+### 2026-03-11: F6 — Read-only mechanism: questType check, not QuestFile.readOnly
+**Context**: `QuestFile` already has a `readOnly?: boolean` field. Two approaches for locking the editor: set `QuestFile.readOnly: true` on all files in a prediction quest (relying on AI to include it), or check `questType === 'prediction'` in `QuestViewComponent`.
+**Decision**: Use `questType === 'prediction'` in `QuestViewComponent` to set Monaco `readOnly`. `QuestFile.readOnly` is reserved for per-file scaffolding in multi-file quests (e.g. a read-only fixture file alongside an editable solution file). Coupling read-only state to quest type is semantically correct and immune to AI omission errors.
+**Rejected alternatives**: `QuestFile.readOnly: true` set by the AI prompt — AI could forget to include the field, silently making the editor editable on a prediction quest.
+
+---
+
 ### 2026-03-11: F4 — Test coverage: Vitest unit test for GlobalService only
 **Context**: CLAUDE.md requires an automated test for every feature. Two options: Vitest unit test for `GlobalService`, or Playwright E2E for the D3 SVG component.
 **Decision**: Vitest unit test (`global.service.spec.ts`). Mock `IrisApiService.getGlobals()` with a JSON fixture and assert the `globals` signal is updated correctly.
