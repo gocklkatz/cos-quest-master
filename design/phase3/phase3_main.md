@@ -45,6 +45,7 @@
 | 9 | **Quest Generation Loading Indicator** ✅ | phase3-high | Eliminates feedback-gap anxiety between quest completion and next quest appearing | [feature-09-quest-generation-indicator.md](feature-09-quest-generation-indicator.md) |
 | 10 | **AI Review Modal** ✅ | phase3-high | Ensures players read the AI evaluation feedback before the next quest loads | [feature-10-review-modal.md](feature-10-review-modal.md) |
 | 11 | **Scrollable Output Pane** ✅ | phase3-high | Prevents long output from overflowing and becoming unreadable | — |
+| 12 | **Branch Progression System** | phase3-mid | Automatically advances the player to new skill branches after demonstrated mastery, preventing curriculum stall on `setup` | [feature-12-branch-progression.md](feature-12-branch-progression.md) |
 
 ---
 
@@ -72,6 +73,7 @@ graph TD
     C3[Navbar Navigation] --> F4
     F1 --> F9[Quest Generation Indicator]
     F1 --> F10[AI Review Modal]
+    F1 --> F12[Branch Progression System]
 ```
 
 ---
@@ -137,6 +139,11 @@ Replace the full-height header bar with a ~40px slim navbar. Navigation links in
 - **Goal**: Reclaim ~16px of vertical space for code; make top-level navigation explicit and extensible.
 - **Implementation**: Enable Angular Router (`provideRouter`); define `/quest` and `/tree` routes; nav links use `routerLink`/`routerLinkActive`. Remove XP section from `HeaderBarComponent`; inject `GameStateService` directly into `QuestPanelComponent` for XP display. Replace `<app-quest-view>` in `app.html` with `<router-outlet />`. Introduce `UiEventService` so `QuestViewComponent` can trigger the settings modal without a direct parent binding. Ship a stub `TreeVisualizerComponent` placeholder; F4 fills it later.
 
+### F12: Branch Progression System
+After the player completes a configured number of quests in the current branch, the next `generateNextQuest` call automatically uses the next branch in the curriculum (`setup` → `commands` → `globals` → `classes`). A brief toast in the Quest Panel announces the transition. The current branch is persisted in `localStorage` via `GameStateService`.
+- **Goal**: Prevent curriculum stall; enforce Spiral Curriculum by introducing new ObjectScript paradigms in a controlled, mastery-gated order.
+- **Implementation**: New `BRANCH_PROGRESSION` config; `QuestEngineService.resolveBranch()` counts completed quests per branch and advances when a threshold is met; `GameStateService` stores `currentBranch`; `QuestPanelComponent` renders a transient "Branch Unlocked" toast.
+
 ### F8: Quest Time Tracking & Goal System
 Tracks active time spent on quests and allows users to set daily and weekly goals (e.g., "30 mins/day," "4 hours/week").
 - **Goal**: Spaced repetition and effort-based motivation.
@@ -186,3 +193,4 @@ Tracks active time spent on quests and allows users to set daily and weekly goal
 11. **Multi-Paradigm Mastery**: Design "Spiral" capstone quests (F5).
 12. **Code Literacy**: Implement Code Prediction quest type (F6).
 13. **Output Usability**: Make the output pane scrollable (F11).
+14. **Curriculum Progression**: Implement Branch Progression System so the player advances beyond `setup` (F12).
