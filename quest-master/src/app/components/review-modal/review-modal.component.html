@@ -1,0 +1,37 @@
+<div class="modal-backdrop" (click)="confirm()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header" [class.pass]="evaluation().passed" [class.fail]="!evaluation().passed">
+      <span class="status-icon">{{ evaluation().passed ? '✔' : '✘' }}</span>
+      <h2>{{ evaluation().passed ? 'Quest Passed!' : 'Not Quite Yet' }}</h2>
+    </div>
+
+    <div class="modal-body">
+      @if (evaluation().passed) {
+        <div class="xp-row">
+          <span class="xp-badge">+{{ evaluation().xpEarned }} XP</span>
+          @if (evaluation().bonusAchieved.length > 0) {
+            <span class="bonus-label">Bonus: {{ evaluation().bonusAchieved.join(', ') }}</span>
+          }
+        </div>
+      }
+
+      <section>
+        <h3>Feedback</h3>
+        <p class="feedback-text">{{ evaluation().feedback }}</p>
+      </section>
+
+      @if (evaluation().codeReview) {
+        <section>
+          <h3>Code Review</h3>
+          <pre class="code-review">{{ evaluation().codeReview }}</pre>
+        </section>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-primary" autofocus (click)="confirm()">OK</button>
+    </div>
+
+  </div>
+</div>

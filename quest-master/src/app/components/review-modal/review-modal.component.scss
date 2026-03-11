@@ -1,0 +1,131 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #1e1b2e;
+  border: 1px solid #3b3058;
+  border-radius: 12px;
+  width: 520px;
+  max-width: 95vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #3b3058;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #e2d9f3;
+  }
+
+  &.pass { border-bottom-color: #166534; }
+  &.fail { border-bottom-color: #7f1d1d; }
+}
+
+.status-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+
+  .pass & { color: #4ade80; }
+  .fail & { color: #f87171; }
+}
+
+.modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.xp-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.xp-badge {
+  background: #3b2070;
+  color: #c4b5fd;
+  border: 1px solid #7c5cbf;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.bonus-label {
+  font-size: 0.8rem;
+  color: #fbbf24;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  h3 {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9b8ec4;
+  }
+}
+
+.feedback-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #c4b5d9;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.code-review {
+  margin: 0;
+  background: #110f1e;
+  border: 1px solid #3b3058;
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 0.82rem;
+  color: #c4b5d9;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px 20px;
+  border-top: 1px solid #3b3058;
+}
+
+.btn-primary {
+  background: #7c5cbf;
+  color: #fff;
+  border: none;
+  padding: 8px 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+
+  &:hover { background: #9170d8; }
+}

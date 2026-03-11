@@ -7,6 +7,7 @@ import { QuestPanelComponent } from './components/quest-panel/quest-panel.compon
 import { XpAnimationComponent } from './components/xp-animation/xp-animation.component';
 import { AchievementOverlayComponent } from './components/achievement-overlay/achievement-overlay.component';
 import { AiPairChatComponent } from './components/ai-pair-chat/ai-pair-chat.component';
+import { ReviewModalComponent } from './components/review-modal/review-modal.component';
 import { GameStateService } from './services/game-state.service';
 import { IrisConnectionService } from './services/iris-connection.service';
 import { QuestEngineService } from './services/quest-engine.service';
@@ -31,6 +32,7 @@ import { CompileError, EvaluationResult, QuestFile } from './models/quest.models
     AchievementOverlayComponent,
     AiPairChatComponent,
     ResizableDividerDirective,
+    ReviewModalComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -80,6 +82,12 @@ export class App implements OnInit {
 
   /** Last evaluation result (cleared when code is run again). */
   evaluation = signal<EvaluationResult | null>(null);
+
+  /** Evaluation result waiting for the player to read it in the review modal. */
+  reviewEvaluation = signal<EvaluationResult | null>(null);
+
+  /** Next-quest loading logic deferred until the review modal is dismissed. */
+  private pendingNextQuest: (() => void) | null = null;
 
   /** XP animation trigger — increment to fire a new animation. */
   xpAnimTrigger = signal(0);
@@ -382,20 +390,35 @@ export class App implements OnInit {
       );
       this.showAchievements(newAchievements);
 
+      // Capture next-quest loading as a deferred closure — executed only after
+      // the player dismisses the review modal via onReviewConfirmed().
       const next = this.questEngine.currentQuest();
       if (next && next.id !== quest.id) {
-        this.lastLoadedQuestId = next.id;
-        this.classQuest.cleanupLastClass(this.gameState.irisConfig());
-        this.loadQuestCode(next);
-        this.output.set(null);
-        this.error.set(null);
-        this.compileErrors.set([]);
-        this.aiPair.loadForQuest(next.id);
+        this.pendingNextQuest = () => {
+          this.lastLoadedQuestId = next.id;
+          this.classQuest.cleanupLastClass(this.gameState.irisConfig());
+          this.loadQuestCode(next);
+          this.output.set(null);
+          this.error.set(null);
+          this.compileErrors.set([]);
+          this.aiPair.loadForQuest(next.id);
+        };
       }
 
       if (apiKey && this.questEngine.activeQuests().length < 2) {
         this.questEngine.generateNextQuest(quest.branch, apiKey);
       }
+    }
+
+    // Show review modal for every result (pass and fail).
+    this.reviewEvaluation.set(result);
+  }
+
+  onReviewConfirmed(): void {
+    this.reviewEvaluation.set(null);
+    if (this.pendingNextQuest) {
+      this.pendingNextQuest();
+      this.pendingNextQuest = null;
     }
   }
 

@@ -138,6 +138,10 @@
     <app-settings-modal (closed)="closeSettings()" (reset)="onReset()" />
   }
 
+  @if (reviewEvaluation()) {
+    <app-review-modal [evaluation]="reviewEvaluation()!" (confirmed)="onReviewConfirmed()" />
+  }
+
   <app-xp-animation
     [trigger]="xpAnimTrigger()"
     [xpEarned]="xpAnimAmount()"
