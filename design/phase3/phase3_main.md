@@ -55,7 +55,7 @@
 | C1 | **Remove Glossary Feature** ✅ | phase3-high | Simplify UI to focus on core quest loop and AI interaction | [change-01-remove-glossary.md](change-01-remove-glossary.md) |
 | C2 | **Remove Skill Tree and Quest Log from Left Pane** ✅ | phase3-high | Reduce left-pane clutter; these panels add navigation overhead without contributing to the core quest-and-feedback loop | [change-02-remove-skill-tree-quest-log.md](change-02-remove-skill-tree-quest-log.md) |
 | C3 | **Replace Header Bar with Slim Navbar + Navigation** | phase3-mid | Reclaim vertical space; introduce top-level navigation between Quest View and Global Tree Visualizer | [change-03-navbar-navigation.md](change-03-navbar-navigation.md) |
-| C4 | **Migrate AppComponent to QuestViewComponent** | phase3-mid | Extract quest workflow into a dedicated routed component so AppComponent becomes a thin shell; prerequisite for C3 routing | [change-04-migrate-app-to-quest-view.md](change-04-migrate-app-to-quest-view.md) |
+| C4 | **Migrate AppComponent to QuestViewComponent** ✅ | phase3-mid | Extract quest workflow into a dedicated routed component so AppComponent becomes a thin shell; prerequisite for C3 routing | [change-04-migrate-app-to-quest-view.md](change-04-migrate-app-to-quest-view.md) |
 
 ---
 

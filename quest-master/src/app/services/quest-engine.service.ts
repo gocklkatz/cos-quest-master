@@ -51,12 +51,28 @@ export class QuestEngineService {
   /** True when the last generation attempt failed. */
   readonly questGenerationError = signal(false);
 
+  /**
+   * Incremented by triggerReset() when AppComponent processes a "Reset All Progress" action.
+   * QuestViewComponent reacts to this signal to clear editor state and reload quest-zero.
+   * Initial value 0 is ignored by the effect (fires only on explicit reset).
+   */
+  readonly resetEpoch = signal(0);
+
   private _lastBranch = '';
   private _lastApiKey = '';
 
   /**
+   * Signal a reset to QuestViewComponent. Called by AppComponent.onReset() after
+   * resetProgress() and re-initialize(). QuestViewComponent's resetEpoch effect
+   * clears editor state and reloads the current quest reactively.
+   */
+  triggerReset(): void {
+    this.resetEpoch.update(n => n + 1);
+  }
+
+  /**
    * Auto-select the first available quest on startup if none is set.
-   * Call from AppComponent.ngOnInit().
+   * Call from QuestViewComponent.ngOnInit().
    */
   initialize(): void {
     if (!this.gameState.currentQuestId()) {

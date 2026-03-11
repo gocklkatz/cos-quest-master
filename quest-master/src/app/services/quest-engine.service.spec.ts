@@ -139,6 +139,18 @@ describe('QuestEngineService — F9: questGenerating / questGenerationError sign
     );
   });
 
+  it('triggerReset() increments resetEpoch on each call', async () => {
+    const { service } = await setup(MOCK_QUEST);
+
+    expect(service.resetEpoch()).toBe(0);
+
+    service.triggerReset();
+    expect(service.resetEpoch()).toBe(1);
+
+    service.triggerReset();
+    expect(service.resetEpoch()).toBe(2);
+  });
+
   it('retryGenerate() clears questGenerationError at the start of retry', async () => {
     let secondCallResolve!: (q: Quest) => void;
     const secondCallPending = new Promise<Quest>(res => { secondCallResolve = res; });

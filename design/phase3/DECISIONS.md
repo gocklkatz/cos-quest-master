@@ -8,6 +8,20 @@
 ---
 
 
+### 2026-03-11: C4 — AI-disabled banner Settings link uses Output event
+**Context**: The AI-disabled banner in `QuestViewComponent` has a "Settings" link that opens the settings modal. `openSettings()` belongs to `AppComponent` — `QuestViewComponent` cannot call it directly without coupling.
+**Decision**: `QuestViewComponent` exposes `@Output() openSettingsRequested = new EventEmitter<void>()`. The template calls `openSettingsRequested.emit()`. `AppComponent.app.html` listens: `(openSettingsRequested)="openSettings()"`.
+**Rejected alternatives**: Moving `openSettings` state into `QuestViewComponent` — wrong layer, settings modal is an app-shell concern. Using a shared service for modal state — over-engineering for a single call site.
+
+---
+
+### 2026-03-11: C4 — Standalone component test isolation with overrideComponent
+**Context**: `QuestViewComponent` imports `CodeEditorComponent` which requires `NGX_MONACO_EDITOR_CONFIG`. Even with `NO_ERRORS_SCHEMA` on the test module, the provider error fires because standalone component imports are instantiated regardless of the schema.
+**Decision**: Use `TestBed.overrideComponent(QuestViewComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } })` to strip all child imports from the component itself during tests. `NO_ERRORS_SCHEMA` on both the module and component override suppresses unknown element errors in the template.
+**Rejected alternatives**: Providing a mock `NGX_MONACO_EDITOR_CONFIG` — brittle, requires knowing all transitive provider requirements of every imported component.
+
+---
+
 ### 2026-03-11: F9 — Loading indicator scope and retry strategy
 
 **Context**: F9 required decisions on (1) how much of the quest card to replace during generation, (2) the thematic copy, (3) which service holds the signals, and (4) how a "Try again" retry button in `QuestPanel` can re-invoke `generateNextQuest()` without re-passing `branch`/`apiKey`.
