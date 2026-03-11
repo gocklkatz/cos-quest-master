@@ -13,6 +13,16 @@
   </div>
 </div>
 
+<!-- ── Daily goal progress bar ──────────────────────── -->
+@if (gameState.dailyGoalMinutes() > 0) {
+  <div class="daily-goal-section" [class.goal-met]="goalMetToday()">
+    <div class="daily-goal-bar">
+      <div class="daily-goal-fill" [style.width.%]="goalPercent()"></div>
+    </div>
+    <span class="daily-goal-label">{{ goalLabel() }}</span>
+  </div>
+}
+
 <!-- ── Branch Unlocked toast ─────────────────────────── -->
 @if (branchUnlockedLabel()) {
   <div class="branch-toast" role="status" aria-live="polite" (click)="dismissBranchToast()">

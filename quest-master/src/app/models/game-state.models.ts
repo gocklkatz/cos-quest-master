@@ -31,6 +31,10 @@ export interface GameState {
   noHintsStreak: number;
   /** The branch currently being used for quest generation. Persisted across sessions. */
   currentBranch: string;
+  /** Player's daily active-time goal in minutes. 0 = no goal / progress bar hidden. Default: 20. */
+  dailyGoalMinutes: number;
+  /** Accumulated active seconds per calendar day. Key = ISO date YYYY-MM-DD. */
+  timeLog: Record<string, number>;
 }
 
 export const DEFAULT_IRIS_CONFIG: IRISConfig = {
@@ -56,4 +60,6 @@ export const DEFAULT_GAME_STATE: GameState = {
   unlockedAchievements: [],
   noHintsStreak: 0,
   currentBranch: 'setup',
+  dailyGoalMinutes: 20,
+  timeLog: {},
 };

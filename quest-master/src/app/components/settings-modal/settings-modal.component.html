@@ -43,6 +43,15 @@
         <p class="hint">Your API key is stored only in this browser and never sent anywhere except api.anthropic.com.</p>
       </section>
 
+      <section>
+        <h3>Learning Goals</h3>
+        <label>
+          Daily goal (minutes)
+          <input type="number" min="0" max="480" [ngModel]="dailyGoalMinutes()" (ngModelChange)="dailyGoalMinutes.set(+$event)" placeholder="0 = no goal" />
+        </label>
+        <p class="hint">Set to 0 to hide the daily progress bar.</p>
+      </section>
+
       <section class="danger-zone">
         <h3>Danger Zone</h3>
         <button class="btn-warning" (click)="clearQuestBank()">Clear AI-Generated Quests</button>

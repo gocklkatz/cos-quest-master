@@ -24,6 +24,8 @@ export class GameStateService {
   readonly currentBranch = computed(() => this.state().currentBranch);
   readonly challengeMode = computed(() => this.state().challengeMode);
   readonly unlockedAchievements = computed(() => this.state().unlockedAchievements);
+  readonly dailyGoalMinutes = computed(() => this.state().dailyGoalMinutes);
+  readonly timeLog = computed(() => this.state().timeLog);
   readonly snapshot = computed(() => this.state());
 
   updateSettings(irisConfig: IRISConfig, anthropicApiKey: string, playerName?: string): void {
@@ -102,6 +104,20 @@ export class GameStateService {
     this.state.update(s => ({
       ...s,
       noHintsStreak: hintsShown ? 0 : s.noHintsStreak + 1,
+    }));
+    this.persist();
+  }
+
+  setDailyGoal(minutes: number): void {
+    this.state.update(s => ({ ...s, dailyGoalMinutes: minutes }));
+    this.persist();
+  }
+
+  recordActiveTime(seconds: number): void {
+    const today = new Date().toISOString().slice(0, 10);
+    this.state.update(s => ({
+      ...s,
+      timeLog: { ...s.timeLog, [today]: (s.timeLog[today] ?? 0) + seconds },
     }));
     this.persist();
   }

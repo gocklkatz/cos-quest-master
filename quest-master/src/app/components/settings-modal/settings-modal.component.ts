@@ -27,6 +27,7 @@ export class SettingsModalComponent {
   password = signal(this.gameState.irisConfig().password);
   anthropicApiKey = signal(this.gameState.anthropicApiKey());
   playerName = signal(this.gameState.playerName());
+  dailyGoalMinutes = signal(this.gameState.dailyGoalMinutes());
 
   showResetConfirm = signal(false);
 
@@ -38,6 +39,7 @@ export class SettingsModalComponent {
       password: this.password(),
     };
     this.gameState.updateSettings(config, this.anthropicApiKey(), this.playerName());
+    this.gameState.setDailyGoal(this.dailyGoalMinutes());
     this.connectionSvc.startPolling(config);
     this.closed.emit();
   }

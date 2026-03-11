@@ -89,6 +89,34 @@
 
 ---
 
+### 2026-03-11: F8 — Active time definition: Page Visibility + 120 s idle timeout
+**Context**: The spec said "measure focus time" without defining what "active" means. Options ranged from total time the quest is open, to editor-focus-only, to idle-timeout based.
+**Decision**: Active = tab is visible (Page Visibility API) AND a keyboard/click/mousemove event has occurred within the last 120 seconds. A 1-second `setInterval` ticks only when both conditions are true. Flush to `GameStateService.recordActiveTime()` every 10 seconds to limit localStorage write frequency.
+**Rejected alternatives**: Editor-focus-only — too narrow; players reading quest text or AI feedback are still actively engaged. Zero-idle-timeout (any visible second counts) — overly generous; rewards leaving the tab open.
+
+---
+
+### 2026-03-11: F8 — Weekly goals deferred; daily only in scope
+**Context**: phase3_main.md mentioned "daily and weekly goals" but the feature doc only specified "X mins/day". Implementing both requires additional `GameState` schema and UI.
+**Decision**: Daily goal only. The `timeLog: Record<string, number>` schema already stores per-day data and can support weekly aggregation in a future iteration with no schema changes.
+**Rejected alternatives**: Implement both now — adds two extra UI controls and a weekly-aggregate computed signal for minimal marginal value in the first iteration.
+
+---
+
+### 2026-03-11: F8 — New achievements are time-based, not completion-based
+**Context**: The feature doc mentioned "3-day streak" and phase3_main.md mentioned "7-Day Streak" and "10 Hours Invested". `streak-7` ("Week Warrior") already fires on 7 consecutive quest-completion days and is unrelated to time tracking.
+**Decision**: Add two new time-based achievements: `goal-streak-3` (daily goal met on 3 consecutive days) and `hours-10` (total accumulated time ≥ 36,000 s). `streak-7` is left untouched.
+**Rejected alternatives**: Replace `streak-7` with a time-based variant — breaks existing unlocks and removes completion-frequency tracking which has independent value.
+
+---
+
+### 2026-03-11: F8 — Goal Met indicator is ambient progress bar, not toast
+**Context**: The verification plan said "a Goal Met indicator appears" but did not specify the UI component or location.
+**Decision**: Slim progress bar below the XP bar in `QuestPanelComponent`. Always visible; fills as today's active time accumulates; label changes to "Goal Met ✓" and colour shifts to accent-green on completion. Ambient, not interruptive — consistent with the panel's role as a status sidebar.
+**Rejected alternatives**: Toast notification — interruptive at an unpredictable moment (mid-quest); second modal — too heavy for a motivational nudge.
+
+---
+
 ### 2026-03-11: F4 — Test coverage: Vitest unit test for GlobalService only
 **Context**: CLAUDE.md requires an automated test for every feature. Two options: Vitest unit test for `GlobalService`, or Playwright E2E for the D3 SVG component.
 **Decision**: Vitest unit test (`global.service.spec.ts`). Mock `IrisApiService.getGlobals()` with a JSON fixture and assert the `globals` signal is updated correctly.

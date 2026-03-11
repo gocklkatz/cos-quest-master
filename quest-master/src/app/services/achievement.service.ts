@@ -61,6 +61,22 @@ export const ACHIEVEMENTS: Achievement[] = [
     rarity: 'rare',
     xpBonus: 150,
   },
+  {
+    id: 'goal-streak-3',
+    name: 'Consistent Coder',
+    description: 'Meet your daily time goal 3 days in a row',
+    icon: '🔥',
+    rarity: 'rare',
+    xpBonus: 150,
+  },
+  {
+    id: 'hours-10',
+    name: 'Seasoned Apprentice',
+    description: 'Accumulate 10 hours of active coding',
+    icon: '⏳',
+    rarity: 'epic',
+    xpBonus: 300,
+  },
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -135,9 +151,40 @@ export class AchievementService {
       case 'streak-7':
         return this.hasSevenDayStreak(state.questLog);
 
+      case 'goal-streak-3':
+        return this.hasGoalStreak(state.timeLog, state.dailyGoalMinutes, 3);
+
+      case 'hours-10': {
+        const total = Object.values(state.timeLog).reduce((sum, s) => sum + s, 0);
+        return total >= 36_000;
+      }
+
       default:
         return false;
     }
+  }
+
+  private hasGoalStreak(timeLog: Record<string, number>, goalMinutes: number, required: number): boolean {
+    if (goalMinutes <= 0) return false;
+    const goalSeconds = goalMinutes * 60;
+    const days = Object.entries(timeLog)
+      .filter(([, seconds]) => seconds >= goalSeconds)
+      .map(([date]) => date)
+      .sort();
+    if (days.length < required) return false;
+    let streak = 1;
+    for (let i = 1; i < days.length; i++) {
+      const prev = new Date(days[i - 1]);
+      const curr = new Date(days[i]);
+      const diffDays = (curr.getTime() - prev.getTime()) / 86_400_000;
+      if (diffDays === 1) {
+        streak++;
+        if (streak >= required) return true;
+      } else {
+        streak = 1;
+      }
+    }
+    return false;
   }
 
   private hasSevenDayStreak(questLog: QuestLogEntry[]): boolean {

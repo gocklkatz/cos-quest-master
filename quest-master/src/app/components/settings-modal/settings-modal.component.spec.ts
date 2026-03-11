@@ -14,9 +14,11 @@ describe('SettingsModalComponent — Dynamic Quest Regeneration (F1)', () => {
       anthropicApiKey: signal(apiKey),
       playerName: signal('Tester'),
       currentBranch: signal('setup'),
+      dailyGoalMinutes: signal(20),
       resetProgress: vi.fn(),
       updateSettings: vi.fn(),
       clearQuestBank: vi.fn(),
+      setDailyGoal: vi.fn(),
     } as unknown as GameStateService;
   }
 

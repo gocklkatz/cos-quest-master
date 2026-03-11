@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import { OutputPanelComponent } from '../output-panel/output-panel.component';
 import { QuestPanelComponent } from '../quest-panel/quest-panel.component';
@@ -14,6 +14,7 @@ import { PaneSizeService } from '../../services/pane-size.service';
 import { AchievementService } from '../../services/achievement.service';
 import { UiEventService } from '../../services/ui-event.service';
 import { GlobalService } from '../../services/global.service';
+import { TimeTrackingService } from '../../services/time-tracking.service';
 import { ResizableDividerDirective } from '../../directives/resizable-divider.directive';
 import { Achievement } from '../../models/achievement.models';
 import { CompileError, EvaluationResult, QuestFile } from '../../models/quest.models';
@@ -34,7 +35,7 @@ import { CompileError, EvaluationResult, QuestFile } from '../../models/quest.mo
   templateUrl: './quest-view.component.html',
   styleUrl: './quest-view.component.scss',
 })
-export class QuestViewComponent implements OnInit {
+export class QuestViewComponent implements OnInit, OnDestroy {
   private gameState = inject(GameStateService);
   private classQuest = inject(ClassQuestService);
   private aiPair = inject(AiPairService);
@@ -43,6 +44,7 @@ export class QuestViewComponent implements OnInit {
   protected uiEvents = inject(UiEventService);
   readonly questEngine = inject(QuestEngineService);
   private globalService = inject(GlobalService);
+  private timeSvc = inject(TimeTrackingService);
 
   showChat = signal(false);
 
@@ -172,7 +174,12 @@ export class QuestViewComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.timeSvc.stopTracking();
+  }
+
   ngOnInit(): void {
+    this.timeSvc.startTracking();
     this.questEngine.initialize();
 
     // Load starter code and chat history for the initial quest.

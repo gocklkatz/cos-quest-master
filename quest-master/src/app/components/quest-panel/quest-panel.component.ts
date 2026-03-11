@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, output, signal } from '@ang
 import { Quest, EvaluationResult } from '../../models/quest.models';
 import { QuestEngineService } from '../../services/quest-engine.service';
 import { GameStateService } from '../../services/game-state.service';
+import { TimeTrackingService } from '../../services/time-tracking.service';
 import { xpForNextLevel, levelProgress, MAX_LEVEL } from '../../data/xp-table';
 import { BRANCH_DISPLAY_NAMES } from '../../data/branch-progression';
 
@@ -15,6 +16,7 @@ import { BRANCH_DISPLAY_NAMES } from '../../data/branch-progression';
 export class QuestPanelComponent {
   private questEngine = inject(QuestEngineService);
   readonly gameState = inject(GameStateService);
+  private timeSvc = inject(TimeTrackingService);
   readonly maxLevel = MAX_LEVEL;
 
   get xpForNextLevelValue(): number {
@@ -32,6 +34,21 @@ export class QuestPanelComponent {
   readonly questGenerating = this.questEngine.questGenerating;
   readonly questGenerationError = this.questEngine.questGenerationError;
   readonly branchUnlocked = this.questEngine.branchUnlocked;
+
+  readonly goalMetToday = this.timeSvc.goalMetToday;
+
+  readonly goalPercent = computed(() => {
+    const goal = this.gameState.dailyGoalMinutes();
+    if (goal <= 0) return 0;
+    return Math.min(100, (this.timeSvc.todaySeconds() / (goal * 60)) * 100);
+  });
+
+  readonly goalLabel = computed(() => {
+    if (this.timeSvc.goalMetToday()) return 'Goal Met \u2713';
+    const todayMin = Math.floor(this.timeSvc.todaySeconds() / 60);
+    const goalMin = this.gameState.dailyGoalMinutes();
+    return `Today: ${todayMin}m\u00a0/\u00a0${goalMin}m`;
+  });
 
   readonly branchUnlockedLabel = computed(() => {
     const b = this.branchUnlocked();
