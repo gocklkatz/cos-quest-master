@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { GameStateService } from './game-state.service';
 import { ClaudeApiService } from './claude-api.service';
 import { Quest, EvaluationResult, QuestTier } from '../models/quest.models';
@@ -44,6 +44,15 @@ export class QuestEngineService {
     const id = this.gameState.currentQuestId();
     return id ? this.gameState.completedQuests().includes(id) : false;
   });
+
+  /** True while a quest is being generated via Claude. */
+  readonly questGenerating = signal(false);
+
+  /** True when the last generation attempt failed. */
+  readonly questGenerationError = signal(false);
+
+  private _lastBranch = '';
+  private _lastApiKey = '';
 
   /**
    * Auto-select the first available quest on startup if none is set.
@@ -93,6 +102,11 @@ export class QuestEngineService {
    * Returns the generated quest, or null if generation fails.
    */
   async generateNextQuest(branch: string, apiKey: string): Promise<Quest | null> {
+    this._lastBranch = branch;
+    this._lastApiKey = apiKey;
+    this.questGenerating.set(true);
+    this.questGenerationError.set(false);
+
     const completedIds = this.gameState.completedQuests();
     const coveredConcepts = this.gameState.coveredConcepts();
     const tier: QuestTier = calcLevel(this.gameState.xp()) >= 13
@@ -118,9 +132,19 @@ export class QuestEngineService {
         }
       }
 
+      this.questGenerating.set(false);
       return quest;
     } catch {
+      this.questGenerating.set(false);
+      this.questGenerationError.set(true);
       return null;
+    }
+  }
+
+  /** Retry the last failed generation attempt. */
+  retryGenerate(): void {
+    if (this._lastBranch && this._lastApiKey) {
+      this.generateNextQuest(this._lastBranch, this._lastApiKey);
     }
   }
 

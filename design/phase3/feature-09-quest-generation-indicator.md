@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase3-high |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Depends On | F1 — Dynamic Quest Regeneration |
 | Pedagogical Principle | Motivation & Flow — removing friction and anxiety between learning cycles |
 
@@ -15,7 +15,7 @@ After a player completes a quest and the app triggers AI quest generation, a sil
 
 **Acceptance criteria:**
 - Immediately after quest completion triggers `generateNextQuest()`, the quest area shows a loading state (no manual refresh needed).
-- The loading state displays a short, thematic label (e.g., "Forging your next quest…") alongside an animation.
+- The loading state displays the thematic label *"The anvil is hot…"* alongside an animation.
 - Once the quest is stored, the loading state disappears and the new quest renders normally.
 - If generation fails, the loading state is replaced by an error message with a retry option.
 - No regression to existing quest display or submission flow.
@@ -26,44 +26,57 @@ After a player completes a quest and the app triggers AI quest generation, a sil
 
 **The Learning Problem**: A silent gap after completing a quest breaks the learner's sense of momentum. Without feedback, the user cannot tell whether the app is working, broken, or waiting for input. This creates anxiety and erodes trust in the system — both of which increase cognitive load and reduce motivation to continue.
 
-**The Cognitive Solution**: Immediate, thematic progress feedback (e.g., "Forging your next quest…") signals that the system is actively preparing the next challenge. This keeps the learner in a state of positive anticipation rather than confusion, maintaining the motivational arc between quests. The language should match the app's blacksmithing/crafting theme to reinforce immersion.
+**The Cognitive Solution**: Immediate, thematic progress feedback (*"The anvil is hot…"*) signals that the system is actively preparing the next challenge. This keeps the learner in a state of positive anticipation rather than confusion, maintaining the motivational arc between quests. The language matches the app's blacksmithing/crafting theme to reinforce immersion.
 
 ---
 
 ## Implementation Details
 
-- **Signal**: Add a `questGenerating = signal(false)` to `QuestService`. Set to `true` at the start of `generateNextQuest()`, set back to `false` (in both success and error paths) once the quest is written to storage.
-- **QuestPanel template**: Use `@if (questGenerating())` to conditionally render:
-  - A skeleton/placeholder card or a centered spinner + label in place of the quest title and description.
-  - A thematic message: *"Forging your next quest…"*
-  - Keep the Run / Submit buttons disabled while generating.
-- **Error state**: If `generateNextQuest()` throws, set a `questGenerationError` signal. Show an inline error with a "Try again" button that re-invokes generation.
-- **Animation**: Use a CSS keyframe animation (pulse or shimmer) — no external animation library required.
-- **Accessibility**: The loading container must have `role="status"` and `aria-live="polite"` so screen readers announce the state change.
+- **Signals on `QuestEngineService`**:
+  - `questGenerating = signal(false)` — set to `true` at the start of `generateNextQuest()`, cleared to `false` in both success and error paths.
+  - `questGenerationError = signal(false)` — set to `true` only on failure, cleared at the start of each retry.
+  - `retryGenerate()` method — re-invokes generation using internally stored `_lastBranch` and `_lastApiKey` (saved at the start of each `generateNextQuest()` call). No arguments needed from the caller.
+
+- **`QuestPanel` template** — partial replacement (Option A): the quest list at the bottom remains visible at all times. While `questGenerating()` is true, replace only the header + narrative + objective + hints + bonus sections with:
+  - A shimmer skeleton block.
+  - The thematic label: *"The anvil is hot…"*
+  - `role="status"` and `aria-live="polite"` on the loading container.
+  - Run / Submit buttons (in `AppComponent`) are disabled via a `questGenerating` input passed down.
+
+- **`QuestPanel` component**: injects `QuestEngineService` directly to read `questGenerating()`, `questGenerationError()`, and call `retryGenerate()`.
+
+- **`AppComponent`**: passes `questGenerating` signal value as an input to disable Run/Submit while generating.
+
+- **Animation**: CSS keyframe shimmer (`@keyframes shimmer`) — no external animation library.
+
+- **Accessibility**: loading container has `role="status"` and `aria-live="polite"`.
 
 ---
 
 ## Files Changed
 
-- `quest-master/src/app/services/quest.service.ts` — add `questGenerating` and `questGenerationError` signals; wrap `generateNextQuest()` to set/clear them
-- `quest-master/src/app/components/quest-panel/quest-panel.component.ts` — read `questGenerating` signal from service
-- `quest-master/src/app/components/quest-panel/quest-panel.component.html` — add `@if` branch for loading state
-- `quest-master/src/app/components/quest-panel/quest-panel.component.scss` — add shimmer/pulse keyframe animation
+- `quest-master/src/app/services/quest-engine.service.ts` — add `questGenerating`, `questGenerationError` signals; store `_lastBranch`/`_lastApiKey`; wrap `generateNextQuest()` to set/clear signals; add `retryGenerate()`
+- `quest-master/src/app/components/quest-panel/quest-panel.component.ts` — inject `QuestEngineService`; expose signals for template
+- `quest-master/src/app/components/quest-panel/quest-panel.component.html` — add `@if` branch for partial loading state (keeps quest list visible)
+- `quest-master/src/app/components/quest-panel/quest-panel.component.scss` — add `@keyframes shimmer` and `.generating-placeholder` styles
+- `quest-master/src/app/app.ts` — pass `questGenerating` signal value to Run/Submit disabled state
+- `quest-master/src/app/services/quest-engine.service.spec.ts` — unit tests for new signals and `retryGenerate()`
+- `quest-master/src/app/components/quest-panel/quest-panel.component.spec.ts` — snapshot updated for loading state branch
 
 ---
 
 ## Open Questions
 
-- [ ] Should the spinner/skeleton replace only the title+description area, or the entire quest card? (Prefer partial replacement so the quest panel chrome stays visible.)
-- [ ] What is the exact thematic label? Options: *"Forging your next quest…"*, *"The anvil is hot…"*, *"Shaping your challenge…"*
+- ~~Should the spinner/skeleton replace only the title+description area, or the entire quest card?~~ **Partial replacement (Option A)** — quest list stays visible at all times.
+- ~~What is the exact thematic label?~~ ***"The anvil is hot…"***
 
 ---
 
 ## Verification Plan
 
-1. Complete quest 0 ("Forge the Anvil") — loading indicator appears immediately.
+1. Complete quest 0 ("Forge the Anvil") — loading indicator appears immediately in the quest content area; quest list remains visible.
 2. Wait for generation to finish — indicator disappears and next quest renders.
 3. Simulate a network failure in `ClaudeApiService` — error state renders with "Try again" button.
 4. Click "Try again" — generation retries and succeeds (or shows error again).
 5. Run `ng build` — zero errors.
-6. Run unit tests — `QuestService` signals tested; `QuestPanel` snapshot updated.
+6. Run unit tests — `QuestEngineService` signals tested; `QuestPanel` snapshot updated.

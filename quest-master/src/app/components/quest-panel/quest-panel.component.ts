@@ -1,5 +1,6 @@
-import { Component, computed, effect, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { Quest, EvaluationResult } from '../../models/quest.models';
+import { QuestEngineService } from '../../services/quest-engine.service';
 
 @Component({
   selector: 'app-quest-panel',
@@ -9,6 +10,11 @@ import { Quest, EvaluationResult } from '../../models/quest.models';
   styleUrl: './quest-panel.component.scss',
 })
 export class QuestPanelComponent {
+  private questEngine = inject(QuestEngineService);
+
+  readonly questGenerating = this.questEngine.questGenerating;
+  readonly questGenerationError = this.questEngine.questGenerationError;
+
   quest = input<Quest | null>(null);
   availableQuests = input<Quest[]>([]);
   completedQuestIds = input<string[]>([]);
@@ -56,6 +62,10 @@ export class QuestPanelComponent {
 
   selectQuest(id: string): void {
     this.questSelected.emit(id);
+  }
+
+  retryGenerate(): void {
+    this.questEngine.retryGenerate();
   }
 
   isCompleted(id: string): boolean {

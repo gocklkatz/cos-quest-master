@@ -428,6 +428,78 @@
   text-transform: capitalize;
 }
 
+// ── Generation loading state ──────────────────────────────
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.generating-placeholder {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #1e1830;
+}
+
+.generating-shimmer {
+  border-radius: 4px;
+  background: linear-gradient(90deg, #1a1530 25%, #2a2048 50%, #1a1530 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
+  margin-bottom: 10px;
+
+  &--title {
+    height: 18px;
+    width: 70%;
+  }
+
+  &--line {
+    height: 12px;
+    width: 100%;
+
+    &.short {
+      width: 55%;
+    }
+  }
+}
+
+.generating-label {
+  margin: 14px 0 0;
+  font-size: 0.78rem;
+  color: #7060a8;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+.generating-error {
+  padding: 16px;
+  border-bottom: 1px solid #1e1830;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.generating-error-msg {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #c87070;
+}
+
+.retry-btn {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid #7a3a3a;
+  color: #c87070;
+  padding: 4px 14px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+
+  &:hover {
+    border-color: #c87070;
+    color: #e89090;
+  }
+}
+
 // ── Empty state ──────────────────────────────────────────
 .quest-empty {
   display: flex;
