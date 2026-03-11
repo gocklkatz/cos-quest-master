@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, ElementRef, afterRenderEffect, input, viewChild } from '@angular/core';
 import { CompileError } from '../../models/quest.models';
 
 @Component({
@@ -13,4 +13,17 @@ export class OutputPanelComponent {
   isRunning = input(false);
   /** Compile errors from class-mode runs — rendered in red above runtime output. */
   compileErrors = input<CompileError[]>([]);
+
+  private outputBody = viewChild<ElementRef<HTMLElement>>('outputBody');
+
+  constructor() {
+    afterRenderEffect(() => {
+      // Track all output signals so the effect re-runs on any change.
+      this.output();
+      this.error();
+      this.compileErrors();
+      const el = this.outputBody()?.nativeElement;
+      if (el) el.scrollTop = el.scrollHeight;
+    });
+  }
 }
