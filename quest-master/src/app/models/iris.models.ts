@@ -10,3 +10,19 @@ export interface ExecuteResult {
   output?: string;
   error?: string;
 }
+
+export interface GlobalNode {
+  key: string;
+  value?: string;
+  truncated?: boolean;
+  children: GlobalNode[];
+}
+
+export interface GlobalEntry {
+  name: string;
+  children: GlobalNode[];
+}
+
+export interface GlobalsResponse {
+  globals: GlobalEntry[];
+}

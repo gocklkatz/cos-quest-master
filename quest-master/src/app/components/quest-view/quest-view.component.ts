@@ -13,6 +13,7 @@ import { AiPairService } from '../../services/ai-pair.service';
 import { PaneSizeService } from '../../services/pane-size.service';
 import { AchievementService } from '../../services/achievement.service';
 import { UiEventService } from '../../services/ui-event.service';
+import { GlobalService } from '../../services/global.service';
 import { ResizableDividerDirective } from '../../directives/resizable-divider.directive';
 import { Achievement } from '../../models/achievement.models';
 import { CompileError, EvaluationResult, QuestFile } from '../../models/quest.models';
@@ -41,6 +42,7 @@ export class QuestViewComponent implements OnInit {
   private achievementSvc = inject(AchievementService);
   protected uiEvents = inject(UiEventService);
   readonly questEngine = inject(QuestEngineService);
+  private globalService = inject(GlobalService);
 
   showChat = signal(false);
 
@@ -300,6 +302,7 @@ export class QuestViewComponent implements OnInit {
         this.compileErrors.set([]);
         this.output.set(result.output);
         this.error.set(null);
+        this.globalService.refresh();
       }
     } catch (e: any) {
       this.isRunning.set(false);

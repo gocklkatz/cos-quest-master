@@ -12,6 +12,7 @@ XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
   <Route Url="/health" Method="GET" Call="Health"/>
   <Route Url="/execute" Method="POST" Call="Execute"/>
   <Route Url="/compile" Method="POST" Call="Compile"/>
+  <Route Url="/globals" Method="GET" Call="Globals"/>
 </Routes>
 }
 
@@ -172,6 +173,76 @@ ClassMethod Compile() As %Status
   }
   Do:($Get(tSrcFile)'="") ##class(%File).Delete(tSrcFile)
   Do:($Get(tDiagFile)'="") ##class(%File).Delete(tDiagFile)
+  Quit $$$OK
+}
+
+/// Return a depth-limited (max 3 levels) JSON tree of user globals in the USER namespace.
+/// Includes only globals whose names match [A-Za-z][A-Za-z0-9]* (excludes ^%, ^IRIS*, etc.).
+/// Node cap: max 50 children per node, 200 nodes total; truncated nodes include "truncated":true.
+ClassMethod Globals() As %Status
+{
+  Do %response.SetHeader("Content-Type","application/json")
+  Set tResult = {"globals": []}
+  Set tTotalNodes = 0
+
+  // ^$GLOBAL returns names WITH the leading ^ (e.g. "^Test", "^%cspSession")
+  // Match only plain user globals: ^[UpperOrLower][AlphaNum]*
+  Set tGName = $Order(^$GLOBAL(""))
+  While tGName '= "" {
+    If $Match(tGName, "^\^[A-Za-z][A-Za-z0-9]*$") && (tTotalNodes < 200) {
+      Set tGRef = tGName
+      Set tGNode = {"name": (tGRef), "children": []}
+
+      // Level 1
+      Set tL1Count = 0, tL1Trunc = 0
+      Set tSub1 = $Order(@tGRef@(""))
+      While tSub1 '= "" && (tTotalNodes < 200) {
+        If tL1Count >= 50 { Set tL1Trunc = 1  Quit }
+        Set tL1Count = tL1Count + 1, tTotalNodes = tTotalNodes + 1
+        Set tNode1 = {"key": (tSub1), "children": []}
+        Set tD1 = $Data(@tGRef@(tSub1))
+        If (tD1 = 1) || (tD1 = 11) { Set tNode1.value = $Get(@tGRef@(tSub1)) }
+
+        // Level 2
+        Set tL2Count = 0, tL2Trunc = 0
+        Set tSub2 = $Order(@tGRef@(tSub1, ""))
+        While tSub2 '= "" && (tTotalNodes < 200) {
+          If tL2Count >= 50 { Set tL2Trunc = 1  Quit }
+          Set tL2Count = tL2Count + 1, tTotalNodes = tTotalNodes + 1
+          Set tNode2 = {"key": (tSub2), "children": []}
+          Set tD2 = $Data(@tGRef@(tSub1, tSub2))
+          If (tD2 = 1) || (tD2 = 11) { Set tNode2.value = $Get(@tGRef@(tSub1, tSub2)) }
+
+          // Level 3
+          Set tL3Count = 0, tL3Trunc = 0
+          Set tSub3 = $Order(@tGRef@(tSub1, tSub2, ""))
+          While tSub3 '= "" && (tTotalNodes < 200) {
+            If tL3Count >= 50 { Set tL3Trunc = 1  Quit }
+            Set tL3Count = tL3Count + 1, tTotalNodes = tTotalNodes + 1
+            Set tNode3 = {"key": (tSub3), "children": []}
+            Set tD3 = $Data(@tGRef@(tSub1, tSub2, tSub3))
+            If (tD3 = 1) || (tD3 = 11) { Set tNode3.value = $Get(@tGRef@(tSub1, tSub2, tSub3)) }
+            Do tNode2.children.%Push(tNode3)
+            Set tSub3 = $Order(@tGRef@(tSub1, tSub2, tSub3))
+          }
+          If tL3Trunc { Do tNode2.children.%Push({"key": "…", "truncated": (1), "children": []}) }
+
+          Do tNode1.children.%Push(tNode2)
+          Set tSub2 = $Order(@tGRef@(tSub1, tSub2))
+        }
+        If tL2Trunc { Do tNode1.children.%Push({"key": "…", "truncated": (1), "children": []}) }
+
+        Do tGNode.children.%Push(tNode1)
+        Set tSub1 = $Order(@tGRef@(tSub1))
+      }
+      If tL1Trunc { Do tGNode.children.%Push({"key": "…", "truncated": (1), "children": []}) }
+
+      Do tResult.globals.%Push(tGNode)
+    }
+    Set tGName = $Order(^$GLOBAL(tGName))
+  }
+
+  Write tResult.%ToJSON()
   Quit $$$OK
 }
 

@@ -37,3 +37,45 @@
 - *Full card replacement*: simpler but causes a layout jump and loses the quest list context, increasing disorientation.
 - *Output event for retry*: emitting from `QuestPanel` up to `AppComponent` adds indirection with no benefit once the service is already injected.
 - *Inject `GameStateService` into `QuestPanel` for apiKey*: couples the component to a second service for a single edge case.
+
+---
+
+### 2026-03-11: F4 — D3.js chosen over pure SVG for tree layout
+**Context**: The Global Tree Visualizer needs an interactive, collapsible tree with variable-depth nodes. Two options were evaluated before implementation started.
+**Decision**: Use D3 (`d3-hierarchy` + `d3-zoom`). Add `d3` and `@types/d3` to `package.json`. The ~80 KB minified cost is acceptable for a local dev tool; the Reingold-Tilford layout algorithm is non-trivial to implement by hand.
+**Rejected alternatives**: Pure SVG — zero dependencies but requires writing the layout math manually, which is a significant distraction from the pedagogical goal.
+
+---
+
+### 2026-03-11: F4 — Globals inclusion filter uses allow-list regex, not deny-list
+**Context**: The original spec only excluded `^%` globals. IRIS has many other internal globals (`^IRIS*`, `^Cache*`, `^rOBJ`, `^oddDEF`, etc.) that should not appear in the visualizer.
+**Decision**: Only include globals whose names match `$MATCH(name, "^\^[A-Za-z][A-Za-z0-9]*$")`. This is an allow-list (plain alphanumeric names only) that naturally excludes all IRIS-internal globals without requiring an enumerated deny-list that would need maintenance as IRIS versions evolve.
+**Rejected alternatives**: Deny-list of known prefixes (`^%`, `^IRIS`, `^Cache`, `^rI`, `^odd`) — brittle; new IRIS releases may introduce new internal global families.
+
+---
+
+### 2026-03-11: F4 — Node-count cap: 50 children per node, 200 nodes total
+**Context**: Depth limit of 3 was specified but no cap on breadth. A global with thousands of first-level subscripts could produce an oversized JSON payload or an unreadable tree.
+**Decision**: Cap at 50 children per node and 200 nodes total across the entire response. When truncated, the affected node includes `"truncated": true` so the frontend can render a visual indicator.
+**Rejected alternatives**: No cap (risk of browser hang on large globals); cap on total payload size in bytes (harder to implement in ObjectScript than a node count).
+
+---
+
+### 2026-03-11: F4 — UI placement is full-page /tree route (not sidebar tab)
+**Context**: The original F4 spec described the visualizer as a "sidebar tab." C3 shipped a full-width routed page at `/tree` with a `TreeVisualizerComponent` stub and navbar navigation, which supersedes the sidebar tab concept.
+**Decision**: F4 implements the body of `TreeVisualizerComponent` as a full-width page. No changes to `app.html` or the three-pane quest layout are required.
+**Rejected alternatives**: Sidebar tab — obsolete after C3 introduced top-level router-based navigation.
+
+---
+
+### 2026-03-11: F4 — GlobalService delegates to IrisApiService, not direct HttpClient
+**Context**: Two patterns were possible: `GlobalService` makes its own `HttpClient` calls, or it delegates to `IrisApiService` which already handles auth headers and error formatting.
+**Decision**: Add `getGlobals(config: IRISConfig)` to `IrisApiService`. `GlobalService` injects `IrisApiService` + `GameStateService` (for `irisConfig()`). Consistent with all other IRIS-facing services.
+**Rejected alternatives**: Direct `HttpClient` in `GlobalService` — duplicates auth header logic and error handling already centralised in `IrisApiService`.
+
+---
+
+### 2026-03-11: F4 — Test coverage: Vitest unit test for GlobalService only
+**Context**: CLAUDE.md requires an automated test for every feature. Two options: Vitest unit test for `GlobalService`, or Playwright E2E for the D3 SVG component.
+**Decision**: Vitest unit test (`global.service.spec.ts`). Mock `IrisApiService.getGlobals()` with a JSON fixture and assert the `globals` signal is updated correctly.
+**Rejected alternatives**: Playwright E2E — D3-rendered SVG structure is an implementation detail that is brittle to assert against; the visual correctness is better verified manually via the Verification Plan.

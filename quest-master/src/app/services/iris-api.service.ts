@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { IRISConfig, ExecuteResult } from '../models/iris.models';
+import { IRISConfig, ExecuteResult, GlobalsResponse } from '../models/iris.models';
 
 @Injectable({ providedIn: 'root' })
 export class IrisApiService {
@@ -70,6 +70,12 @@ export class IrisApiService {
         { headers: this.getHeaders(config) }
       )
       .pipe(catchError(err => of({ error: this.friendlyError(err) })));
+  }
+
+  getGlobals(config: IRISConfig): Observable<GlobalsResponse> {
+    return this.http
+      .get<GlobalsResponse>(`/api/quest/globals`, { headers: this.getHeaders(config) })
+      .pipe(catchError(() => of({ globals: [] })));
   }
 
   /** Delete a document from IRIS via Atelier. */

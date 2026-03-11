@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase3-mid |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Pedagogical Principle | Dual Coding |
 | Depends On | C3 (Navbar Navigation) — the `/tree` route and `TreeVisualizerComponent` stub are created by C3; F4 implements the component body |
 
@@ -22,13 +22,15 @@ Build a visualizer that renders the structure of IRIS globals as an interactive 
 
 ## Implementation Details
 - **Frontend**:
-    - New `GlobalVisualizerComponent` using D3.js or a lightweight SVG tree.
-    - Sidebar tab to toggle the visualizer panel.
-    - Refresh triggered by the existing "Run" event — after a successful execute call, `GlobalService.refresh()` is called.
-    - No auto-polling; no timer.
+    - `TreeVisualizerComponent` (stub created by C3) implements the full `/tree` page body — it is a full-width routed view, not a sidebar tab.
+    - Uses **D3.js** (`d3-hierarchy` + `d3-zoom`) for tree layout. Add `d3` and `@types/d3` to `package.json`.
+    - `GlobalService` injects `IrisApiService` (for the `getGlobals(config)` call) and `GameStateService` (for `irisConfig()`). Exposes a `globals` signal updated on each refresh.
+    - Refresh triggered by `QuestViewComponent.runAllFiles()` success path — `GlobalService.refresh()` is called after a successful execute. No auto-polling; no timer.
 - **IRIS Backend**:
     - Add `GET /api/quest/globals` route to `QuestMaster.REST.Execute`.
     - Implement a safe, depth-limited global walker using `$ORDER` (max depth: 3 levels).
+    - **Inclusion filter**: only globals whose names match `$MATCH(name, "^\^[A-Za-z][A-Za-z0-9]*$")` are returned. This naturally excludes `^%*`, `^IRIS*`, `^Cache*`, `^rOBJ`, `^oddDEF`, and all other IRIS-internal globals without an enumerated deny-list.
+    - **Node-count cap**: max 50 children per node, max 200 nodes total. When truncated, the affected node includes `"truncated": true`.
     - Response schema:
       ```json
       {
@@ -39,13 +41,13 @@ Build a visualizer that renders the structure of IRIS globals as an interactive 
               { "key": "1", "value": "Hello", "children": [] },
               { "key": "2", "value": null, "children": [
                   { "key": "data", "value": "World", "children": [] }
-              ]}
+              ]},
+              { "key": "...", "truncated": true, "children": [] }
             ]
           }
         ]
       }
       ```
-    - Limit scope to globals in the `USER` namespace whose names start with `^` (exclude system globals like `^%`).
 - **AI Prompts**: —
 
 ---
@@ -53,24 +55,25 @@ Build a visualizer that renders the structure of IRIS globals as an interactive 
 ## Files Changed
 
 - `quest-master/iris/QuestMaster.REST.Execute.cls` — add `GET /globals` route and `Globals()` method
-- `quest-master/src/app/services/global.service.ts` — new `GlobalService` (calls `/api/quest/globals`, exposes signal)
-- `quest-master/src/app/components/global-visualizer/global-visualizer.component.ts` — new component (SVG/D3 tree)
-- `quest-master/src/app/components/global-visualizer/global-visualizer.component.html` — template
-- `quest-master/src/app/components/global-visualizer/global-visualizer.component.scss` — styles
-- `quest-master/src/app/app.ts` — wire up `GlobalService.refresh()` after Run, add visualizer to layout
-- `quest-master/src/app/app.html` — add visualizer panel and toggle
-- `quest-master/package.json` — add `d3` dependency (if D3 approach is chosen)
+- `quest-master/src/app/services/iris-api.service.ts` — add `getGlobals(config)` method
+- `quest-master/src/app/services/global.service.ts` — new `GlobalService` (wraps `IrisApiService.getGlobals`, exposes `globals` signal)
+- `quest-master/src/app/services/global.service.spec.ts` — Vitest unit tests for `GlobalService` (mock `IrisApiService`)
+- `quest-master/src/app/components/tree-visualizer/tree-visualizer.component.ts` — implement component body (D3 tree); replaces C3 stub
+- `quest-master/src/app/components/tree-visualizer/tree-visualizer.component.html` — template (SVG host element)
+- `quest-master/src/app/components/tree-visualizer/tree-visualizer.component.scss` — styles
+- `quest-master/src/app/components/quest-view/quest-view.component.ts` — call `GlobalService.refresh()` in `runAllFiles()` success path
+- `quest-master/package.json` — add `d3` and `@types/d3`
 
 ---
 
 ## Open Questions
 
-- [ ] **D3.js vs. pure SVG**: D3 is not currently in `package.json`. Decision needed before implementation. D3 adds ~80 KB (minified+gzip) but simplifies tree layout math. Pure SVG is zero-dependency but requires manual layout. Choose one.
-- [ ] **UI placement**: The doc says "sidebar tab" but doesn't specify where in the existing layout. The architecture diagram shows `GlobalVisualizer [NEW]` alongside `AIPairChat`. Should the visualizer be a tab within the left sidebar (alongside `QuestPanel`)? A panel below `AiPairChat` on the right? Or a toggle that replaces the AI chat area?
-- [ ] **Node-count safety cap**: Depth limit of 3 is specified, but no maximum node count. A global with thousands of first-level subscripts could produce an oversized JSON payload. Add a per-level or total-node cap (e.g., max 50 children per node, max 200 nodes total) and return a truncation indicator.
-- [ ] **Scope of excluded globals**: The spec only excludes names starting with `^%`. IRIS also has internal globals like `^CacheTemp*`, `^IRIS*`, `^SYS*`. Clarify whether "user globals only" means strictly "not starting with `^%`" or a broader exclusion list.
-- [ ] **`GlobalService` HTTP pattern**: Should `GlobalService` call `IrisApiService` (following the existing service pattern) or make its own `HttpClient` calls directly?
-- [ ] **Test coverage**: No test file is specified. Per CLAUDE.md, an automated test is required. Decide: Vitest unit test for `GlobalService` (mock HTTP), or Playwright E2E for the visual component?
+- ~~**D3.js vs. pure SVG**~~ — **Use D3** (`d3-hierarchy` + `d3-zoom`). Reingold-Tilford layout math is non-trivial to write by hand; D3's ~80 KB cost is acceptable for a local dev tool. Add `d3` + `@types/d3`.
+- ~~**UI placement**~~ — C3 already resolved this: the visualizer is a **full-width routed page at `/tree`**, not a sidebar tab. `TreeVisualizerComponent` (stub from C3) becomes the page body. No changes to `app.html` are needed.
+- ~~**Node-count safety cap**~~ — **50 children per node, 200 nodes total**. Truncated nodes include `"truncated": true` in the JSON response.
+- ~~**Scope of excluded globals**~~ — **Allow-list by regex**: only globals matching `^\^[A-Za-z][A-Za-z0-9]*$` are returned. This excludes `^%*`, `^IRIS*`, `^Cache*`, `^rOBJ`, `^oddDEF`, etc. without an enumerated deny-list.
+- ~~**`GlobalService` HTTP pattern**~~ — **Add `getGlobals(config: IRISConfig)` to `IrisApiService`**; `GlobalService` injects `IrisApiService` + `GameStateService`. Consistent with existing service pattern.
+- ~~**Test coverage**~~ — **Vitest unit test** for `GlobalService` (`global.service.spec.ts`). Mock `IrisApiService.getGlobals()` with a fixture and assert signal value. Playwright E2E for the SVG tree is too brittle at this stage.
 
 ---
 
