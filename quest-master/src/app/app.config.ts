@@ -1,6 +1,9 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { provideMonacoEditor } from 'ngx-monaco-editor-v2';
+import { QuestViewComponent } from './components/quest-view/quest-view.component';
+import { TreeVisualizerComponent } from './components/tree-visualizer/tree-visualizer.component';
 
 export function registerObjectScript(): void {
   const monaco = (window as any).monaco;
@@ -68,6 +71,11 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(),
+    provideRouter([
+      { path: 'quest', component: QuestViewComponent },
+      { path: 'tree', component: TreeVisualizerComponent },
+      { path: '**', redirectTo: 'quest' },
+    ]),
     provideMonacoEditor({
       baseUrl: 'assets',
       onMonacoLoad: registerObjectScript,

@@ -4,3 +4,12 @@
   height: 100vh;
   overflow: hidden;
 }
+
+// Router outlet host element must fill remaining height so routed components
+// can use height: 100% reliably.
+router-outlet + * {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}

@@ -1,3 +1,40 @@
+// ── XP / Level bar ───────────────────────────────────────
+.xp-section {
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid #1e1830;
+  flex-shrink: 0;
+}
+
+.xp-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #9b8ec4;
+  margin-bottom: 5px;
+}
+
+.level-badge {
+  background: #3b3058;
+  padding: 1px 8px;
+  border-radius: 10px;
+  color: #d4b8f5;
+  font-weight: 600;
+}
+
+.xp-bar {
+  height: 5px;
+  background: #2d2550;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c5cbf, #a07ee0);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
 // ── Container ────────────────────────────────────────────
 .quest-panel {
   display: flex;

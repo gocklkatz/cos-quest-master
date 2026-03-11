@@ -1,6 +1,8 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { Quest, EvaluationResult } from '../../models/quest.models';
 import { QuestEngineService } from '../../services/quest-engine.service';
+import { GameStateService } from '../../services/game-state.service';
+import { xpForNextLevel, levelProgress, MAX_LEVEL } from '../../data/xp-table';
 
 @Component({
   selector: 'app-quest-panel',
@@ -11,6 +13,20 @@ import { QuestEngineService } from '../../services/quest-engine.service';
 })
 export class QuestPanelComponent {
   private questEngine = inject(QuestEngineService);
+  readonly gameState = inject(GameStateService);
+  readonly maxLevel = MAX_LEVEL;
+
+  get xpForNextLevelValue(): number {
+    return xpForNextLevel(this.gameState.level());
+  }
+
+  get xpProgress(): number {
+    return levelProgress(this.gameState.xp());
+  }
+
+  get isMaxLevel(): boolean {
+    return this.gameState.level() >= MAX_LEVEL;
+  }
 
   readonly questGenerating = this.questEngine.questGenerating;
   readonly questGenerationError = this.questEngine.questGenerationError;

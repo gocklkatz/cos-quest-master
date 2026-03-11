@@ -54,7 +54,7 @@
 |---|---|---|---|---|
 | C1 | **Remove Glossary Feature** ✅ | phase3-high | Simplify UI to focus on core quest loop and AI interaction | [change-01-remove-glossary.md](change-01-remove-glossary.md) |
 | C2 | **Remove Skill Tree and Quest Log from Left Pane** ✅ | phase3-high | Reduce left-pane clutter; these panels add navigation overhead without contributing to the core quest-and-feedback loop | [change-02-remove-skill-tree-quest-log.md](change-02-remove-skill-tree-quest-log.md) |
-| C3 | **Replace Header Bar with Slim Navbar + Navigation** | phase3-mid | Reclaim vertical space; introduce top-level navigation between Quest View and Global Tree Visualizer | [change-03-navbar-navigation.md](change-03-navbar-navigation.md) |
+| C3 | **Replace Header Bar with Slim Navbar + Navigation** ✅ | phase3-mid | Reclaim vertical space; introduce top-level navigation between Quest View and Global Tree Visualizer | [change-03-navbar-navigation.md](change-03-navbar-navigation.md) |
 | C4 | **Migrate AppComponent to QuestViewComponent** ✅ | phase3-mid | Extract quest workflow into a dedicated routed component so AppComponent becomes a thin shell; prerequisite for C3 routing | [change-04-migrate-app-to-quest-view.md](change-04-migrate-app-to-quest-view.md) |
 
 ---
@@ -134,8 +134,8 @@ Extract all quest-workflow state, logic, and template from `AppComponent` into a
 
 ### C3: Replace Header Bar with Slim Navbar + Navigation
 Replace the full-height header bar with a ~40px slim navbar. Navigation links in the centre of the navbar switch between two top-level views: **Quest View** (the existing three-pane layout) and **Tree Visualizer** (full-width, replaces the workspace). The XP bar and level badge move to the top of the quest sidebar, where they are contextually meaningful. The connection indicator and settings gear stay in the navbar and are visible in both views.
-- **Goal**: Reclaim ~20px of vertical space for code; make top-level navigation explicit and extensible.
-- **Implementation**: Refactor `HeaderBarComponent` to emit `(viewChanged)`; add `activeView` signal to `AppComponent`; move XP display into `QuestPanelComponent` (via direct `GameStateService` injection); conditionally render workspace vs. Tree Visualizer in `app.html`.
+- **Goal**: Reclaim ~16px of vertical space for code; make top-level navigation explicit and extensible.
+- **Implementation**: Enable Angular Router (`provideRouter`); define `/quest` and `/tree` routes; nav links use `routerLink`/`routerLinkActive`. Remove XP section from `HeaderBarComponent`; inject `GameStateService` directly into `QuestPanelComponent` for XP display. Replace `<app-quest-view>` in `app.html` with `<router-outlet />`. Introduce `UiEventService` so `QuestViewComponent` can trigger the settings modal without a direct parent binding. Ship a stub `TreeVisualizerComponent` placeholder; F4 fills it later.
 
 ### F8: Quest Time Tracking & Goal System
 Tracks active time spent on quests and allows users to set daily and weekly goals (e.g., "30 mins/day," "4 hours/week").

@@ -1,25 +1,16 @@
-<header class="header-bar">
+<nav class="navbar">
   <div class="brand">
     <span class="logo">&#x2694;</span>
     <span class="title">Quest Master</span>
   </div>
 
-  <div class="xp-section">
-    <div class="xp-label">
-      @if (isMaxLevel) {
-        <span>XP: {{ gameState.xp() }} (MAX)</span>
-      } @else {
-        <span>XP: {{ gameState.xp() }}/{{ xpForNextLevelValue }}</span>
-      }
-      <span class="level-badge">Level {{ gameState.level() }}</span>
-    </div>
-    <div class="xp-bar">
-      <div class="xp-fill" [style.width.%]="xpProgress"></div>
-    </div>
+  <div class="nav-links">
+    <a class="nav-link" routerLink="/quest" routerLinkActive="active">Quest View</a>
+    <a class="nav-link" routerLink="/tree" routerLinkActive="active">Tree Visualizer</a>
   </div>
 
   <div class="right-section">
     <app-connection-indicator />
     <button class="settings-btn" (click)="openSettings.emit()" title="Settings">&#x2699;</button>
   </div>
-</header>
+</nav>

@@ -1,0 +1,52 @@
+.tree-visualizer-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: #0d0b1a;
+}
+
+.placeholder-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 56px;
+  background: #110f1e;
+  border: 1px solid #2d2550;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 420px;
+}
+
+.placeholder-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.placeholder-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #e2d9f3;
+}
+
+.placeholder-description {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #9b8ec4;
+  line-height: 1.5;
+}
+
+.placeholder-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  background: #1e1830;
+  border: 1px solid #3b3058;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7a6ea8;
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import { OutputPanelComponent } from '../output-panel/output-panel.component';
 import { QuestPanelComponent } from '../quest-panel/quest-panel.component';
@@ -12,6 +12,7 @@ import { ClassQuestService } from '../../services/class-quest.service';
 import { AiPairService } from '../../services/ai-pair.service';
 import { PaneSizeService } from '../../services/pane-size.service';
 import { AchievementService } from '../../services/achievement.service';
+import { UiEventService } from '../../services/ui-event.service';
 import { ResizableDividerDirective } from '../../directives/resizable-divider.directive';
 import { Achievement } from '../../models/achievement.models';
 import { CompileError, EvaluationResult, QuestFile } from '../../models/quest.models';
@@ -38,10 +39,8 @@ export class QuestViewComponent implements OnInit {
   private aiPair = inject(AiPairService);
   private paneSizes = inject(PaneSizeService);
   private achievementSvc = inject(AchievementService);
+  protected uiEvents = inject(UiEventService);
   readonly questEngine = inject(QuestEngineService);
-
-  /** Emitted when the AI-disabled banner's Settings link is clicked. */
-  @Output() openSettingsRequested = new EventEmitter<void>();
 
   showChat = signal(false);
 

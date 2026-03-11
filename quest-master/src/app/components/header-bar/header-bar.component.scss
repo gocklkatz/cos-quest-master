@@ -1,9 +1,9 @@
-.header-bar {
+.navbar {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   padding: 0 20px;
-  height: 56px;
+  height: 40px;
   background: #110f1e;
   border-bottom: 1px solid #2d2550;
   flex-shrink: 0;
@@ -16,52 +16,43 @@
   flex-shrink: 0;
 
   .logo {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
   }
 
   .title {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #e2d9f3;
     letter-spacing: 0.02em;
   }
 }
 
-.xp-section {
-  flex: 1;
-  max-width: 320px;
+.nav-links {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 4px;
+  flex: 1;
+  justify-content: center;
 }
 
-.xp-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
+.nav-link {
+  padding: 4px 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
   color: #9b8ec4;
-}
+  text-decoration: none;
+  border-radius: 6px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
 
-.level-badge {
-  background: #3b3058;
-  padding: 1px 8px;
-  border-radius: 10px;
-  color: #d4b8f5;
-  font-weight: 600;
-}
+  &:hover {
+    color: #e2d9f3;
+  }
 
-.xp-bar {
-  height: 6px;
-  background: #2d2550;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.xp-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #7c5cbf, #a07ee0);
-  border-radius: 3px;
-  transition: width 0.4s ease;
+  &.active {
+    color: #e2d9f3;
+    border-bottom-color: #a07ee0;
+  }
 }
 
 .right-section {
@@ -76,7 +67,7 @@
   background: none;
   border: none;
   color: #9b8ec4;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 6px;
