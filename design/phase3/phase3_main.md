@@ -54,6 +54,8 @@
 |---|---|---|---|---|
 | C1 | **Remove Glossary Feature** ✅ | phase3-high | Simplify UI to focus on core quest loop and AI interaction | [change-01-remove-glossary.md](change-01-remove-glossary.md) |
 | C2 | **Remove Skill Tree and Quest Log from Left Pane** ✅ | phase3-high | Reduce left-pane clutter; these panels add navigation overhead without contributing to the core quest-and-feedback loop | [change-02-remove-skill-tree-quest-log.md](change-02-remove-skill-tree-quest-log.md) |
+| C3 | **Replace Header Bar with Slim Navbar + Navigation** | phase3-mid | Reclaim vertical space; introduce top-level navigation between Quest View and Global Tree Visualizer | [change-03-navbar-navigation.md](change-03-navbar-navigation.md) |
+| C4 | **Migrate AppComponent to QuestViewComponent** | phase3-mid | Extract quest workflow into a dedicated routed component so AppComponent becomes a thin shell; prerequisite for C3 routing | [change-04-migrate-app-to-quest-view.md](change-04-migrate-app-to-quest-view.md) |
 
 ---
 
@@ -66,6 +68,8 @@ graph TD
     F2 --> F5[Unified Spiral Quests]
     F2 --> F6[Code Prediction Quests]
     F4[Global Tree Visualizer] --> F5
+    C4[Migrate AppComponent] --> C3
+    C3[Navbar Navigation] --> F4
     F1 --> F9[Quest Generation Indicator]
     F1 --> F10[AI Review Modal]
 ```
@@ -123,6 +127,16 @@ The output pane that displays IRIS execution results gets a fixed maximum height
 - **Goal**: Keep the layout stable and all output accessible regardless of output length.
 - **Implementation**: Add `max-height` and `overflow-y: auto` (or equivalent Angular CDK scroll strategy) to the output pane container. Ensure the pane auto-scrolls to the bottom on new output so the latest result is always visible.
 
+### C4: Migrate AppComponent to QuestViewComponent
+Extract all quest-workflow state, logic, and template from `AppComponent` into a new `QuestViewComponent`. After this change, `AppComponent` is a thin shell: navbar + `<router-outlet>` + `SettingsModal`. `QuestViewComponent` owns running, evaluating, and displaying quests. This is a structural prerequisite for C3 routing — C3 cannot add `<router-outlet>` until the workspace is its own component.
+- **Goal**: Decouple app shell from quest workflow; enable C3's Angular Router integration.
+- **Implementation**: New `QuestViewComponent` (standalone) receives all signals, methods, and child components from `AppComponent`. A `resetEpoch` signal on `QuestEngineService` handles cross-boundary state reset after Settings → Reset All Progress.
+
+### C3: Replace Header Bar with Slim Navbar + Navigation
+Replace the full-height header bar with a ~40px slim navbar. Navigation links in the centre of the navbar switch between two top-level views: **Quest View** (the existing three-pane layout) and **Tree Visualizer** (full-width, replaces the workspace). The XP bar and level badge move to the top of the quest sidebar, where they are contextually meaningful. The connection indicator and settings gear stay in the navbar and are visible in both views.
+- **Goal**: Reclaim ~20px of vertical space for code; make top-level navigation explicit and extensible.
+- **Implementation**: Refactor `HeaderBarComponent` to emit `(viewChanged)`; add `activeView` signal to `AppComponent`; move XP display into `QuestPanelComponent` (via direct `GameStateService` injection); conditionally render workspace vs. Tree Visualizer in `app.html`.
+
 ### F8: Quest Time Tracking & Goal System
 Tracks active time spent on quests and allows users to set daily and weekly goals (e.g., "30 mins/day," "4 hours/week").
 - **Goal**: Spaced repetition and effort-based motivation.
@@ -166,7 +180,9 @@ Tracks active time spent on quests and allows users to set daily and weekly goal
 5.  **Metacognitive Loop**: Update Claude evaluation prompts (F2).
 6.  **Syntax Guardrails**: Implement Monaco syntax markers for ObjectScript quirks (F7).
 7.  **Habit Formation**: Build the Quest Time Tracking & Goal System (F8).
-8.  **Mental Model Visualization**: Build the Global Tree Visualizer (F4).
-9.  **Multi-Paradigm Mastery**: Design "Spiral" capstone quests (F5).
-10. **Code Literacy**: Implement Code Prediction quest type (F6).
-11. **Output Usability**: Make the output pane scrollable (F11).
+8.  **AppComponent Shell**: Extract quest workflow into `QuestViewComponent`; make `AppComponent` a thin shell (C4).
+9.  **Navigation Shell**: Slim navbar, Angular Router, XP-in-sidebar (C3) — ship with Tree Visualizer placeholder route.
+10. **Mental Model Visualization**: Build the Global Tree Visualizer into the existing `/tree` route (F4).
+11. **Multi-Paradigm Mastery**: Design "Spiral" capstone quests (F5).
+12. **Code Literacy**: Implement Code Prediction quest type (F6).
+13. **Output Usability**: Make the output pane scrollable (F11).

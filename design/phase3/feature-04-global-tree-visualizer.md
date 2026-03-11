@@ -5,7 +5,7 @@
 | Priority | phase3-mid |
 | Status | ⬜ Not started |
 | Pedagogical Principle | Dual Coding |
-| Depends On | — |
+| Depends On | C3 (Navbar Navigation) — the `/tree` route and `TreeVisualizerComponent` stub are created by C3; F4 implements the component body |
 
 ---
 
