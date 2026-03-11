@@ -29,6 +29,8 @@ export interface GameState {
   unlockedAchievements: string[];
   /** Number of consecutive quests completed without revealing any hints. */
   noHintsStreak: number;
+  /** The branch currently being used for quest generation. Persisted across sessions. */
+  currentBranch: string;
 }
 
 export const DEFAULT_IRIS_CONFIG: IRISConfig = {
@@ -53,4 +55,5 @@ export const DEFAULT_GAME_STATE: GameState = {
   challengeMode: false,
   unlockedAchievements: [],
   noHintsStreak: 0,
+  currentBranch: 'setup',
 };

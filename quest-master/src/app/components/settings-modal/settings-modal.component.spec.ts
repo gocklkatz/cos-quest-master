@@ -13,6 +13,7 @@ describe('SettingsModalComponent — Dynamic Quest Regeneration (F1)', () => {
       irisConfig: signal({ baseUrl: '', namespace: 'USER', username: '_SYSTEM', password: '' }),
       anthropicApiKey: signal(apiKey),
       playerName: signal('Tester'),
+      currentBranch: signal('setup'),
       resetProgress: vi.fn(),
       updateSettings: vi.fn(),
       clearQuestBank: vi.fn(),

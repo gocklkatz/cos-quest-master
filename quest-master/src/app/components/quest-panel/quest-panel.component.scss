@@ -537,6 +537,62 @@
   }
 }
 
+// ── Branch Unlocked toast ─────────────────────────────────
+.branch-toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #1e2a14 0%, #172010 100%);
+  border-bottom: 1px solid #2e5a1a;
+  border-left: 3px solid #5a9a30;
+  cursor: pointer;
+  animation: toast-slide-in 0.25s ease-out;
+  flex-shrink: 0;
+
+  &:hover {
+    background: linear-gradient(135deg, #253515 0%, #1c2813 100%);
+  }
+}
+
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.branch-toast-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.branch-toast-text {
+  flex: 1;
+  font-size: 0.78rem;
+  color: #90d060;
+  line-height: 1.4;
+
+  strong {
+    color: #b0f080;
+    font-weight: 700;
+  }
+}
+
+.branch-toast-close {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: #5a8a30;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  transition: color 0.15s;
+
+  &:hover {
+    color: #90d060;
+  }
+}
+
 // ── Empty state ──────────────────────────────────────────
 .quest-empty {
   display: flex;

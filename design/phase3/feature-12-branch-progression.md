@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase3-mid |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Depends On | Feature 01 (Dynamic Quest Regeneration) |
 | Pedagogical Principle | Spiral Curriculum / Mastery-Based Progression |
 
@@ -93,21 +93,24 @@ No changes required to the system prompt — the branch is already templated as 
 
 ## Files Changed
 
-- `quest-master/src/app/data/branch-progression.ts` — new config file
-- `quest-master/src/app/services/game-state.service.ts` — add `currentBranch` signal + `setCurrentBranch()`
-- `quest-master/src/app/services/quest-engine.service.ts` — add `resolveBranch()`, `branchUnlocked` signal, `clearBranchUnlocked()`; wire into `generateNextQuest()`
-- `quest-master/src/app/components/quest-panel/quest-panel.component.ts` — read `branchUnlocked` signal, render toast
+- `quest-master/src/app/data/branch-progression.ts` — new config file (created)
+- `quest-master/src/app/models/game-state.models.ts` — added `currentBranch: string` to `GameState`; default `'setup'`
+- `quest-master/src/app/services/game-state.service.ts` — added `currentBranch` computed signal + `setCurrentBranch()`
+- `quest-master/src/app/services/quest-engine.service.ts` — added `resolveBranch()`, `branchUnlocked` signal, `clearBranchUnlocked()`; wired into `generateNextQuest()`
+- `quest-master/src/app/components/quest-panel/quest-panel.component.ts` — reads `branchUnlocked`, computes `branchUnlockedLabel`, auto-dismiss timer, `dismissBranchToast()`
 - `quest-master/src/app/components/quest-panel/quest-panel.component.html` — toast markup
-- `quest-master/src/app/components/settings-modal/settings-modal.component.ts` — reset branch on progress reset
-- `quest-master/src/app/services/quest-engine.service.spec.ts` — unit tests for `resolveBranch()`
+- `quest-master/src/app/components/quest-panel/quest-panel.component.scss` — toast styles
+- `quest-master/src/app/components/settings-modal/settings-modal.component.ts` — uses `gameState.currentBranch()` for post-reset generation
+- `quest-master/src/app/components/settings-modal/settings-modal.component.spec.ts` — added `currentBranch` signal to mock
+- `quest-master/src/app/services/quest-engine.service.spec.ts` — added 4 unit tests for `resolveBranch()` and branch progression
 
 ---
 
 ## Open Questions
 
-- [ ] **Quest counting strategy**: `resolveBranch` counts quests already in `allQuests()` (the quest bank). Should it count *completed* quests only (those with a history entry), or *all quests generated* in that branch including unattempted ones? Counting completed quests is safer (prevents accidental advance if the player never attempts an early quest) but requires a join with game history.
+- [x] ~~**Quest counting strategy**: `resolveBranch` counts quests already in `allQuests()` (the quest bank). Should it count *completed* quests only (those with a history entry), or *all quests generated* in that branch including unattempted ones?~~ **Resolved**: Implemented using **completed quests only** — intersection of `gameState.completedQuests()` and `allQuests()` filtered by branch. Safer: prevents accidental advance if the player skips an early quest.
 
-- [ ] **Branch name display**: The toast shows the raw branch string (`'commands'`, `'globals'`, etc.). Should there be a display-name map (e.g., `'globals'` → `"Global Variables"`)? Or is the raw name acceptable for now?
+- [x] ~~**Branch name display**: The toast shows the raw branch string (`'commands'`, `'globals'`, etc.). Should there be a display-name map?~~ **Resolved**: Added `BRANCH_DISPLAY_NAMES` map in `branch-progression.ts` (e.g. `globals` → `"Global Variables"`). Used in `QuestPanelComponent.branchUnlockedLabel`.
 
 - [x] ~~**What happens at quest-zero**: Quest-zero (`setup` branch) is a static starter quest, not a generated one. Should completing quest-zero count toward the `setup` threshold?~~ **Resolved**: Yes. Quest-zero counts. The player needs 2 more generated `setup` quests (total threshold: 3) before advancing to `commands`.
 

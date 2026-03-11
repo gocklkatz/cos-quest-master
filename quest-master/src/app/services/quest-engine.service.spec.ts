@@ -5,6 +5,7 @@ import { QuestEngineService } from './quest-engine.service';
 import { GameStateService } from './game-state.service';
 import { ClaudeApiService } from './claude-api.service';
 import { Quest } from '../models/quest.models';
+import { BRANCH_PROGRESSION } from '../data/branch-progression';
 
 describe('QuestEngineService — F9: questGenerating / questGenerationError signals', () => {
   const MOCK_QUEST: Quest = {
@@ -24,16 +25,23 @@ describe('QuestEngineService — F9: questGenerating / questGenerationError sign
     files: [{ id: 'f1', filename: 'solution.script', fileType: 'script', label: 'solution.script' }],
   };
 
-  function buildMockGameState() {
+  function buildMockGameState(overrides: Partial<{
+    completedQuests: string[];
+    questBank: Quest[];
+  }> = {}) {
+    const completedQuests = signal<string[]>(overrides.completedQuests ?? []);
+    const questBank = signal<Quest[]>(overrides.questBank ?? []);
     return {
-      completedQuests: signal<string[]>([]),
+      completedQuests,
       coveredConcepts: signal<string[]>([]),
       xp: signal(0),
-      questBank: signal<Quest[]>([]),
+      questBank,
       currentQuestId: signal<string | null>(null),
+      currentBranch: signal('setup'),
       allQuests: computed(() => []),
       addToQuestBank: vi.fn(),
       setCurrentQuest: vi.fn(),
+      setCurrentBranch: vi.fn(),
       completeQuest: vi.fn(),
     } as unknown as GameStateService;
   }
@@ -184,5 +192,118 @@ describe('QuestEngineService — F9: questGenerating / questGenerationError sign
     expect(service.questGenerating()).toBe(true);
 
     secondCallResolve(MOCK_QUEST);
+  });
+});
+
+// ── Helper: build a Quest with a given branch and id ─────────────────────────
+function makeQuest(id: string, branch: string): Quest {
+  return {
+    id,
+    title: id,
+    branch,
+    tier: 'apprentice',
+    narrative: '',
+    objective: '',
+    evaluationCriteria: '',
+    hints: [],
+    bonusObjectives: [],
+    bonusXP: 0,
+    xpReward: 50,
+    prerequisites: [],
+    conceptsIntroduced: [],
+    files: [{ id: 'f1', filename: 'solution.script', fileType: 'script', label: 'solution.script' }],
+  };
+}
+
+describe('QuestEngineService — F12: resolveBranch / branch progression', () => {
+  const setup_threshold = BRANCH_PROGRESSION.find(s => s.branch === 'setup')!.minQuestsToAdvance!;
+
+  async function buildService(completedIds: string[], bank: Quest[]) {
+    const completedQuestsSignal = signal<string[]>(completedIds);
+    const questBankSignal = signal<Quest[]>(bank);
+    const mockGameState = {
+      completedQuests: completedQuestsSignal,
+      coveredConcepts: signal<string[]>([]),
+      xp: signal(0),
+      questBank: questBankSignal,
+      currentQuestId: signal<string | null>(null),
+      currentBranch: signal('setup'),
+      addToQuestBank: vi.fn(),
+      setCurrentQuest: vi.fn(),
+      setCurrentBranch: vi.fn(),
+      completeQuest: vi.fn(),
+    } as unknown as GameStateService;
+
+    const mockClaude = {
+      generateQuest: vi.fn().mockResolvedValue(makeQuest('generated', 'commands')),
+      evaluateSubmission: vi.fn(),
+    } as unknown as ClaudeApiService;
+
+    await TestBed.configureTestingModule({
+      providers: [
+        QuestEngineService,
+        { provide: GameStateService, useValue: mockGameState },
+        { provide: ClaudeApiService, useValue: mockClaude },
+      ],
+    }).compileComponents();
+
+    return {
+      service: TestBed.inject(QuestEngineService),
+      mockGameState,
+      mockClaude,
+    };
+  }
+
+  it('stays in setup when fewer than threshold quests are completed', async () => {
+    // 2 setup quests completed — below threshold of 3
+    const setupQuests = [makeQuest('q0', 'setup'), makeQuest('q1', 'setup')];
+    const { service, mockClaude } = await buildService(['q0', 'q1'], setupQuests);
+
+    await service.generateNextQuest('setup', 'key');
+
+    expect(mockClaude.generateQuest).toHaveBeenCalledWith(
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key'
+    );
+    expect(service.branchUnlocked()).toBeNull();
+  });
+
+  it('advances to commands when setup threshold is reached', async () => {
+    // quest-zero is in STARTER_QUESTS; we provide threshold setup quests in the bank
+    const setupQuests = Array.from({ length: setup_threshold }, (_, i) => makeQuest(`sq${i}`, 'setup'));
+    const completedIds = setupQuests.map(q => q.id);
+    const { service, mockClaude, mockGameState } = await buildService(completedIds, setupQuests);
+
+    await service.generateNextQuest('setup', 'key');
+
+    expect(mockClaude.generateQuest).toHaveBeenCalledWith(
+      expect.any(Array), expect.any(Array), 'commands', expect.any(String), 'key'
+    );
+    expect(mockGameState.setCurrentBranch).toHaveBeenCalledWith('commands');
+    expect(service.branchUnlocked()).toBe('commands');
+  });
+
+  it('clearBranchUnlocked() sets branchUnlocked back to null', async () => {
+    const setupQuests = Array.from({ length: setup_threshold }, (_, i) => makeQuest(`sq${i}`, 'setup'));
+    const completedIds = setupQuests.map(q => q.id);
+    const { service } = await buildService(completedIds, setupQuests);
+
+    await service.generateNextQuest('setup', 'key');
+    expect(service.branchUnlocked()).toBe('commands');
+
+    service.clearBranchUnlocked();
+    expect(service.branchUnlocked()).toBeNull();
+  });
+
+  it('does not advance from terminal capstone branch', async () => {
+    const capstoneQuests = Array.from({ length: 10 }, (_, i) => makeQuest(`cq${i}`, 'capstone'));
+    const completedIds = capstoneQuests.map(q => q.id);
+    const { service, mockClaude } = await buildService(completedIds, capstoneQuests);
+
+    await service.generateNextQuest('capstone', 'key');
+
+    expect(mockClaude.generateQuest).toHaveBeenCalledWith(
+      expect.any(Array), expect.any(Array), 'capstone', expect.any(String), 'key'
+    );
+    expect(service.branchUnlocked()).toBeNull();
   });
 });

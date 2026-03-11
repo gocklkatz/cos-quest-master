@@ -57,7 +57,7 @@ export class SettingsModalComponent {
     // Fire-and-forget: pre-generate the first AI quest so it is ready when quest-zero completes.
     const apiKey = this.anthropicApiKey();
     if (apiKey) {
-      this.questEngine.generateNextQuest('setup', apiKey);
+      this.questEngine.generateNextQuest(this.gameState.currentBranch(), apiKey);
     }
     this.showResetConfirm.set(false);
     // Emit reset (not closed) so AppComponent can reload the editor for quest-zero.

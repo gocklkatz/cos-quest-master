@@ -21,6 +21,7 @@ export class GameStateService {
   readonly questLog = computed(() => this.state().questLog);
   readonly questBank = computed(() => this.state().questBank);
   readonly unlockedBranches = computed(() => this.state().unlockedBranches);
+  readonly currentBranch = computed(() => this.state().currentBranch);
   readonly challengeMode = computed(() => this.state().challengeMode);
   readonly unlockedAchievements = computed(() => this.state().unlockedAchievements);
   readonly snapshot = computed(() => this.state());
@@ -71,6 +72,11 @@ export class GameStateService {
       ...s,
       questBank: [...s.questBank.filter(q => q.id !== quest.id), quest],
     }));
+    this.persist();
+  }
+
+  setCurrentBranch(branch: string): void {
+    this.state.update(s => ({ ...s, currentBranch: branch }));
     this.persist();
   }
 

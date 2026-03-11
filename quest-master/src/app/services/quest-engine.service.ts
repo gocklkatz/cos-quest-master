@@ -5,6 +5,7 @@ import { Quest, EvaluationResult, QuestTier } from '../models/quest.models';
 import { QuestLogEntry } from '../models/game-state.models';
 import { STARTER_QUESTS } from '../data/starter-quests';
 import { calcLevel } from '../data/xp-table';
+import { BRANCH_PROGRESSION } from '../data/branch-progression';
 
 @Injectable({ providedIn: 'root' })
 export class QuestEngineService {
@@ -50,6 +51,13 @@ export class QuestEngineService {
 
   /** True when the last generation attempt failed. */
   readonly questGenerationError = signal(false);
+
+  /** Non-null while the "Branch Unlocked" toast should be shown; holds the new branch name. */
+  readonly branchUnlocked = signal<string | null>(null);
+
+  clearBranchUnlocked(): void {
+    this.branchUnlocked.set(null);
+  }
 
   /**
    * Incremented by triggerReset() when AppComponent processes a "Reset All Progress" action.
@@ -114,11 +122,38 @@ export class QuestEngineService {
   }
 
   /**
+   * Returns the branch to use for the next generation call.
+   * If the player has completed enough quests in `branch`, advances to the next stage.
+   */
+  private resolveBranch(branch: string): string {
+    const stageIndex = BRANCH_PROGRESSION.findIndex(s => s.branch === branch);
+    if (stageIndex === -1) return branch;
+    const stage = BRANCH_PROGRESSION[stageIndex];
+    if (stage.minQuestsToAdvance === null) return branch; // terminal
+
+    const completedIds = new Set(this.gameState.completedQuests());
+    const completedInBranch = this.allQuests().filter(
+      q => q.branch === branch && completedIds.has(q.id)
+    ).length;
+
+    if (completedInBranch >= stage.minQuestsToAdvance && stageIndex + 1 < BRANCH_PROGRESSION.length) {
+      return BRANCH_PROGRESSION[stageIndex + 1].branch;
+    }
+    return branch;
+  }
+
+  /**
    * Generate the next quest via Claude and cache it in the quest bank.
    * Returns the generated quest, or null if generation fails.
    */
   async generateNextQuest(branch: string, apiKey: string): Promise<Quest | null> {
-    this._lastBranch = branch;
+    const targetBranch = this.resolveBranch(branch);
+    if (targetBranch !== branch) {
+      this.gameState.setCurrentBranch(targetBranch);
+      this.branchUnlocked.set(targetBranch);
+    }
+
+    this._lastBranch = targetBranch;
     this._lastApiKey = apiKey;
     this.questGenerating.set(true);
     this.questGenerationError.set(false);
@@ -132,7 +167,7 @@ export class QuestEngineService {
         : 'apprentice';
 
     try {
-      const quest = await this.claude.generateQuest(completedIds, coveredConcepts, branch, tier, apiKey);
+      const quest = await this.claude.generateQuest(completedIds, coveredConcepts, targetBranch, tier, apiKey);
       this.gameState.addToQuestBank(quest);
 
       // Race-condition recovery: if the player finished the current quest while we were

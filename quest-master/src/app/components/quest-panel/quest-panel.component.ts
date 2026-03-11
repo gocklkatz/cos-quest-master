@@ -3,6 +3,7 @@ import { Quest, EvaluationResult } from '../../models/quest.models';
 import { QuestEngineService } from '../../services/quest-engine.service';
 import { GameStateService } from '../../services/game-state.service';
 import { xpForNextLevel, levelProgress, MAX_LEVEL } from '../../data/xp-table';
+import { BRANCH_DISPLAY_NAMES } from '../../data/branch-progression';
 
 @Component({
   selector: 'app-quest-panel',
@@ -30,6 +31,23 @@ export class QuestPanelComponent {
 
   readonly questGenerating = this.questEngine.questGenerating;
   readonly questGenerationError = this.questEngine.questGenerationError;
+  readonly branchUnlocked = this.questEngine.branchUnlocked;
+
+  readonly branchUnlockedLabel = computed(() => {
+    const b = this.branchUnlocked();
+    if (!b) return null;
+    return BRANCH_DISPLAY_NAMES[b] ?? b;
+  });
+
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+  dismissBranchToast(): void {
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = null;
+    }
+    this.questEngine.clearBranchUnlocked();
+  }
 
   quest = input<Quest | null>(null);
   availableQuests = input<Quest[]>([]);
@@ -48,6 +66,14 @@ export class QuestPanelComponent {
     effect(() => {
       this.quest(); // track
       this.hintsRevealed.set(0);
+    });
+
+    // Auto-dismiss the "Branch Unlocked" toast after 4 seconds.
+    effect(() => {
+      if (this.branchUnlocked()) {
+        if (this.toastTimer) clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => this.dismissBranchToast(), 4000);
+      }
     });
   }
 

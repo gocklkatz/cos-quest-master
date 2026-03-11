@@ -13,6 +13,15 @@
   </div>
 </div>
 
+<!-- ── Branch Unlocked toast ─────────────────────────── -->
+@if (branchUnlockedLabel()) {
+  <div class="branch-toast" role="status" aria-live="polite" (click)="dismissBranchToast()">
+    <span class="branch-toast-icon">&#127381;</span>
+    <span class="branch-toast-text">New branch unlocked: <strong>{{ branchUnlockedLabel() }}</strong></span>
+    <button class="branch-toast-close" aria-label="Dismiss">&times;</button>
+  </div>
+}
+
 @if (quest()) {
   <div class="quest-panel">
 
