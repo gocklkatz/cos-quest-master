@@ -139,7 +139,7 @@
   }
 
   @if (reviewEvaluation()) {
-    <app-review-modal [evaluation]="reviewEvaluation()!" (confirmed)="onReviewConfirmed()" />
+    <app-review-modal [evaluation]="reviewEvaluation()!" [apiKey]="anthropicApiKey()" (confirmed)="onReviewConfirmed()" />
   }
 
   <app-xp-animation

@@ -29,6 +29,46 @@
       }
     </div>
 
+    @if (evaluation().passed && evaluation().followUpQuestion) {
+      <section class="modal-body interrogation-section">
+        <h3>Reflect</h3>
+        <p class="interrogation-question">{{ evaluation().followUpQuestion }}</p>
+        <textarea
+          class="interrogation-input"
+          rows="3"
+          placeholder="Write your answer here… (no right or wrong — just think it through)"
+          [value]="reflectionAnswer()"
+          (input)="reflectionAnswer.set($any($event.target).value)"
+          [disabled]="isEvaluatingReflection() || !!reflectionFeedback()"
+        ></textarea>
+
+        @if (!reflectionFeedback()) {
+          <button
+            class="btn-reflect"
+            (click)="submitReflection()"
+            [disabled]="!reflectionAnswer().trim() || isEvaluatingReflection() || !apiKey()"
+          >
+            @if (isEvaluatingReflection()) {
+              <span class="spinner">&#8635;</span> Evaluating…
+            } @else {
+              Submit Reflection
+            }
+          </button>
+        }
+
+        @if (reflectionFeedback()) {
+          <div class="reflection-feedback">
+            <h3>Mentor Feedback</h3>
+            <p class="reflection-feedback-text">{{ reflectionFeedback() }}</p>
+          </div>
+        }
+
+        @if (reflectionError()) {
+          <p class="reflection-error">{{ reflectionError() }}</p>
+        }
+      </section>
+    }
+
     <div class="modal-footer">
       <button class="btn-primary" autofocus (click)="confirm()">OK</button>
     </div>

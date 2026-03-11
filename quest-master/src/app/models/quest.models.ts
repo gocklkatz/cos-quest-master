@@ -60,6 +60,7 @@ export interface EvaluationResult {
   feedback: string;
   codeReview: string;
   xpEarned: number;
+  followUpQuestion?: string;
 }
 
 /**

@@ -131,7 +131,8 @@ Evaluate the submission. Respond with JSON only — no markdown fences, no extra
   "bonusAchieved": ["bonus objective text for each bonus met"],
   "feedback": "encouraging, specific feedback in 1-3 sentences",
   "codeReview": "idiomatic ObjectScript suggestions, 1-3 sentences",
-  "xpEarned": number (up to ${quest.xpReward} base XP plus up to ${quest.bonusXP} bonus XP)
+  "xpEarned": number (up to ${quest.xpReward} base XP plus up to ${quest.bonusXP} bonus XP),
+  "followUpQuestion": "if passed=true, a single question that asks the player to explain WHY they made a specific design choice visible in their submitted code (e.g. 'You used $PIECE with a comma delimiter — why would $EXTRACT be a poor substitute here?'). The question MUST reference a specific line or construct from the player's actual code. If passed=false, omit this field or set it to null."
 }`;
 
     const user = `Player's code:\n${playerCode}\n\nIRIS execution output:\n${executionOutput || '(none)'}\n\nIRIS errors:\n${errors || '(none)'}`;
@@ -139,5 +140,20 @@ Evaluate the submission. Respond with JSON only — no markdown fences, no extra
     const resp = await this.callClaude(system, user, apiKey);
     const text: string = resp.content?.[0]?.text ?? '';
     return JSON.parse(stripJsonFences(text)) as EvaluationResult;
+  }
+
+  async evaluateReflection(
+    question: string,
+    answer: string,
+    apiKey: string,
+  ): Promise<string> {
+    const system = `You are a mentor evaluating a learner's written reflection on an ObjectScript design choice.
+The learner was asked: "${question}"
+Their answer: "${answer}"
+
+Respond in 2-4 plain-text sentences. Confirm what they got right, gently correct any misconceptions, and optionally deepen their understanding with one additional insight. Do not use JSON or markdown.`;
+
+    const resp = await this.callClaude(system, 'Evaluate my reflection.', apiKey);
+    return resp.content?.[0]?.text?.trim() ?? '';
   }
 }
