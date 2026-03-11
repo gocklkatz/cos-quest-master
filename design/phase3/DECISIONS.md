@@ -75,6 +75,20 @@
 
 ---
 
+### 2026-03-11: F5 — GuildMember class defined by player (Option A), class name prescribed
+**Context**: capstone-01 requires a `%Persistent` class. Two options: player defines it (multi-file quest) or a pre-seeded class is compiled into IRIS before the quest.
+**Decision**: Player defines `User.GuildMember` as part of capstone-01 using the multi-file quest format (`.cls` + `.script` with `dependsOn`). The class name `User.GuildMember` is prescribed in the quest definition so the storage global name is deterministic (`^User.GuildMemberD`).
+**Rejected alternatives**: Pre-seeded class — requires an undocumented backend setup step; also removes the pedagogical value of the player seeing a `%Persistent` class defined for the first time.
+
+---
+
+### 2026-03-11: F5 — capstone-02 uses SQL SELECT, not %OpenId, to avoid ID threading
+**Context**: After `%Save()` in capstone-01 the player has an ID, but there is no mechanical way to pass it to capstone-02. Options: rely on Claude to accept any plausible ID in `%OpenId()`, prescribe ID=1, use `$ORDER` to discover the ID, or redesign capstone-02 around SQL SELECT.
+**Decision**: capstone-02 uses `&sql(SELECT ... FROM User.GuildMember)` to retrieve the saved record. No ID is required; SQL is declarative. `evaluationCriteria` instructs Claude to accept any valid SQL query against `User.GuildMember` that retrieves at least one row.
+**Rejected alternatives**: Prescribe ID=1 — breaks if the player runs capstone-01 multiple times. `$ORDER` discovery — blurs the conceptual boundary with capstone-03 which is explicitly the "raw globals" step. `testHarness` global bridge — pollutes the USER namespace and adds complexity without pedagogical value.
+
+---
+
 ### 2026-03-11: F4 — Test coverage: Vitest unit test for GlobalService only
 **Context**: CLAUDE.md requires an automated test for every feature. Two options: Vitest unit test for `GlobalService`, or Playwright E2E for the D3 SVG component.
 **Decision**: Vitest unit test (`global.service.spec.ts`). Mock `IrisApiService.getGlobals()` with a JSON fixture and assert the `globals` signal is updated correctly.

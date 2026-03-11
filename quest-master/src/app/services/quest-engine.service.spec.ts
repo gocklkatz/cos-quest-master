@@ -6,6 +6,7 @@ import { GameStateService } from './game-state.service';
 import { ClaudeApiService } from './claude-api.service';
 import { Quest } from '../models/quest.models';
 import { BRANCH_PROGRESSION } from '../data/branch-progression';
+import { STARTER_QUESTS } from '../data/starter-quests';
 
 describe('QuestEngineService — F9: questGenerating / questGenerationError signals', () => {
   const MOCK_QUEST: Quest = {
@@ -305,5 +306,93 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
       expect.any(Array), expect.any(Array), 'capstone', expect.any(String), 'key'
     );
     expect(service.branchUnlocked()).toBeNull();
+  });
+});
+
+// ── F5: Capstone quest prerequisite gating ────────────────────────────────────
+
+describe('QuestEngineService — F5: capstone prerequisite gating', () => {
+  const capstone01 = STARTER_QUESTS.find(q => q.id === 'capstone-01')!;
+  const capstone02 = STARTER_QUESTS.find(q => q.id === 'capstone-02')!;
+  const capstone03 = STARTER_QUESTS.find(q => q.id === 'capstone-03')!;
+
+  async function buildService(completedIds: string[]) {
+    const mockGameState = {
+      completedQuests: signal<string[]>(completedIds),
+      coveredConcepts: signal<string[]>([]),
+      xp: signal(0),
+      questBank: signal<Quest[]>([]),
+      currentQuestId: signal<string | null>(null),
+      currentBranch: signal('capstone'),
+      allQuests: computed(() => []),
+      addToQuestBank: vi.fn(),
+      setCurrentQuest: vi.fn(),
+      setCurrentBranch: vi.fn(),
+      completeQuest: vi.fn(),
+    } as unknown as GameStateService;
+
+    const mockClaude = {
+      generateQuest: vi.fn(),
+      evaluateSubmission: vi.fn(),
+    } as unknown as ClaudeApiService;
+
+    await TestBed.configureTestingModule({
+      providers: [
+        QuestEngineService,
+        { provide: GameStateService, useValue: mockGameState },
+        { provide: ClaudeApiService, useValue: mockClaude },
+      ],
+    }).compileComponents();
+
+    return TestBed.inject(QuestEngineService);
+  }
+
+  it('all three capstone quests exist in STARTER_QUESTS', () => {
+    expect(capstone01).toBeDefined();
+    expect(capstone02).toBeDefined();
+    expect(capstone03).toBeDefined();
+  });
+
+  it('all three capstone quests have branch "capstone"', () => {
+    expect(capstone01.branch).toBe('capstone');
+    expect(capstone02.branch).toBe('capstone');
+    expect(capstone03.branch).toBe('capstone');
+  });
+
+  it('capstone-01 has no prerequisites', () => {
+    expect(capstone01.prerequisites).toEqual([]);
+  });
+
+  it('capstone-02 requires capstone-01', () => {
+    expect(capstone02.prerequisites).toContain('capstone-01');
+  });
+
+  it('capstone-03 requires capstone-02', () => {
+    expect(capstone03.prerequisites).toContain('capstone-02');
+  });
+
+  it('capstone-01 is available with no quests completed', async () => {
+    const service = await buildService([]);
+    expect(service.availableQuests().map(q => q.id)).toContain('capstone-01');
+  });
+
+  it('capstone-02 is locked with no quests completed', async () => {
+    const service = await buildService([]);
+    expect(service.availableQuests().map(q => q.id)).not.toContain('capstone-02');
+  });
+
+  it('capstone-02 unlocks after capstone-01 is completed', async () => {
+    const service = await buildService(['capstone-01']);
+    expect(service.availableQuests().map(q => q.id)).toContain('capstone-02');
+  });
+
+  it('capstone-03 is locked when only capstone-01 is completed', async () => {
+    const service = await buildService(['capstone-01']);
+    expect(service.availableQuests().map(q => q.id)).not.toContain('capstone-03');
+  });
+
+  it('capstone-03 unlocks after capstone-02 is completed', async () => {
+    const service = await buildService(['capstone-01', 'capstone-02']);
+    expect(service.availableQuests().map(q => q.id)).toContain('capstone-03');
   });
 });

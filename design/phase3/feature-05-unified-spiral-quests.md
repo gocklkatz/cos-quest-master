@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase3-mid |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Pedagogical Principle | Spiral Curriculum |
 | Depends On | Feature 04, Feature 02 |
 
@@ -35,20 +35,21 @@ Design a capstone quest chain of three linked quests that each interact with the
 ## Files Changed
 
 - `quest-master/src/app/data/starter-quests.ts` — add three `capstone-01/02/03` quest definitions
+- `quest-master/src/app/services/quest-engine.service.spec.ts` — F5 prerequisite gating tests
 
 ---
 
 ## Open Questions
 
-- [ ] **GuildMember class strategy (blocking)**: `capstone-01` calls `%New()` / `%Save()` on a `GuildMember` class. Should the player *define* that class as part of the quest (multi-file quest: one `.cls` file + one `.script` file), or should a pre-seeded `GuildMember` class be compiled into IRIS before the quest starts? Option A requires a multi-file quest setup; option B requires a backend setup step not currently specified anywhere.
+- ~~**GuildMember class strategy (blocking)**~~: Option A chosen — player defines the class as a multi-file quest (`.cls` + `.script`). Class name prescribed as `User.GuildMember` to make global storage deterministic.
 
-- [ ] **Correct global name for capstone-03 (blocking)**: The spec hardcodes `^GuildMember.MemberD` but the actual IRIS storage global depends on the class package. If the class is `User.GuildMember`, the global is `^User.GuildMemberD`. The correct name cannot be determined until the class name used in `capstone-01` is fixed. Update `capstone-03`'s hints and `evaluationCriteria` once resolved.
+- ~~**Correct global name for capstone-03 (blocking)**~~: Class prescribed as `User.GuildMember` → IRIS storage global is deterministically `^User.GuildMemberD`. Hardcoded in capstone-03 hints and `evaluationCriteria`.
 
-- [ ] **ID threading between capstone-01 and capstone-02**: There is no mechanical way to pass the saved `%Save()` ID forward to `capstone-02`. Evaluation relies entirely on Claude reading the player's code. The `evaluationCriteria` for `capstone-02` must instruct Claude to accept *any* valid `%OpenId()` or `&sql(...)` call targeting a plausible ID, not a specific hardcoded one.
+- ~~**ID threading between capstone-01 and capstone-02**~~: capstone-02 uses SQL SELECT (`&sql()`) rather than `%OpenId()`. SQL is declarative — no ID required. `evaluationCriteria` instructs Claude to accept any valid SQL query against `User.GuildMember` that retrieves at least one row. Sidesteps ID threading entirely and is the most pedagogically coherent choice for the "SQL paradigm" step.
 
-- [ ] **F04 dependency scope**: The Verification Plan (step 5) requires the Global Tree Visualizer (F04, ⬜ Not started) to be live. F04 has 6 unresolved open questions of its own. `capstone-03` quest data can be written and gated without F04 — the visualizer is only needed for verification. Decide: merge F05 quest definitions before F04 is complete, and defer verification step 5?
+- ~~**F04 dependency scope**~~: F04 is ✅ complete. Verification step 5 is unblocked.
 
-- [ ] **Test coverage**: No automated test is specified. Per CLAUDE.md, at least one test is required. Likely candidate: a Vitest unit test in `quest-engine.service.spec.ts` that loads the three capstone quests and verifies prerequisite gating (capstone-02 unlocks only after capstone-01 is completed, etc.).
+- ~~**Test coverage**~~: Vitest unit test added to `quest-engine.service.spec.ts` (F5 describe block). Tests: all three quests have `branch: 'capstone'`; capstone-01 available with no prereqs; capstone-02 locked until capstone-01 done; capstone-03 locked until capstone-02 done.
 
 ---
 

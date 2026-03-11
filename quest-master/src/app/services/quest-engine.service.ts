@@ -21,9 +21,16 @@ export class QuestEngineService {
   /** Quests whose prerequisites have all been completed (regardless of whether already done). */
   readonly availableQuests = computed(() => {
     const completed = new Set(this.gameState.completedQuests());
-    return this.allQuests().filter(q =>
-      q.prerequisites.every(p => completed.has(p))
-    );
+    const currentBranch = this.gameState.currentBranch();
+    const currentBranchIndex = BRANCH_PROGRESSION.findIndex(s => s.branch === currentBranch);
+
+    return this.allQuests().filter(q => {
+      if (!q.prerequisites.every(p => completed.has(p))) return false;
+      // Only show quests from branches the player has unlocked.
+      const questBranchIndex = BRANCH_PROGRESSION.findIndex(s => s.branch === q.branch);
+      if (questBranchIndex === -1) return true; // unknown branch — always show
+      return questBranchIndex <= currentBranchIndex;
+    });
   });
 
   /** Available quests that haven't been completed yet. */

@@ -31,8 +31,7 @@ describe('SettingsModalComponent — Dynamic Quest Regeneration (F1)', () => {
     return { startPolling: vi.fn() } as unknown as IrisConnectionService;
   }
 
-  it('STARTER_QUESTS contains only quest-zero', () => {
-    expect(STARTER_QUESTS.length).toBe(1);
+  it('STARTER_QUESTS has quest-zero as the first entry', () => {
     expect(STARTER_QUESTS[0].id).toBe('quest-zero');
   });
 
