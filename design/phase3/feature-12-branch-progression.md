@@ -16,10 +16,11 @@ Implement a curriculum-driven mechanism that automatically advances the player t
 **Acceptance criteria:**
 1. After completing the configured number of quests in `setup`, the next generated quest uses branch `commands`.
 2. After completing the configured number of quests in `commands`, the next generated quest uses branch `globals`.
-3. The progression continues through all configured branches in order. The final branch has no advancement threshold.
-4. A "Branch Unlocked" toast is displayed in the Quest Panel when a transition occurs.
-5. The current branch is stored in `GameStateService` (persisted to `localStorage`) so it survives page reload.
-6. All existing behaviour is unchanged when no transition occurs.
+3. The progression continues through all configured branches in order: `setup → commands → globals → classes → sql → capstone`. The final branch (`capstone`) has no advancement threshold.
+4. Completing `quest-zero` (the static starter quest, branch `setup`) counts toward the `setup` threshold. The player therefore only needs 2 additional AI-generated `setup` quests before advancing to `commands`.
+5. A "Branch Unlocked" toast is displayed in the Quest Panel when a transition occurs.
+6. The current branch is stored in `GameStateService` (persisted to `localStorage`) so it survives page reload.
+7. All existing behaviour is unchanged when no transition occurs.
 
 ---
 
@@ -45,14 +46,16 @@ export interface BranchStage {
 }
 
 export const BRANCH_PROGRESSION: BranchStage[] = [
-  { branch: 'setup',    minQuestsToAdvance: 3 },
+  { branch: 'setup',    minQuestsToAdvance: 3 },   // quest-zero counts; 2 more generated quests needed
   { branch: 'commands', minQuestsToAdvance: 5 },
   { branch: 'globals',  minQuestsToAdvance: 5 },
-  { branch: 'classes',  minQuestsToAdvance: null },
+  { branch: 'classes',  minQuestsToAdvance: 5 },
+  { branch: 'sql',      minQuestsToAdvance: 3 },   // focused bridge before capstone
+  { branch: 'capstone', minQuestsToAdvance: null }, // terminal — F5 Spiral Quests live here
 ];
 ```
 
-The constants are deliberately conservative (3 / 5 / 5) — enough to practise each topic without overstaying.
+The constants are deliberately conservative (3 / 5 / 5 / 5 / 3) — enough to practise each topic without overstaying. `sql` gets a shorter threshold (3) because it is a focused bridge paradigm before the capstone rather than a full curriculum tier.
 
 ### GameStateService changes
 
@@ -106,17 +109,21 @@ No changes required to the system prompt — the branch is already templated as 
 
 - [ ] **Branch name display**: The toast shows the raw branch string (`'commands'`, `'globals'`, etc.). Should there be a display-name map (e.g., `'globals'` → `"Global Variables"`)? Or is the raw name acceptable for now?
 
-- [ ] **What happens at quest-zero**: Quest-zero (`setup` branch) is a static starter quest, not a generated one. Should completing quest-zero count toward the `setup` threshold? If yes, the player only needs 2 more generated quests before transitioning to `commands`. If no, quest-zero's branch is ignored in the count — the player always completes at least 3 generated quests in `setup` first.
+- [x] ~~**What happens at quest-zero**: Quest-zero (`setup` branch) is a static starter quest, not a generated one. Should completing quest-zero count toward the `setup` threshold?~~ **Resolved**: Yes. Quest-zero counts. The player needs 2 more generated `setup` quests (total threshold: 3) before advancing to `commands`.
 
-- [ ] **Thresholds are tunable**: The values 3 / 5 / 5 are first guesses. They should be validated against real player sessions. Consider making them configurable via a developer flag in `branch-progression.ts` rather than hardcoding.
+- [ ] **Thresholds are tunable**: The values 3 / 5 / 5 / 5 / 3 are first guesses. They should be validated against real player sessions. Consider making them configurable via a developer flag in `branch-progression.ts` rather than hardcoding.
 
 ---
 
 ## Verification Plan
 
-1. Complete quest-zero. Confirm branch stays `setup`.
-2. Complete 3 quests with branch `setup`. On the 3rd completion, verify the next quest is generated with `commands` branch (check network request payload or `QuestEngine.currentQuest().branch`).
+1. Complete quest-zero. Confirm branch stays `setup` (threshold not yet reached: 1 of 3).
+2. Complete 2 more quests with branch `setup`. On the 2nd AI-generated completion (3rd overall including quest-zero), verify the next quest is generated with `commands` branch (check network request payload or `QuestEngine.currentQuest().branch`).
 3. Verify the "Branch Unlocked: commands" toast appears in the Quest Panel after the 3rd `setup` quest is submitted.
-4. Reload the page. Verify `currentBranch` is still `commands` (persisted).
+4. Reload the page. Verify `currentBranch` is still `commands` (persisted to localStorage).
 5. Open Settings → Reset All Progress. Verify `currentBranch` resets to `setup`.
 6. Complete 5 `commands` quests. Verify transition to `globals` branch.
+7. Complete 5 `globals` quests. Verify transition to `classes` branch.
+8. Complete 5 `classes` quests. Verify transition to `sql` branch.
+9. Complete 3 `sql` quests. Verify transition to `capstone` branch (F5 Spiral Quests).
+10. Confirm no further advancement occurs from `capstone` (terminal stage).

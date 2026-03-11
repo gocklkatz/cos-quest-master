@@ -25,7 +25,7 @@
 
 | Priority | Theme | Pedagogical Rationale |
 |---|---|---|
-| **P1 — High value, low complexity** | Dynamic Quest Regeneration, AI Elaborative Interrogation, Monaco Scaffolding Hints | Metacognition & Varied Practice |
+| **P1 — High value, low complexity** | Dynamic Quest Regeneration, AI Elaborative Interrogation | Metacognition & Varied Practice |
 | **P2 — High value, medium complexity** | Global Tree Visualizer, Unified Spiral Quests | Dual Coding & Spiral Curriculum |
 | **P3 — Future / High complexity** | Code Prediction Quests (Parables) | Worked Example Effect |
 
@@ -40,7 +40,6 @@
 | 4 | **Global Tree Visualizer** ✅ | phase3-mid | Visual mental model of persistent data | [feature-04-global-tree-visualizer.md](feature-04-global-tree-visualizer.md) |
 | 5 | **Unified "Spiral" Quests** | phase3-mid | Bridges OO and Procedural layers | [feature-05-unified-spiral-quests.md](feature-05-unified-spiral-quests.md) |
 | 6 | **Code Prediction Quests** | phase3-low | Reduces cognitive load via reading | [feature-06-code-prediction-quests.md](feature-06-code-prediction-quests.md) |
-| 7 | **Monaco "Scaffolding" Hints** | phase3-high | Real-time feedback on syntax quirks | [feature-07-monaco-scaffolding-hints.md](feature-07-monaco-scaffolding-hints.md) |
 | 8 | **Quest Time Tracking & Goals** | phase3-mid | Fosters habit formation and effort-based rewards | [feature-08-quest-time-tracking-goals.md](feature-08-quest-time-tracking-goals.md) |
 | 9 | **Quest Generation Loading Indicator** ✅ | phase3-high | Eliminates feedback-gap anxiety between quest completion and next quest appearing | [feature-09-quest-generation-indicator.md](feature-09-quest-generation-indicator.md) |
 | 10 | **AI Review Modal** ✅ | phase3-high | Ensures players read the AI evaluation feedback before the next quest loads | [feature-10-review-modal.md](feature-10-review-modal.md) |
@@ -74,6 +73,7 @@ graph TD
     F1 --> F9[Quest Generation Indicator]
     F1 --> F10[AI Review Modal]
     F1 --> F12[Branch Progression System]
+    F5 --> F12
 ```
 
 ---
@@ -110,10 +110,6 @@ AI-generated quests where the editor is read-only. The user selects the predicte
 - **Goal**: Build "code literacy" without the cognitive load of production.
 - **Implementation**: Optional `questType`, `choices`, and `correctAnswer` fields on `Quest`; graded locally without a Claude call.
 
-### F7: Monaco "Scaffolding" Hints
-Custom Monaco "CodeLens" or "Markers" for common ObjectScript pitfalls (e.g., "Missing space after SET," "Two spaces required after FOR").
-- **Goal**: Scaffolding that fades as the user levels up.
-
 ### F9: Quest Generation Loading Indicator
 When a quest is submitted and the AI is generating the next one, the UI currently goes silent for several seconds. This feature adds a visible progress state to the `QuestPanel` that activates immediately on quest completion and resolves once the new quest is ready.
 - **Goal**: Eliminate "dead air" feedback gap and reassure the user that work is happening.
@@ -140,7 +136,12 @@ Replace the full-height header bar with a ~40px slim navbar. Navigation links in
 - **Implementation**: Enable Angular Router (`provideRouter`); define `/quest` and `/tree` routes; nav links use `routerLink`/`routerLinkActive`. Remove XP section from `HeaderBarComponent`; inject `GameStateService` directly into `QuestPanelComponent` for XP display. Replace `<app-quest-view>` in `app.html` with `<router-outlet />`. Introduce `UiEventService` so `QuestViewComponent` can trigger the settings modal without a direct parent binding. Ship a stub `TreeVisualizerComponent` placeholder; F4 fills it later.
 
 ### F12: Branch Progression System
-After the player completes a configured number of quests in the current branch, the next `generateNextQuest` call automatically uses the next branch in the curriculum (`setup` → `commands` → `globals` → `classes`). A brief toast in the Quest Panel announces the transition. The current branch is persisted in `localStorage` via `GameStateService`.
+After the player completes a configured number of quests in the current branch, the next `generateNextQuest` call automatically uses the next branch in the curriculum (`setup` → `commands` → `globals` → `classes` → `sql` → `capstone`). A brief toast in the Quest Panel announces the transition. The current branch is persisted in `localStorage` via `GameStateService`.
+
+**Branch thresholds**: `setup (3)` — `commands (5)` — `globals (5)` — `classes (5)` — `sql (3)` — `capstone (null/terminal)`.
+`sql` is a focused bridge paradigm (embedded SQL, dynamic queries, `%ResultSet`) before `capstone` unifies all three paradigms (OO + SQL + Raw Globals) in F5's Spiral Quests.
+`quest-zero` counts toward the `setup` threshold — the player needs 2 more AI-generated `setup` quests before advancing to `commands`.
+
 - **Goal**: Prevent curriculum stall; enforce Spiral Curriculum by introducing new ObjectScript paradigms in a controlled, mastery-gated order.
 - **Implementation**: New `BRANCH_PROGRESSION` config; `QuestEngineService.resolveBranch()` counts completed quests per branch and advances when a threshold is met; `GameStateService` stores `currentBranch`; `QuestPanelComponent` renders a transient "Branch Unlocked" toast.
 
@@ -178,6 +179,16 @@ Tracks active time spent on quests and allows users to set daily and weekly goal
 
 ---
 
+## Resolved Design Decisions
+
+| Date | Feature | Decision |
+|---|---|---|
+| 2026-03-11 | F12 | `quest-zero` **counts** toward the `setup` threshold. Player needs 2 more AI-generated `setup` quests (total: 3) before advancing. |
+| 2026-03-11 | F12 + F5 | Full branch sequence is `setup → commands → globals → classes → sql → capstone`. `sql` is a dedicated branch for embedded SQL, dynamic queries, and `%ResultSet` — bridging `classes` (OOP) and `capstone` (F5 Spiral Quests that unify OO + SQL + Raw Globals). |
+| 2026-03-11 | F12 | `F5 → F12` dependency added to graph: F12's `BRANCH_PROGRESSION` config must include the `capstone` branch that F5's Spiral Quests inhabit. F5 must be specced before F12 can finalise quest counts for `capstone`. |
+
+---
+
 ## Development Sequence (Phase 3)
 
 1.  **Cleanup**: Remove Glossary Feature and Tab (C1).
@@ -185,8 +196,7 @@ Tracks active time spent on quests and allows users to set daily and weekly goal
 3.  **Generation Feedback**: Add Quest Generation Loading Indicator (F9).
 4.  **Review Retention**: Add AI Review Modal to block next-quest load until feedback is read (F10).
 5.  **Metacognitive Loop**: Update Claude evaluation prompts (F2).
-6.  **Syntax Guardrails**: Implement Monaco syntax markers for ObjectScript quirks (F7).
-7.  **Habit Formation**: Build the Quest Time Tracking & Goal System (F8).
+6.  **Habit Formation**: Build the Quest Time Tracking & Goal System (F8).
 8.  **AppComponent Shell**: Extract quest workflow into `QuestViewComponent`; make `AppComponent` a thin shell (C4).
 9.  **Navigation Shell**: Slim navbar, Angular Router, XP-in-sidebar (C3) — ship with Tree Visualizer placeholder route.
 10. **Mental Model Visualization**: Build the Global Tree Visualizer into the existing `/tree` route (F4).
