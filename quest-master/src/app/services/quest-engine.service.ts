@@ -205,6 +205,20 @@ export class QuestEngineService {
     }
   }
 
+  /**
+   * Discard the current quest and generate a fresh one in the same branch.
+   * Increments skipsThisSession; does NOT call recordQuestComplete().
+   */
+  async skipQuest(): Promise<void> {
+    const branch = this.gameState.currentBranch();
+    const apiKey = this.gameState.anthropicApiKey();
+    this.gameState.incrementSkips();
+    const newQuest = await this.generateNextQuest(branch, apiKey);
+    if (newQuest) {
+      this.gameState.setCurrentQuest(newQuest.id);
+    }
+  }
+
   /** Retry the last failed generation attempt. */
   retryGenerate(): void {
     if (this._lastBranch && this._lastApiKey) {

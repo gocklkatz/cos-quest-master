@@ -118,6 +118,25 @@
         </div>
       }
 
+      <!-- ── Skip quest ─────────────────────────── -->
+      @if (!evaluation()?.passed) {
+        <div class="quest-section skip-section">
+          @if (!confirmingSkip()) {
+            <button
+              class="skip-btn"
+              [disabled]="questGenerating()"
+              (click)="requestSkip()"
+            >Skip</button>
+          } @else {
+            <span class="skip-confirm-label">Skip this quest?</span>
+            <div class="skip-confirm-actions">
+              <button class="skip-confirm-btn" (click)="confirmSkip()">Skip</button>
+              <button class="skip-cancel-btn" (click)="cancelSkip()">Cancel</button>
+            </div>
+          }
+        </div>
+      }
+
       <!-- ── Prediction choices ────────────────── -->
       @if (quest()?.questType === 'prediction' && quest()?.choices?.length) {
         <div class="quest-section prediction-section">

@@ -138,6 +138,26 @@
 
 ---
 
+### 2026-03-12: F13 — skipQuest() reads apiKey from GameStateService, not a parameter
+
+**Context**: `skipQuest()` must call `generateNextQuest(currentBranch, apiKey)`. The apiKey could come from a parameter (requiring `QuestPanelComponent` to receive it as an input and forward it) or be read directly from `GameStateService.anthropicApiKey()` inside the service.
+
+**Decision**: `QuestEngineService.skipQuest()` reads `apiKey` from `GameStateService.anthropicApiKey()` and `currentBranch` from `GameStateService.currentBranch()`. No parameter needed; no new input binding on `QuestPanelComponent`.
+
+**Rejected alternatives**: Parameter on `skipQuest(apiKey, branch)` — `QuestPanelComponent` already injects `GameStateService` but threading these values as arguments adds boilerplate with no benefit, since `QuestEngineService` already has a service dependency on `GameStateService`.
+
+---
+
+### 2026-03-12: F13 — skipsThisSession is in-memory only, not persisted to localStorage
+
+**Context**: The spec said `skipsThisSession` is stored on `GameStateService` and reset on `resetProgress()`. A decision was needed on whether to add it to the `GameState` interface (persisted) or keep it as a standalone signal (in-memory).
+
+**Decision**: Plain `signal<number>(0)` on `GameStateService`, outside `GameState`. Not serialised to `localStorage`. Resets on page reload and on `resetProgress()`. `GameState` model and `DEFAULT_GAME_STATE` are not modified.
+
+**Rejected alternatives**: Adding to `GameState` — "this session" semantics imply page-scoped lifetime; persisting it would require a schema migration comment and would mislead future readers into thinking session counters are durable state.
+
+---
+
 ### 2026-03-11: F6 — Read-only mechanism: questType check, not QuestFile.readOnly
 **Context**: `QuestFile` already has a `readOnly?: boolean` field. Two approaches for locking the editor: set `QuestFile.readOnly: true` on all files in a prediction quest (relying on AI to include it), or check `questType === 'prediction'` in `QuestViewComponent`.
 **Decision**: Use `questType === 'prediction'` in `QuestViewComponent` to set Monaco `readOnly`. `QuestFile.readOnly` is reserved for per-file scaffolding in multi-file quests (e.g. a read-only fixture file alongside an editable solution file). Coupling read-only state to quest type is semantically correct and immune to AI omission errors.

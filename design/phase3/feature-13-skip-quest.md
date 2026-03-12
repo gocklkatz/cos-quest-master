@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase3-mid |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Depends On | F1 (Dynamic Quest Regeneration), F9 (Quest Generation Loading Indicator) |
 | Pedagogical Principle | Desirable Difficulty / Engagement Preservation |
 
@@ -40,8 +40,8 @@ Add a **Skip** button to the Quest Panel. When the player presses it:
 
 ## Implementation Details
 
-- **`QuestEngineService`**: Add `skipQuest()` method — discards current quest, increments `GameStateService.skipsThisSession`, calls `generateNextQuest(currentBranch, apiKey)`. Does NOT call `recordQuestComplete()`.
-- **`GameStateService`**: Add `skipsThisSession` signal (number, default `0`). Reset to `0` in `resetProgress()`.
+- **`QuestEngineService`**: Add `skipQuest()` method — discards current quest, increments `GameStateService.skipsThisSession`, calls `generateNextQuest(currentBranch, apiKey)`. Does NOT call `recordQuestComplete()`. Reads `apiKey` from `GameStateService.anthropicApiKey()` directly (no parameter needed); reads `currentBranch` from `GameStateService.currentBranch()`.
+- **`GameStateService`**: Add `skipsThisSession` signal (number, default `0`). Add `incrementSkips()` mutation method. **Not persisted to `localStorage`** — in-memory only, resets on page reload or `resetProgress()`.
 - **`QuestPanelComponent`**: Add Skip button next to Submit. Button binds to a local `confirmingSkip` boolean signal. When `confirmingSkip` is `false`, shows "Skip". When `true`, shows "Skip this quest?" + **Confirm** / **Cancel** inline. Button disabled when `questGenerating()` is `true`.
 - **No IRIS backend changes** required.
 - **No AI prompt changes** required — skip reuses the existing `generateNextQuest` flow.
@@ -50,18 +50,19 @@ Add a **Skip** button to the Quest Panel. When the player presses it:
 
 ## Files Changed
 
-- `quest-master/src/app/quest-view/quest-panel/quest-panel.component.ts` — Skip button logic, `confirmingSkip` signal
-- `quest-master/src/app/quest-view/quest-panel/quest-panel.component.html` — Skip button + inline confirmation UI
-- `quest-master/src/app/quest-view/quest-panel/quest-panel.component.scss` — Skip button styles
+- `quest-master/src/app/components/quest-panel/quest-panel.component.ts` — Skip button logic, `confirmingSkip` signal
+- `quest-master/src/app/components/quest-panel/quest-panel.component.html` — Skip button + inline confirmation UI
+- `quest-master/src/app/components/quest-panel/quest-panel.component.scss` — Skip button styles
 - `quest-master/src/app/services/quest-engine.service.ts` — `skipQuest()` method
-- `quest-master/src/app/services/game-state.service.ts` — `skipsThisSession` signal
+- `quest-master/src/app/services/game-state.service.ts` — `skipsThisSession` signal, `incrementSkips()` method
+- `quest-master/src/app/models/game-state.models.ts` — `skipsThisSession` field not added (in-memory only; see Open Questions resolution)
 
 ---
 
 ## Open Questions
 
-- [ ] Should skips be persisted across sessions (e.g., in `localStorage`) for future analytics, or reset-only?
-- [ ] Should there be a visual indicator (e.g., toast "Generating a new quest…") separate from the F9 loading skeleton, or is F9 sufficient?
+- ~~Should skips be persisted across sessions (e.g., in `localStorage`) for future analytics, or reset-only?~~ **Not persisted.** `skipsThisSession` is in-memory only — a plain signal on `GameStateService`, not part of `GameState`. "This session" semantics mean page reload = reset, which is user-expected. If future analytics need it, the existing `timeLog`-style `Record<string, number>` pattern can be adopted without breaking the current schema.
+- ~~Should there be a visual indicator (e.g., toast "Generating a new quest…") separate from the F9 loading skeleton, or is F9 sufficient?~~ **F9 is sufficient.** The inline confirmation closes the interaction, then the F9 shimmer skeleton appears immediately. A second concurrent status signal for the same event would be redundant and noisy.
 
 ---
 

@@ -86,13 +86,17 @@ export class QuestPanelComponent {
   /** True after the player has submitted their prediction (disables radio + button). */
   predictionAnswered = signal(false);
 
+  /** True while the inline skip-confirmation prompt is shown. */
+  confirmingSkip = signal(false);
+
   constructor() {
-    // Reset revealed hints and prediction state whenever the active quest changes.
+    // Reset revealed hints, prediction state, and skip confirmation whenever the active quest changes.
     effect(() => {
       this.quest(); // track
       this.hintsRevealed.set(0);
       this.selectedChoice.set(null);
       this.predictionAnswered.set(false);
+      this.confirmingSkip.set(false);
     });
 
     // Auto-dismiss the "Branch Unlocked" toast after 4 seconds.
@@ -135,6 +139,19 @@ export class QuestPanelComponent {
 
   retryGenerate(): void {
     this.questEngine.retryGenerate();
+  }
+
+  requestSkip(): void {
+    this.confirmingSkip.set(true);
+  }
+
+  cancelSkip(): void {
+    this.confirmingSkip.set(false);
+  }
+
+  confirmSkip(): void {
+    this.confirmingSkip.set(false);
+    this.questEngine.skipQuest();
   }
 
   submitPrediction(): void {

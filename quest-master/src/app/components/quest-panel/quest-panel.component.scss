@@ -712,6 +712,81 @@
   }
 }
 
+// ── Skip quest ───────────────────────────────────────────
+.skip-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  flex-wrap: wrap;
+}
+
+.skip-btn {
+  background: transparent;
+  border: 1px solid #3a2e1a;
+  color: #7a6840;
+  padding: 3px 12px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+
+  &:hover:not(:disabled) {
+    border-color: #7a5a20;
+    color: #b09050;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.skip-confirm-label {
+  font-size: 0.72rem;
+  color: #9a8060;
+  flex-shrink: 0;
+}
+
+.skip-confirm-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.skip-confirm-btn {
+  background: #2a1f0e;
+  border: 1px solid #7a5a20;
+  color: #c09050;
+  padding: 3px 12px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  &:hover {
+    background: #3a2a10;
+    border-color: #b08030;
+    color: #e0b060;
+  }
+}
+
+.skip-cancel-btn {
+  background: transparent;
+  border: 1px solid #2e2848;
+  color: #7060a8;
+  padding: 3px 12px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+
+  &:hover {
+    border-color: #5040a0;
+    color: #a090e0;
+  }
+}
+
 // ── Empty state ──────────────────────────────────────────
 .quest-empty {
   display: flex;

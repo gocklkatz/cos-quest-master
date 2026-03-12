@@ -28,6 +28,9 @@ export class GameStateService {
   readonly timeLog = computed(() => this.state().timeLog);
   readonly snapshot = computed(() => this.state());
 
+  /** In-memory only — not persisted. Resets on page reload or resetProgress(). */
+  readonly skipsThisSession = signal(0);
+
   updateSettings(irisConfig: IRISConfig, anthropicApiKey: string, playerName?: string): void {
     this.state.update(s => ({
       ...s,
@@ -127,8 +130,13 @@ export class GameStateService {
     this.persist();
   }
 
+  incrementSkips(): void {
+    this.skipsThisSession.update(n => n + 1);
+  }
+
   resetProgress(): void {
     this.state.set({ ...DEFAULT_GAME_STATE, irisConfig: this.state().irisConfig, anthropicApiKey: this.state().anthropicApiKey });
+    this.skipsThisSession.set(0);
     this.persist();
   }
 

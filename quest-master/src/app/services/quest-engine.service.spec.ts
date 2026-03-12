@@ -144,7 +144,7 @@ describe('QuestEngineService — F9: questGenerating / questGenerationError sign
 
     expect(mockClaude.generateQuest).toHaveBeenCalledTimes(2);
     expect(mockClaude.generateQuest).toHaveBeenLastCalledWith(
-      expect.any(Array), expect.any(Array), 'globals', expect.any(String), 'key-123'
+      expect.any(Array), expect.any(Array), 'globals', expect.any(String), 'key-123', expect.any(String)
     );
   });
 
@@ -193,6 +193,96 @@ describe('QuestEngineService — F9: questGenerating / questGenerationError sign
     expect(service.questGenerating()).toBe(true);
 
     secondCallResolve(MOCK_QUEST);
+  });
+});
+
+// ── F13: Skip Quest ───────────────────────────────────────────────────────────
+
+describe('QuestEngineService — F13: skipQuest()', () => {
+  const SKIP_QUEST: Quest = {
+    id: 'skip-target',
+    title: 'Skip Target',
+    branch: 'globals',
+    tier: 'apprentice',
+    narrative: '',
+    objective: '',
+    evaluationCriteria: '',
+    hints: [],
+    bonusObjectives: [],
+    bonusXP: 0,
+    xpReward: 100,
+    prerequisites: [],
+    conceptsIntroduced: [],
+    files: [{ id: 'f1', filename: 'solution.script', fileType: 'script', label: 'solution.script' }],
+  };
+
+  async function buildSkipService(currentBranch = 'globals', apiKey = 'test-key') {
+    const mockGameState = {
+      completedQuests: signal<string[]>([]),
+      coveredConcepts: signal<string[]>([]),
+      xp: signal(0),
+      questBank: signal<Quest[]>([]),
+      currentQuestId: signal<string | null>('some-quest'),
+      currentBranch: signal(currentBranch),
+      anthropicApiKey: signal(apiKey),
+      addToQuestBank: vi.fn(),
+      setCurrentQuest: vi.fn(),
+      setCurrentBranch: vi.fn(),
+      completeQuest: vi.fn(),
+      incrementSkips: vi.fn(),
+    } as unknown as GameStateService;
+
+    const mockClaude = {
+      generateQuest: vi.fn().mockResolvedValue(SKIP_QUEST),
+      evaluateSubmission: vi.fn(),
+    } as unknown as ClaudeApiService;
+
+    await TestBed.configureTestingModule({
+      providers: [
+        QuestEngineService,
+        { provide: GameStateService, useValue: mockGameState },
+        { provide: ClaudeApiService, useValue: mockClaude },
+      ],
+    }).compileComponents();
+
+    return {
+      service: TestBed.inject(QuestEngineService),
+      mockGameState,
+      mockClaude,
+    };
+  }
+
+  it('increments skipsThisSession via GameStateService', async () => {
+    const { service, mockGameState } = await buildSkipService();
+    await service.skipQuest();
+    expect(mockGameState.incrementSkips).toHaveBeenCalledOnce();
+  });
+
+  it('calls generateNextQuest with branch and apiKey from GameStateService', async () => {
+    const { service, mockClaude } = await buildSkipService('globals', 'my-api-key');
+    await service.skipQuest();
+    expect(mockClaude.generateQuest).toHaveBeenCalledWith(
+      expect.any(Array), expect.any(Array), 'globals', expect.any(String), 'my-api-key', expect.any(String)
+    );
+  });
+
+  it('advances currentQuestId to the new quest on success', async () => {
+    const { service, mockGameState } = await buildSkipService();
+    await service.skipQuest();
+    expect(mockGameState.setCurrentQuest).toHaveBeenCalledWith(SKIP_QUEST.id);
+  });
+
+  it('does not call setCurrentQuest when generation fails', async () => {
+    const { service, mockGameState, mockClaude } = await buildSkipService();
+    (mockClaude.generateQuest as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'));
+    await service.skipQuest();
+    expect(mockGameState.setCurrentQuest).not.toHaveBeenCalled();
+  });
+
+  it('does not call completeQuest', async () => {
+    const { service, mockGameState } = await buildSkipService();
+    await service.skipQuest();
+    expect(mockGameState.completeQuest).not.toHaveBeenCalled();
   });
 });
 
@@ -263,7 +353,7 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
     await service.generateNextQuest('setup', 'key');
 
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key'
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', expect.any(String)
     );
     expect(service.branchUnlocked()).toBeNull();
   });
@@ -277,7 +367,7 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
     await service.generateNextQuest('setup', 'key');
 
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'commands', expect.any(String), 'key'
+      expect.any(Array), expect.any(Array), 'commands', expect.any(String), 'key', expect.any(String)
     );
     expect(mockGameState.setCurrentBranch).toHaveBeenCalledWith('commands');
     expect(service.branchUnlocked()).toBe('commands');
@@ -303,7 +393,7 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
     await service.generateNextQuest('capstone', 'key');
 
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'capstone', expect.any(String), 'key'
+      expect.any(Array), expect.any(Array), 'capstone', expect.any(String), 'key', expect.any(String)
     );
     expect(service.branchUnlocked()).toBeNull();
   });
