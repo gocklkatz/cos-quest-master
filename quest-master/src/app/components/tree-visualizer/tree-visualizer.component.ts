@@ -3,12 +3,14 @@ import {
   Component,
   ElementRef,
   ViewChild,
+  computed,
   effect,
   inject,
 } from '@angular/core';
 import * as d3 from 'd3';
 import { GlobalService } from '../../services/global.service';
-import { GlobalEntry, GlobalNode } from '../../models/iris.models';
+import { GlobalEntry, GlobalNode } from '../../models/iris.models'; // GlobalNode used in mapNodeBudgeted
+import { globalMatchesFilter } from '../../utils/global-filter';
 
 interface TreeNode {
   label: string;
@@ -25,7 +27,13 @@ interface TreeNode {
   styleUrl: './tree-visualizer.component.scss',
 })
 export class TreeVisualizerComponent implements AfterViewInit {
-  private globalService = inject(GlobalService);
+  protected globalService = inject(GlobalService);
+
+  readonly filteredGlobals = computed(() => {
+    const term = this.globalService.filterTerm().toLowerCase();
+    const all = this.globalService.globals();
+    return term ? all.filter(g => globalMatchesFilter(g, term)) : all;
+  });
 
   @ViewChild('svgEl') private svgEl!: ElementRef<SVGSVGElement>;
 
@@ -33,7 +41,7 @@ export class TreeVisualizerComponent implements AfterViewInit {
 
   constructor() {
     effect(() => {
-      const globals = this.globalService.globals();
+      const globals = this.filteredGlobals();
       if (this.viewReady) {
         this.render(globals);
       }
@@ -42,7 +50,15 @@ export class TreeVisualizerComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.viewReady = true;
-    this.render(this.globalService.globals());
+    this.globalService.refresh();
+  }
+
+  onFilterInput(event: Event): void {
+    this.globalService.filterTerm.set((event.target as HTMLInputElement).value);
+  }
+
+  clearFilter(): void {
+    this.globalService.filterTerm.set('');
   }
 
   private render(globals: GlobalEntry[]): void {
@@ -51,6 +67,10 @@ export class TreeVisualizerComponent implements AfterViewInit {
     svg.selectAll('*').remove();
 
     if (globals.length === 0) {
+      const term = this.globalService.filterTerm();
+      const msg = term
+        ? `No globals matching '${term}'`
+        : 'Run code that sets globals — they will appear here.';
       svg
         .append('text')
         .attr('x', '50%')
@@ -58,11 +78,13 @@ export class TreeVisualizerComponent implements AfterViewInit {
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
         .attr('class', 'empty-label')
-        .text('Run code that sets globals — they will appear here.');
+        .attr('fill', '#a89bc4')
+        .text(msg);
       return;
     }
 
-    const root = d3.hierarchy<TreeNode>(this.toTreeData(globals));
+    const nodeBudget = this.globalService.filterTerm() ? 2000 : 300;
+    const root = d3.hierarchy<TreeNode>(this.toTreeData(globals, nodeBudget));
 
     // nodeSize gives fixed spacing regardless of tree width
     const nodeH = 44;
@@ -142,22 +164,37 @@ export class TreeVisualizerComponent implements AfterViewInit {
       .text(d => `= ${d.data.value}`);
   }
 
-  private toTreeData(globals: GlobalEntry[]): TreeNode {
+  private toTreeData(globals: GlobalEntry[], budget: number): TreeNode {
+    let remaining = budget;
+    const mapNodeBudgeted = (n: GlobalNode): TreeNode | null => {
+      if (remaining <= 0) return null;
+      remaining--;
+      const children = n.children
+        .map(c => mapNodeBudgeted(c))
+        .filter((c): c is TreeNode => c !== null);
+      return {
+        label: n.truncated ? '…' : n.key,
+        value: n.value,
+        truncated: n.truncated,
+        children: children.length ? children : undefined,
+      };
+    };
+
     return {
       label: 'USER',
-      children: globals.map(g => ({
-        label: g.name,
-        children: g.children.length ? g.children.filter(n => !n.key.startsWith('%')).map(n => this.mapNode(n)) : undefined,
-      })),
+      children: globals.map(g => {
+        if (remaining <= 0) return { label: g.name };
+        remaining--;
+        const children = g.children
+          .filter(n => !n.key.startsWith('%'))
+          .map(n => mapNodeBudgeted(n))
+          .filter((c): c is TreeNode => c !== null);
+        return {
+          label: g.name,
+          children: children.length ? children : undefined,
+        };
+      }),
     };
   }
 
-  private mapNode(n: GlobalNode): TreeNode {
-    return {
-      label: n.truncated ? '…' : n.key,
-      value: n.value,
-      truncated: n.truncated,
-      children: n.children.length ? n.children.map(c => this.mapNode(c)) : undefined,
-    };
-  }
 }

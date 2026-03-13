@@ -3,5 +3,31 @@
     <span class="tree-title">Global Tree — USER namespace</span>
     <span class="tree-hint">Run code in Quest View, then return here to inspect globals.</span>
   </header>
+
+  <div class="filter-bar">
+    <div class="filter-input-wrap">
+      <input
+        class="filter-input"
+        type="text"
+        placeholder="Filter globals…"
+        [value]="globalService.filterTerm()"
+        (input)="onFilterInput($event)"
+        (keydown.escape)="clearFilter()"
+      />
+      @if (globalService.filterTerm()) {
+        <button class="filter-clear" (click)="clearFilter()" title="Clear filter">×</button>
+      }
+    </div>
+    @if (globalService.globals().length > 0) {
+      <span class="filter-count" [class.filter-count--capped]="!globalService.filterTerm()">
+        @if (globalService.filterTerm()) {
+          Showing {{ filteredGlobals().length }} of {{ globalService.globals().length }} globals
+        } @else {
+          {{ globalService.globals().length }} globals — type to filter
+        }
+      </span>
+    }
+  </div>
+
   <svg #svgEl class="tree-svg"></svg>
 </div>

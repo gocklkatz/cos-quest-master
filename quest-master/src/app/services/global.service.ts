@@ -10,6 +10,7 @@ export class GlobalService {
   private gameState = inject(GameStateService);
 
   readonly globals = signal<GlobalEntry[]>([]);
+  readonly filterTerm = signal<string>('');
 
   refresh(): void {
     this.irisApi

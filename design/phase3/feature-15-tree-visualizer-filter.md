@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase3-mid |
-| Status | ⬜ Not started |
+| Status | 🚧 In progress |
 | Depends On | F4 (Global Tree Visualizer) |
 | Pedagogical Principle | Learner Agency / Directed Attention |
 
@@ -84,3 +84,61 @@ Add a filter input field at the top of the Tree Visualizer view. The backend ret
 5. Press Escape — filter clears.
 6. Type `Learning`, navigate to Quest View, navigate back — filter term `Learning` is restored; count still filtered.
 7. Type `xyz` — empty-state message shown.
+
+---
+
+## Bug Fixes (post-completion)
+
+### 2026-03-13: Dropped keystrokes in filter input
+
+**Symptom**: Characters typed into the filter field were intermittently ignored; the user had to retype them. Filtering by an existing global name (e.g. `MyGlobal`) showed nothing in the tree.
+
+**Root cause**: The `[value]="globalService.filterTerm()"` one-way binding and the 300 ms debounce fought each other. Angular's change detection ran after every keystroke and reset the input's DOM `value` to the stale signal value (the signal only updated after the debounce timer fired), effectively erasing each typed character before the next could be entered. Both symptoms — dropped keystrokes and the filter appearing not to work — were the same bug.
+
+**Fix**: Removed the debounce entirely. `onFilterInput` now calls `globalService.filterTerm.set(value)` directly. The `[value]` binding and the signal stay in sync on every keystroke.
+
+**Files changed**: `quest-master/src/app/components/tree-visualizer/tree-visualizer.component.ts`
+
+---
+
+## UX Audit Findings (2026-03-13)
+
+Expert heuristic evaluation of the completed component against the primary learner workflow (write code → switch to Tree tab → inspect globals). Issues are ordered by impact.
+
+### Critical
+
+| # | Issue | Symptom for learner |
+|---|---|---|
+| 1 | **No loading state or refresh button** | `refresh()` fires only once, on first tab visit. If the learner visits Tree before running code, then runs code and returns, they see stale data with no indication. The empty-state message "Run code in Quest View…" is shown both when no globals exist *and* while the fetch is in flight — a false negative that makes learners think their code failed. |
+| 2 | **No error handling on refresh** | If the HTTP call fails (IRIS down, Docker stopped), `globals()` stays at its previous value silently. The user sees either an outdated tree or the empty-state message with no error message. |
+| 3 | **SVG has no ARIA structure** | The entire D3 tree is invisible to screen readers. No `role`, no `aria-label`, no `<title>` elements on nodes. |
+
+### High
+
+| # | Issue | Symptom for learner |
+|---|---|---|
+| 4 | **Two invisible truncation systems** | The backend caps at 50 children / 3 levels (marks `truncated: true`); the frontend silently drops nodes when the 300-node budget runs out. Backend truncation shows a `…` dashed circle (unexplained); frontend truncation leaves no trace at all. Learners can't tell their data is incomplete. |
+| 5 | **Node budget jumps 300 → 2000 when filter is active** | The tree renders dramatically more nodes when filtered than when browsing unfiltered. Removing the filter causes nodes to disappear with no explanation. |
+
+### Medium
+
+| # | Issue | Symptom for learner |
+|---|---|---|
+| 6 | **No node hover / click interaction** | Beginners try clicking the `…` truncation nodes and get no response. No canonical IRIS path (`^Global("sub1","sub2")`) is shown anywhere, so learners can't connect the visual to the ObjectScript syntax they write. |
+| 7 | **No zoom reset** | After zooming in or panning off-screen, the only recovery is navigating away and back. |
+| 8 | **Filter input fixed at 220px** | Long global names (e.g. `^MyApplicationConfig`) plus subscript paths can exceed the visible input width. |
+
+### Accessibility / Contrast Failures
+
+| Element | Color | Background | Ratio | WCAG AA |
+|---|---|---|---|---|
+| `.tree-hint` | `#6b5f94` | `#0d0b1a` | ~3.1:1 | Fail |
+| `.filter-count` (default) | `#6b5f94` | `#0d0b1a` | ~3.1:1 | Fail |
+| Truncated node label | `#4a3f6b` | `#0d0b1a` | ~2.0:1 | Fail |
+| Filter placeholder | `#4a3f6b` | `#1a1630` | ~2.0:1 | Fail |
+
+Additional ARIA gaps: the filter `<input>` has no `<label>` element; the clear button (`×`) uses only a `title` attribute, which screen readers do not reliably announce — it needs `aria-label="Clear filter"`.
+
+### Recommended next-sprint focus
+
+Fix issues **1 + 2 + 4** together — they share the same root: `GlobalService` needs a `loading` signal and an `error` signal, and the component needs a refresh button. This eliminates the most common learner failure state (believing their code did not work when it did). A "last refreshed" timestamp next to the refresh button addresses issue 4 at the same time.

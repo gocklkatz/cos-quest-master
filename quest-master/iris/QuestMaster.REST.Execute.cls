@@ -178,27 +178,26 @@ ClassMethod Compile() As %Status
 
 /// Return a depth-limited (max 3 levels) JSON tree of user globals in the USER namespace.
 /// Includes only globals whose names match [A-Za-z][A-Za-z0-9]* (excludes ^%, ^IRIS*, etc.).
-/// Node cap: max 50 children per node, 200 nodes total; truncated nodes include "truncated":true.
+/// Node cap: max 50 children per level (3 levels); no total-node cap (frontend filter handles visual complexity).
 ClassMethod Globals() As %Status
 {
   Do %response.SetHeader("Content-Type","application/json")
   Set tResult = {"globals": []}
-  Set tTotalNodes = 0
 
   // ^$GLOBAL returns names WITH the leading ^ (e.g. "^Test", "^%cspSession")
   // Match only plain user globals: ^[UpperOrLower][AlphaNum.]* (dots allowed for package globals like ^Learning.AdventurerD)
   Set tGName = $Order(^$GLOBAL(""))
   While tGName '= "" {
-    If $Match(tGName, "^\^[A-Za-z][A-Za-z0-9.]*$") && (tTotalNodes < 200) {
+    If $Match(tGName, "^\^[A-Za-z][A-Za-z0-9.]*$") {
       Set tGRef = tGName
       Set tGNode = {"name": (tGRef), "children": []}
 
       // Level 1
       Set tL1Count = 0, tL1Trunc = 0
       Set tSub1 = $Order(@tGRef@(""))
-      While tSub1 '= "" && (tTotalNodes < 200) {
+      While tSub1 '= "" {
         If tL1Count >= 50 { Set tL1Trunc = 1  Quit }
-        Set tL1Count = tL1Count + 1, tTotalNodes = tTotalNodes + 1
+        Set tL1Count = tL1Count + 1
         Set tNode1 = {"key": (tSub1), "children": []}
         Set tD1 = $Data(@tGRef@(tSub1))
         If (tD1 = 1) || (tD1 = 11) { Set tNode1.value = $Get(@tGRef@(tSub1)) }
@@ -206,9 +205,9 @@ ClassMethod Globals() As %Status
         // Level 2
         Set tL2Count = 0, tL2Trunc = 0
         Set tSub2 = $Order(@tGRef@(tSub1, ""))
-        While tSub2 '= "" && (tTotalNodes < 200) {
+        While tSub2 '= "" {
           If tL2Count >= 50 { Set tL2Trunc = 1  Quit }
-          Set tL2Count = tL2Count + 1, tTotalNodes = tTotalNodes + 1
+          Set tL2Count = tL2Count + 1
           Set tNode2 = {"key": (tSub2), "children": []}
           Set tD2 = $Data(@tGRef@(tSub1, tSub2))
           If (tD2 = 1) || (tD2 = 11) { Set tNode2.value = $Get(@tGRef@(tSub1, tSub2)) }
@@ -216,9 +215,9 @@ ClassMethod Globals() As %Status
           // Level 3
           Set tL3Count = 0, tL3Trunc = 0
           Set tSub3 = $Order(@tGRef@(tSub1, tSub2, ""))
-          While tSub3 '= "" && (tTotalNodes < 200) {
+          While tSub3 '= "" {
             If tL3Count >= 50 { Set tL3Trunc = 1  Quit }
-            Set tL3Count = tL3Count + 1, tTotalNodes = tTotalNodes + 1
+            Set tL3Count = tL3Count + 1
             Set tNode3 = {"key": (tSub3), "children": []}
             Set tD3 = $Data(@tGRef@(tSub1, tSub2, tSub3))
             If (tD3 = 1) || (tD3 = 11) { Set tNode3.value = $Get(@tGRef@(tSub1, tSub2, tSub3)) }
@@ -242,7 +241,10 @@ ClassMethod Globals() As %Status
     Set tGName = $Order(^$GLOBAL(tGName))
   }
 
-  Write tResult.%ToJSON()
+  Set tStream = ##class(%Stream.TmpCharacter).%New()
+  Do tResult.%ToJSON(tStream)
+  Do tStream.Rewind()
+  While 'tStream.AtEnd { Write tStream.Read(32000) }
   Quit $$$OK
 }
 

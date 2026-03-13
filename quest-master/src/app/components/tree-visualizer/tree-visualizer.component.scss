@@ -34,6 +34,68 @@
   color: #6b5f94;
 }
 
+// ── Filter bar ─────────────────────────────────────────────────────────────────
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px;
+  border-bottom: 1px solid #2d2550;
+  flex-shrink: 0;
+}
+
+.filter-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filter-input {
+  background: #1a1630;
+  border: 1px solid #3b3058;
+  border-radius: 6px;
+  color: #c4b5f5;
+  font-size: 0.8rem;
+  padding: 5px 28px 5px 10px;
+  width: 220px;
+  outline: none;
+  font-family: inherit;
+
+  &::placeholder {
+    color: #4a3f6b;
+  }
+
+  &:focus {
+    border-color: #7c5cbf;
+  }
+}
+
+.filter-clear {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  color: #6b5f94;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+
+  &:hover {
+    color: #c4b5f5;
+  }
+}
+
+.filter-count {
+  font-size: 0.75rem;
+  color: #6b5f94;
+
+  &--capped {
+    color: #a89bc4;
+  }
+}
+
 // ── SVG canvas ─────────────────────────────────────────────────────────────────
 
 .tree-svg {
@@ -46,7 +108,7 @@
 // ── Empty state ────────────────────────────────────────────────────────────────
 
 .empty-label {
-  fill: #6b5f94;
+  fill: #a89bc4;
   font-size: 0.85rem;
   font-family: inherit;
 }
