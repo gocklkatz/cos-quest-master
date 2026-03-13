@@ -8,7 +8,7 @@ This file applies to all phase subfolders under `design/`.
 
 | File | Purpose |
 |---|---|
-| `phaseN/phaseN_main.md` | TOC and status overview — links to feature docs, dependency graph, architecture diagram |
+| `phaseN/phaseN_main.md` | TOC and status overview — Phase Retrospective, Carry-overs, Features table, dependency graph, architecture diagram, Development Sequence |
 | `phaseN/feature-NN-*.md` | One doc per feature: status header, task prompt, design rationale, implementation notes |
 | `phaseN/change-NN-*.md` | One doc per refactoring/removal: simplified feature template, no Pedagogical Design section required |
 | `phaseN/DECISIONS.md` | Chronological log of major architectural forks and rejected alternatives |
@@ -127,9 +127,27 @@ Do not delete entries from `DECISIONS.md` — only add new entries or append cor
 
 ---
 
+## When creating a new phase main doc
+
+A `phaseN_main.md` must contain these sections **in order**:
+
+1. **What Phase N-1 Established** — a short retrospective table: key architectural changes from the previous phase and how they constrain or enable the current one. Do not duplicate feature descriptions; one row per architectural impact.
+2. **Carry-overs from Phase N-1** — a table of any incomplete features from the previous phase that are promoted into this phase. Link to the original feature doc (no duplication of content).
+3. **Phase N Priority Tiers** — three rows (P1/P2/P3) with theme and pedagogical rationale.
+4. **Features** — status table linking to individual feature docs. Do **not** add inline feature summaries here; the feature docs are the single source of truth.
+5. **Phase N Refactorings & Decommissions** — status table for `change-NN-*` items.
+6. **Feature Dependency Graph** — Mermaid `graph TD`. Add edges; do not redesign.
+7. **Architecture Overview** — ASCII diagram updated to show new services and endpoints.
+8. **Development Sequence** — ordered numbered list of implementation steps.
+9. **Design Decisions** — single line: `See [DECISIONS.md](DECISIONS.md).` Do **not** duplicate decision content inline.
+
+---
+
 ## Conventions
 
 - **Status values**: `⬜ Not started` / `🚧 In progress` / `✅ Complete`
 - **Priority values**: `phaseN-high` / `phaseN-mid` / `phaseN-low` / `backlog`
 - **File naming**: `feature-NN-kebab-case.md` / `change-NN-kebab-case.md` (two-digit zero-padded number)
+- **Feature numbering**: global and sequential across phases — never reuse a number. Check the previous phase's highest feature number before assigning a new one.
 - **Dependency graph**: use the Mermaid `graph TD` format already in `*_main.md` — add edges, do not redesign the graph
+- **Single source of truth**: feature details live only in the feature doc. `*_main.md` links to feature docs; it does not summarise them.
