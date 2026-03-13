@@ -47,6 +47,7 @@
 | 12 | **Branch Progression System** ✅ | phase3-mid | Automatically advances the player to new skill branches after demonstrated mastery, preventing curriculum stall on `setup` | [feature-12-branch-progression.md](feature-12-branch-progression.md) |
 | 13 | **Skip Quest** ✅ | phase3-mid | Allows the player to discard a quest they find unhelpful and immediately generate a new one, preventing frustration-driven dropout | [feature-13-skip-quest.md](feature-13-skip-quest.md) |
 | 14 | **Claude API Error Feedback** ✅ | phase3-high | Surfaces meaningful errors (expired key, exhausted credits, rate-limit) when `ClaudeApiService` fails instead of silently falling back to the simple evaluator | [feature-14-claude-api-error-feedback.md](feature-14-claude-api-error-feedback.md) |
+| 15 | **Tree Visualizer Global Filter** | phase3-mid | Client-side filter field lets the learner narrow the tree to globals whose names match a search term; directs attention to the data just created by the current quest | [feature-15-tree-visualizer-filter.md](feature-15-tree-visualizer-filter.md) |
 
 ---
 
@@ -78,6 +79,7 @@ graph TD
     F2 --> F5[Unified Spiral Quests]
     F2 --> F6[Code Prediction Quests]
     F4[Global Tree Visualizer] --> F5
+    F4 --> F15[Tree Visualizer Filter]
     C4[Migrate AppComponent] --> C3
     C3[Navbar Navigation] --> F4
     F1 --> F9[Quest Generation Indicator]
@@ -235,3 +237,4 @@ Tracks active time spent on quests and allows users to set daily and weekly goal
 13. **Output Usability**: Make the output pane scrollable (F11).
 14. **Curriculum Progression**: Implement Branch Progression System so the player advances beyond `setup` (F12).
 15. **API Error Visibility**: Surface Claude API failures (invalid key, exhausted credits, rate-limit) with typed errors and an inline UI warning (F14).
+16. **Tree Visualizer Filter**: Add client-side filter input to Tree Visualizer; remove total node cap from backend (F15).

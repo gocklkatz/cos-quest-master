@@ -186,10 +186,10 @@ ClassMethod Globals() As %Status
   Set tTotalNodes = 0
 
   // ^$GLOBAL returns names WITH the leading ^ (e.g. "^Test", "^%cspSession")
-  // Match only plain user globals: ^[UpperOrLower][AlphaNum]*
+  // Match only plain user globals: ^[UpperOrLower][AlphaNum.]* (dots allowed for package globals like ^Learning.AdventurerD)
   Set tGName = $Order(^$GLOBAL(""))
   While tGName '= "" {
-    If $Match(tGName, "^\^[A-Za-z][A-Za-z0-9]*$") && (tTotalNodes < 200) {
+    If $Match(tGName, "^\^[A-Za-z][A-Za-z0-9.]*$") && (tTotalNodes < 200) {
       Set tGRef = tGName
       Set tGNode = {"name": (tGRef), "children": []}
 
