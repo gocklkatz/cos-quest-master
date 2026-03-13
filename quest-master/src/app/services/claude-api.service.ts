@@ -53,6 +53,8 @@ export class ClaudeApiService {
     apiKey: string,
     questType: 'standard' | 'prediction' = 'standard',
   ): Promise<Quest> {
+    const isClassBranch = currentBranch === 'classes' || currentBranch === 'capstone';
+
     const isEarlyStage = completedQuests.length === 0 || (completedQuests.length === 1 && completedQuests[0] === 'quest-zero');
     const earlyStageGuidance = isEarlyStage
       ? `\nIMPORTANT — EARLY LEARNER: The player is at Level 1 / apprentice tier. This quest MUST:
@@ -99,12 +101,17 @@ Generate the NEXT quest in this branch. It should:
 5. Include 1-2 bonus objectives for extra XP
 6. Specify evaluation criteria for code review
 
-CRITICAL CONSTRAINT — file execution model:
+${isClassBranch ? `CRITICAL CONSTRAINT — file execution model (classes/capstone branch):
+- Quests in the classes or capstone branch MUST use TWO files: a .cls file and a .script file.
+- The .cls file (fileType: "cls") contains the full Class definition. It is compiled via /api/quest/compile.
+- The .script file (fileType: "script") instantiates or uses the compiled class. It runs via XECUTE.
+- The .script file MUST declare "dependsOn": ["<cls-file-id>"] so the class compiles before the script runs.
+- Do NOT put Class/Property/Method syntax inside the script file — it will cause a compile error.` : `CRITICAL CONSTRAINT — file execution model:
 - Each quest defines a "files" array. Generated quests for command/globals/snippet branches use a single script file.
 - Script files (fileType: "script") run as plain ObjectScript commands via XECUTE — NOT inside a class or method.
 - DO NOT use ClassMethod, Method, Class, or class-definition syntax in script files.
 - Valid in script files: SET, WRITE, FOR, IF, DO, XECUTE, $ORDER, globals, etc.
-- Invalid in script files: ClassMethod Foo() { ... } — this causes a compile error
+- Invalid in script files: ClassMethod Foo() { ... } — this causes a compile error`}
 
 Respond with a JSON object with exactly these fields — no markdown fences, no extra commentary:
 {
@@ -121,7 +128,25 @@ Respond with a JSON object with exactly these fields — no markdown fences, no 
   "expectedOutput": null,
   "evaluationCriteria": "string",
   "prerequisites": ["completed quest IDs"],
-  "files": [
+  ${isClassBranch ? `"files": [
+    {
+      "id": "cls-main",
+      "filename": "Package.ClassName.cls",
+      "fileType": "cls",
+      "label": "Class Definition",
+      "starterCode": "string (full Class ... Extends ... { ... } definition)",
+      "starterCodeHint": "string (one-line comment orienting the player)"
+    },
+    {
+      "id": "main",
+      "filename": "solution.script",
+      "fileType": "script",
+      "label": "Solution Script",
+      "dependsOn": ["cls-main"],
+      "starterCode": "string (ObjectScript commands that use the compiled class)",
+      "starterCodeHint": "string (one-line comment orienting the player)"
+    }
+  ],` : `"files": [
     {
       "id": "main",
       "filename": "solution.script",
@@ -130,7 +155,7 @@ Respond with a JSON object with exactly these fields — no markdown fences, no 
       "starterCode": "string (valid ObjectScript commands)",
       "starterCodeHint": "string (one-line comment orienting the player without revealing logic)"
     }
-  ],
+  ],`}
   "conceptsIntroduced": ["string"],
   "docLinks": [{"label": "string", "url": "https://docs.intersystems.com/..."}]
 }

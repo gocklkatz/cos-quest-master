@@ -61,6 +61,14 @@
 
 ---
 
+## Bugs
+
+| # | Bug | Priority | Description | Doc |
+|---|---|---|---|---|
+| B1 | **Class Definition executed as script** ✅ | phase3-high | "Run on IRIS" wraps editor content in a temp routine and calls `/execute`, so class-definition code produces `Invalid command: 'Class'`. The Class Definition tab must route to `/compile` instead. | [bug-01-class-definition-compile.md](bug-01-class-definition-compile.md) |
+
+---
+
 ## Feature Dependency Graph
 
 ```mermaid

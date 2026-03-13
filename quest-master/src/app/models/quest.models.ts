@@ -75,7 +75,14 @@ export interface EvaluationResult {
  */
 export function normalizeQuest(raw: any): Quest {
   if (Array.isArray(raw.files) && raw.files.length > 0) {
-    return raw as Quest;
+    const quest = raw as Quest;
+    // Defensive: ensure fileType matches the filename extension.
+    // Guards against AI returning fileType:"script" for .cls files and stale localStorage quests.
+    for (const file of quest.files) {
+      if (file.filename.endsWith('.cls')) file.fileType = 'cls';
+      else if (file.filename.endsWith('.script')) file.fileType = 'script';
+    }
+    return quest;
   }
   const isCls = raw.mode === 'class';
   const filename = isCls
