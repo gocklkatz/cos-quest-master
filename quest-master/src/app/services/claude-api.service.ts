@@ -1,6 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Quest, EvaluationResult, QuestTier, normalizeQuest } from '../models/quest.models';
 
+export class ClaudeApiError extends Error {
+  constructor(public readonly status: number, message: string) {
+    super(message);
+    this.name = 'ClaudeApiError';
+  }
+}
+
+function mapClaudeStatus(status: number): string {
+  if (status === 401) return 'Invalid API key — check Settings.';
+  if (status === 402 || status === 429) return 'AI credits exhausted or rate-limit reached — evaluation used simplified scoring.';
+  if (status === 529) return 'Anthropic API is overloaded — evaluation used simplified scoring.';
+  return `Claude API error ${status} — evaluation used simplified scoring.`;
+}
+
 function stripJsonFences(text: string): string {
   return text.replace(/^```(?:json)?\s*/m, '').replace(/\s*```\s*$/m, '').trim();
 }
@@ -26,8 +40,7 @@ export class ClaudeApiService {
     });
 
     if (!response.ok) {
-      const body = await response.text();
-      throw new Error(`Claude API error ${response.status}: ${body}`);
+      throw new ClaudeApiError(response.status, mapClaudeStatus(response.status));
     }
     return response.json();
   }

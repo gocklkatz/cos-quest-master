@@ -110,6 +110,10 @@
       />
     </div>
 
+    @if (evaluationWarning()) {
+      <div class="evaluation-warning">⚠ {{ evaluationWarning() }}</div>
+    }
+
     @if (showChat()) {
       <!-- Output ↔ chat horizontal divider -->
       <div class="resize-divider resize-divider--horizontal"

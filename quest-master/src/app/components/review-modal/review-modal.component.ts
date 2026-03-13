@@ -1,7 +1,7 @@
 import { Component, HostListener, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { EvaluationResult } from '../../models/quest.models';
-import { ClaudeApiService } from '../../services/claude-api.service';
+import { ClaudeApiError, ClaudeApiService } from '../../services/claude-api.service';
 
 @Component({
   selector: 'app-review-modal',
@@ -38,8 +38,8 @@ export class ReviewModalComponent {
     try {
       const feedback = await this.claudeApi.evaluateReflection(question, answer, key);
       this.reflectionFeedback.set(feedback);
-    } catch {
-      this.reflectionError.set('Could not evaluate reflection. Check your API key and try again.');
+    } catch (e) {
+      this.reflectionError.set(e instanceof ClaudeApiError ? e.message : 'Could not evaluate reflection. Check your API key and try again.');
     } finally {
       this.isEvaluatingReflection.set(false);
     }

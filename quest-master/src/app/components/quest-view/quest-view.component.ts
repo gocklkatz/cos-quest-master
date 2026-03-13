@@ -18,6 +18,7 @@ import { TimeTrackingService } from '../../services/time-tracking.service';
 import { ResizableDividerDirective } from '../../directives/resizable-divider.directive';
 import { Achievement } from '../../models/achievement.models';
 import { CompileError, EvaluationResult, QuestFile } from '../../models/quest.models';
+import { ClaudeApiError } from '../../services/claude-api.service';
 
 @Component({
   selector: 'app-quest-view',
@@ -87,6 +88,9 @@ export class QuestViewComponent implements OnInit, OnDestroy {
   /** Last evaluation result (cleared when code is run again). */
   evaluation = signal<EvaluationResult | null>(null);
 
+  /** Set when Claude evaluation failed and simple evaluator was used instead. Cleared on run or quest load. */
+  evaluationWarning = signal<string | null>(null);
+
   /** Evaluation result waiting for the player to read it in the review modal. */
   reviewEvaluation = signal<EvaluationResult | null>(null);
 
@@ -150,6 +154,7 @@ export class QuestViewComponent implements OnInit, OnDestroy {
           this.error.set(null);
           this.compileErrors.set([]);
           this.evaluation.set(null);
+          this.evaluationWarning.set(null);
           this.aiPair.loadForQuest(quest.id);
         });
       }
@@ -169,6 +174,7 @@ export class QuestViewComponent implements OnInit, OnDestroy {
         this.error.set(null);
         this.compileErrors.set([]);
         this.evaluation.set(null);
+        this.evaluationWarning.set(null);
         const quest = this.questEngine.currentQuest();
         if (quest) {
           this.lastLoadedQuestId = quest.id;
@@ -289,6 +295,7 @@ export class QuestViewComponent implements OnInit, OnDestroy {
     this.error.set(null);
     this.compileErrors.set([]);
     this.evaluation.set(null);
+    this.evaluationWarning.set(null);
 
     this.runAllFiles(files, fileCodeMap);
   }
@@ -363,8 +370,9 @@ export class QuestViewComponent implements OnInit, OnDestroy {
           effectiveError,
           apiKey,
         );
-      } catch {
+      } catch (e) {
         result = this.questEngine.evaluateSimple(quest, effectiveOutput, effectiveError !== '');
+        this.evaluationWarning.set(e instanceof ClaudeApiError ? e.message : 'AI evaluation unavailable — result is based on output matching only.');
       } finally {
         this.isEvaluating.set(false);
       }
@@ -405,6 +413,7 @@ export class QuestViewComponent implements OnInit, OnDestroy {
           this.output.set(null);
           this.error.set(null);
           this.compileErrors.set([]);
+          this.evaluationWarning.set(null);
           this.aiPair.loadForQuest(next.id);
         };
       }
@@ -465,6 +474,7 @@ export class QuestViewComponent implements OnInit, OnDestroy {
           this.output.set(null);
           this.error.set(null);
           this.compileErrors.set([]);
+          this.evaluationWarning.set(null);
           this.aiPair.loadForQuest(next.id);
         };
       }
@@ -506,6 +516,7 @@ export class QuestViewComponent implements OnInit, OnDestroy {
     this.error.set(null);
     this.compileErrors.set([]);
     this.evaluation.set(null);
+    this.evaluationWarning.set(null);
     this.aiPair.loadForQuest(questId);
   }
 }

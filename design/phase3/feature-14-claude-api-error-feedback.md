@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase3-high |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Depends On | F1 (Dynamic Quest Regeneration), F10 (AI Review Modal) |
 | Pedagogical Principle | Trust Calibration — players must know whether feedback came from Claude or the fallback evaluator to correctly weight it |
 
@@ -56,7 +56,7 @@ When any call to `ClaudeApiService` fails (network error, invalid API key, exhau
 
 ## Open Questions
 
-- [ ] Should the warning banner include a "Retry with Claude" button that re-runs evaluation (requires storing the last submission)? Or is the banner purely informational?
+- ~~Should the warning banner include a "Retry with Claude" button that re-runs evaluation (requires storing the last submission)? Or is the banner purely informational?~~ **Resolved 2026-03-13**: Banner is purely informational — no retry button. Adding a retry would require storing the last submission and adds scope without meaningful pedagogical gain.
 
 ---
 

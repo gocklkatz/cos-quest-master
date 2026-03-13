@@ -179,6 +179,16 @@
   overflow: hidden;
 }
 
+/* ── Evaluation warning banner ───────────────────────── */
+.evaluation-warning {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  background: #3d2e00;
+  border-top: 1px solid #a16207;
+  color: #fbbf24;
+  font-size: 0.8rem;
+}
+
 /* ── Chat toggle button in toolbar ───────────────────── */
 .chat-toggle-btn {
   margin-left: auto;
