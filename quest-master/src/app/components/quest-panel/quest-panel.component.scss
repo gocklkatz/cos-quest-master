@@ -712,6 +712,26 @@
   }
 }
 
+.prediction-retry-btn {
+  margin-top: 8px;
+  align-self: flex-start;
+  background: #1f2a1f;
+  border: 1px solid #406040;
+  color: #90b890;
+  padding: 5px 16px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  &:hover {
+    background: #2a3a2a;
+    border-color: #60a060;
+    color: #b0d8b0;
+  }
+}
+
 // ── Skip quest ───────────────────────────────────────────
 .skip-section {
   display: flex;

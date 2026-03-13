@@ -170,7 +170,7 @@
       }
 
       <!-- ── Last evaluation result ─────────────── -->
-      @if (evaluation() && !isEvaluating()) {
+      @if (evaluation() && !isEvaluating() && (quest()?.questType !== 'prediction' || predictionAnswered())) {
         <div class="quest-section evaluation-section" [class.passed]="evaluation()!.passed" [class.failed]="!evaluation()!.passed">
           <div class="eval-header">
             @if (evaluation()!.passed) {
@@ -194,6 +194,9 @@
                 <li class="eval-bonus-item">&#11088; Bonus: {{ b }}</li>
               }
             </ul>
+          }
+          @if (!evaluation()!.passed && quest()?.questType === 'prediction') {
+            <button class="prediction-retry-btn" (click)="retryPrediction()">Try Again</button>
           }
         </div>
       }

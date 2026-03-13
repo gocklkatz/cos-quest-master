@@ -221,7 +221,7 @@ export class QuestViewComponent implements OnInit, OnDestroy {
   }
 
   /** Load a quest's files into the editor, respecting challenge mode. */
-  private loadQuestCode(quest: { files: QuestFile[] }): void {
+  private loadQuestCode(quest: { files: QuestFile[]; questType?: string }): void {
     this.questStartedAt = Date.now();
     this.hintsShownForCurrentQuest.set(false);
     this.fileCodeBuffers.clear();
@@ -229,9 +229,11 @@ export class QuestViewComponent implements OnInit, OnDestroy {
     this.questFiles.set(files);
     const firstFile = files[0] ?? null;
     this.activeFileId.set(firstFile?.id ?? '');
+    // Prediction quests always show the full code — it is the question itself.
+    const useChallengeMode = this.gameState.challengeMode() && quest.questType !== 'prediction';
     this.editorCode.set(
       firstFile
-        ? (this.gameState.challengeMode()
+        ? (useChallengeMode
             ? (firstFile.starterCodeHint ?? '')
             : (firstFile.starterCode ?? ''))
         : '',
@@ -240,7 +242,7 @@ export class QuestViewComponent implements OnInit, OnDestroy {
     for (const file of files.slice(1)) {
       this.fileCodeBuffers.set(
         file.id,
-        this.gameState.challengeMode()
+        useChallengeMode
           ? (file.starterCodeHint ?? '')
           : (file.starterCode ?? ''),
       );

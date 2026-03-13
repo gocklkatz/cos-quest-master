@@ -161,6 +161,11 @@ export class QuestPanelComponent {
     this.predictionSubmitted.emit(choice);
   }
 
+  retryPrediction(): void {
+    this.predictionAnswered.set(false);
+    this.selectedChoice.set(null);
+  }
+
   isCompleted(id: string): boolean {
     return this.completedQuestIds().includes(id);
   }
