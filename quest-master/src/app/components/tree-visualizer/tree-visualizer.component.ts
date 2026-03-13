@@ -147,7 +147,7 @@ export class TreeVisualizerComponent implements AfterViewInit {
       label: 'USER',
       children: globals.map(g => ({
         label: g.name,
-        children: g.children.length ? g.children.map(n => this.mapNode(n)) : undefined,
+        children: g.children.length ? g.children.filter(n => !n.key.startsWith('%')).map(n => this.mapNode(n)) : undefined,
       })),
     };
   }

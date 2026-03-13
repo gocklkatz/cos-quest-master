@@ -15,6 +15,6 @@ export class GlobalService {
     this.irisApi
       .getGlobals(this.gameState.irisConfig())
       .pipe(take(1))
-      .subscribe(response => this.globals.set(response.globals));
+      .subscribe(response => this.globals.set(response.globals.filter(g => !g.name.replace(/^\^/, '').startsWith('%'))));
   }
 }
