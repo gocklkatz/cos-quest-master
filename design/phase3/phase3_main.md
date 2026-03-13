@@ -46,6 +46,7 @@
 | 11 | **Scrollable Output Pane** ✅ | phase3-high | Prevents long output from overflowing and becoming unreadable | — |
 | 12 | **Branch Progression System** ✅ | phase3-mid | Automatically advances the player to new skill branches after demonstrated mastery, preventing curriculum stall on `setup` | [feature-12-branch-progression.md](feature-12-branch-progression.md) |
 | 13 | **Skip Quest** ✅ | phase3-mid | Allows the player to discard a quest they find unhelpful and immediately generate a new one, preventing frustration-driven dropout | [feature-13-skip-quest.md](feature-13-skip-quest.md) |
+| 14 | **Claude API Error Feedback** | phase3-high | Surfaces meaningful errors (expired key, exhausted credits, rate-limit) when `ClaudeApiService` fails instead of silently falling back to the simple evaluator | [feature-14-claude-api-error-feedback.md](feature-14-claude-api-error-feedback.md) |
 
 ---
 
@@ -76,6 +77,8 @@ graph TD
     F1 --> F12[Branch Progression System]
     F5 --> F12
     F1 --> F13[Skip Quest]
+    F1 --> F14[Claude API Error Feedback]
+    F10 --> F14
 ```
 
 ---
@@ -152,6 +155,18 @@ A **Skip** button in the Quest Panel lets the player discard the current quest a
 - **Goal**: Reduce frustration when a generated quest is poorly matched to the player's current context; keep engagement high without breaking the branch curriculum.
 - **Implementation**: `QuestEngineService` exposes a `skipQuest()` method that discards the current quest, increments a `skipsThisSession` counter on `GameStateService`, and calls `generateNextQuest(currentBranch, apiKey)`. A confirmation guard (small inline prompt: "Skip this quest?  Skip / Cancel") prevents accidental dismissals. The Skip button is disabled while a quest is already generating (`questGenerating` signal). No XP penalty; the skipped quest does **not** count toward the branch progression threshold.
 
+### F14: Claude API Error Feedback
+When a call to the Anthropic API fails (invalid key, exhausted credits, rate-limit), the current code silently falls back to the simple pass/fail evaluator. The player receives no indication that AI evaluation did not run and may make wrong inferences from the simplified result.
+
+This feature:
+1. Detects HTTP error status codes in `ClaudeApiService.callClaude` and maps them to user-readable messages (401 → invalid key, 402/429 → credits exhausted or rate-limited, 529 → API overloaded).
+2. Re-throws a typed `ClaudeApiError` so callers can distinguish API failures from other errors.
+3. In `QuestViewComponent.submitCode`, the `catch` block now shows a non-blocking inline warning (e.g. _"AI evaluation unavailable — result is based on output matching only."_) in addition to rendering the simple-evaluator result. The warning is styled distinctly (amber/warning tone) so the player understands the limitation.
+4. The same typed error is surfaced in the reflection `catch` block in `ReviewModalComponent` with a credit-specific message when applicable.
+
+- **Goal**: Preserve trust in the AI feedback loop — players should always know whether their evaluation came from Claude or the fallback.
+- **Implementation**: New `ClaudeApiError` class in `claude-api.service.ts`; `evaluationWarning` signal on `QuestViewComponent`; amber inline banner in `quest-view.component.html` below the output pane.
+
 ### F8: Quest Time Tracking & Goal System
 Tracks active time spent on quests and allows users to set daily and weekly goals (e.g., "30 mins/day," "4 hours/week").
 - **Goal**: Spaced repetition and effort-based motivation.
@@ -211,3 +226,4 @@ Tracks active time spent on quests and allows users to set daily and weekly goal
 12. **Code Literacy**: Implement Code Prediction quest type (F6).
 13. **Output Usability**: Make the output pane scrollable (F11).
 14. **Curriculum Progression**: Implement Branch Progression System so the player advances beyond `setup` (F12).
+15. **API Error Visibility**: Surface Claude API failures (invalid key, exhausted credits, rate-limit) with typed errors and an inline UI warning (F14).
