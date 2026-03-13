@@ -12,10 +12,10 @@ $ErrorActionPreference = "Stop"
 function Pass($msg) { Write-Host "   OK $msg" }
 function Fail($msg) { Write-Error "ERROR: $msg"; exit 1 }
 
-$cred = New-Object System.Management.Automation.PSCredential(
-    "_SYSTEM",
-    (ConvertTo-SecureString $Password -AsPlainText -Force)
-)
+# Build a Basic auth header for preemptive authentication (Invoke-WebRequest with -Credential
+# only responds to 401 challenges; IRIS may not issue one, so we send credentials upfront).
+$basicToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("_SYSTEM:$Password"))
+$authHeader = @{ Authorization = "Basic $basicToken" }
 
 Write-Host "Verifying IRIS setup (container: $Container)"
 Write-Host ""
@@ -37,7 +37,7 @@ Pass "Container healthy"
 Write-Host "3. Health endpoint..."
 try {
     $healthResp = Invoke-WebRequest -Uri "http://localhost:52773/api/quest/health" `
-        -Credential $cred -UseBasicParsing
+        -Headers $authHeader -UseBasicParsing
 } catch {
     Fail "Health endpoint unreachable. Is port 52773 forwarded?"
 }
@@ -51,7 +51,7 @@ Write-Host "4. Execute endpoint..."
 try {
     $execResp = Invoke-WebRequest -Uri "http://localhost:52773/api/quest/execute" `
         -Method POST `
-        -Credential $cred `
+        -Headers $authHeader `
         -ContentType "application/json" `
         -Body '{"code":"WRITE \"verify-ok\", !"}' `
         -UseBasicParsing
