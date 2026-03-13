@@ -90,7 +90,7 @@ export class TreeVisualizerComponent implements AfterViewInit {
     svg.call(
       d3
         .zoom<SVGSVGElement, unknown>()
-        .scaleExtent([0.25, 4])
+        .scaleExtent([0.25, 10])
         .on('zoom', event => g.attr('transform', event.transform)),
     );
 
