@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Priority | phase3-mid |
-| Status | 🚧 In progress |
+| Status | ✅ Complete |
 | Depends On | F4 (Global Tree Visualizer) |
 | Pedagogical Principle | Learner Agency / Directed Attention |
 
@@ -66,7 +66,7 @@ Add a filter input field at the top of the Tree Visualizer view. The backend ret
 
 ## Files Changed
 
-- `quest-master/src/app/services/global.service.ts` — add `filterTerm` signal
+- `quest-master/src/app/services/global.service.ts` — add `filterTerm`, `loading`, `error`, `lastRefreshed` signals; error-handling in `refresh()`
 - `quest-master/src/app/utils/global-filter.ts` — new `globalMatchesFilter()` helper
 - `quest-master/src/app/components/tree-visualizer/tree-visualizer.component.ts`
 - `quest-master/src/app/components/tree-visualizer/tree-visualizer.component.html`
@@ -95,9 +95,13 @@ Add a filter input field at the top of the Tree Visualizer view. The backend ret
 
 **Root cause**: The `[value]="globalService.filterTerm()"` one-way binding and the 300 ms debounce fought each other. Angular's change detection ran after every keystroke and reset the input's DOM `value` to the stale signal value (the signal only updated after the debounce timer fired), effectively erasing each typed character before the next could be entered. Both symptoms — dropped keystrokes and the filter appearing not to work — were the same bug.
 
-**Fix**: Removed the debounce entirely. `onFilterInput` now calls `globalService.filterTerm.set(value)` directly. The `[value]` binding and the signal stay in sync on every keystroke.
+**Fix (v1 — incomplete)**: Removed the debounce. `onFilterInput` calls `globalService.filterTerm.set(value)` directly. The `[value]` binding remained.
 
-**Files changed**: `quest-master/src/app/components/tree-visualizer/tree-visualizer.component.ts`
+**Relapse 2026-03-13**: The filter still failed to apply. Root cause: even without a debounce, Angular's CD ran after each `(input)` event and re-set `input.value` from the signal via `[value]`. Because signal updates and CD scheduling are asynchronous in Angular 17's push model, the binding could overwrite the user's typed characters before the next `input` event fired — keeping the signal empty and the tree unfiltered.
+
+**Fix (v2 — final)**: Removed `[value]` entirely. The input is now uncontrolled from Angular's perspective. `(input)` updates the signal directly without interference. Restoration of the persisted term on navigation back is handled imperatively in `ngAfterViewInit` via a `@ViewChild('filterInputEl')` reference. `clearFilter()` also resets `filterInputEl.nativeElement.value` alongside the signal.
+
+**Files changed**: `quest-master/src/app/components/tree-visualizer/tree-visualizer.component.ts`, `tree-visualizer.component.html`
 
 ---
 
@@ -107,38 +111,38 @@ Expert heuristic evaluation of the completed component against the primary learn
 
 ### Critical
 
-| # | Issue | Symptom for learner |
-|---|---|---|
-| 1 | **No loading state or refresh button** | `refresh()` fires only once, on first tab visit. If the learner visits Tree before running code, then runs code and returns, they see stale data with no indication. The empty-state message "Run code in Quest View…" is shown both when no globals exist *and* while the fetch is in flight — a false negative that makes learners think their code failed. |
-| 2 | **No error handling on refresh** | If the HTTP call fails (IRIS down, Docker stopped), `globals()` stays at its previous value silently. The user sees either an outdated tree or the empty-state message with no error message. |
-| 3 | **SVG has no ARIA structure** | The entire D3 tree is invisible to screen readers. No `role`, no `aria-label`, no `<title>` elements on nodes. |
+| # | Issue | Status | Symptom for learner |
+|---|---|---|---|
+| 1 | **No loading state or refresh button** | ✅ Fixed 2026-03-13 | `refresh()` fires only once, on first tab visit. If the learner visits Tree before running code, then runs code and returns, they see stale data with no indication. The empty-state message "Run code in Quest View…" is shown both when no globals exist *and* while the fetch is in flight — a false negative that makes learners think their code failed. |
+| 2 | **No error handling on refresh** | ✅ Fixed 2026-03-13 | If the HTTP call fails (IRIS down, Docker stopped), `globals()` stays at its previous value silently. The user sees either an outdated tree or the empty-state message with no error message. |
+| 3 | **SVG has no ARIA structure** | ⬜ Open | The entire D3 tree is invisible to screen readers. No `role`, no `aria-label`, no `<title>` elements on nodes. |
+
+**Fix for 1+2**: Added `loading`, `error`, and `lastRefreshed` signals to `GlobalService`. `refresh()` now sets `loading(true)` at start and clears it on success/error; sets `error()` on failure. Component shows "Loading globals…" in the SVG empty state while loading; shows an error banner with a Retry button on failure; shows a ↻ refresh button (spins while loading) and "Updated HH:MM:SS" timestamp in the header.
 
 ### High
 
-| # | Issue | Symptom for learner |
-|---|---|---|
-| 4 | **Two invisible truncation systems** | The backend caps at 50 children / 3 levels (marks `truncated: true`); the frontend silently drops nodes when the 300-node budget runs out. Backend truncation shows a `…` dashed circle (unexplained); frontend truncation leaves no trace at all. Learners can't tell their data is incomplete. |
-| 5 | **Node budget jumps 300 → 2000 when filter is active** | The tree renders dramatically more nodes when filtered than when browsing unfiltered. Removing the filter causes nodes to disappear with no explanation. |
+| # | Issue | Status | Symptom for learner |
+|---|---|---|---|
+| 4 | **Two invisible truncation systems / stale data** | ✅ Partially fixed 2026-03-13 | The backend caps at 50 children / 3 levels (marks `truncated: true`); the frontend silently drops nodes when the 300-node budget runs out. Backend truncation shows a `…` dashed circle (unexplained); frontend truncation leaves no trace at all. Learners can't tell their data is incomplete. |
+| 5 | **Node budget jumps 300 → 2000 when filter is active** | ⬜ Open | The tree renders dramatically more nodes when filtered than when browsing unfiltered. Removing the filter causes nodes to disappear with no explanation. |
+
+**Fix for 4 (partial)**: The "last refreshed" timestamp makes stale data visible. The unexplained `…` dashed circle and the silent frontend node budget drop remain open (tracked under issue 5 / future sprint).
 
 ### Medium
 
-| # | Issue | Symptom for learner |
-|---|---|---|
-| 6 | **No node hover / click interaction** | Beginners try clicking the `…` truncation nodes and get no response. No canonical IRIS path (`^Global("sub1","sub2")`) is shown anywhere, so learners can't connect the visual to the ObjectScript syntax they write. |
-| 7 | **No zoom reset** | After zooming in or panning off-screen, the only recovery is navigating away and back. |
-| 8 | **Filter input fixed at 220px** | Long global names (e.g. `^MyApplicationConfig`) plus subscript paths can exceed the visible input width. |
+| # | Issue | Status | Symptom for learner |
+|---|---|---|---|
+| 6 | **No node hover / click interaction** | ⬜ Open | Beginners try clicking the `…` truncation nodes and get no response. No canonical IRIS path (`^Global("sub1","sub2")`) is shown anywhere, so learners can't connect the visual to the ObjectScript syntax they write. |
+| 7 | **No zoom reset** | ⬜ Open | After zooming in or panning off-screen, the only recovery is navigating away and back. |
+| 8 | **Filter input fixed at 220px** | ⬜ Open | Long global names (e.g. `^MyApplicationConfig`) plus subscript paths can exceed the visible input width. |
 
 ### Accessibility / Contrast Failures
 
-| Element | Color | Background | Ratio | WCAG AA |
-|---|---|---|---|---|
-| `.tree-hint` | `#6b5f94` | `#0d0b1a` | ~3.1:1 | Fail |
-| `.filter-count` (default) | `#6b5f94` | `#0d0b1a` | ~3.1:1 | Fail |
-| Truncated node label | `#4a3f6b` | `#0d0b1a` | ~2.0:1 | Fail |
-| Filter placeholder | `#4a3f6b` | `#1a1630` | ~2.0:1 | Fail |
+| Element | Color | Background | Ratio | WCAG AA | Status |
+|---|---|---|---|---|---|
+| `.tree-hint` | ~~`#6b5f94`~~ `#9b8fc4` | `#0d0b1a` | ~5:1 | Pass | ✅ Fixed 2026-03-13 |
+| `.filter-count` (default) | `#6b5f94` | `#0d0b1a` | ~3.1:1 | Fail | ⬜ Open |
+| Truncated node label | `#4a3f6b` | `#0d0b1a` | ~2.0:1 | Fail | ⬜ Open |
+| Filter placeholder | `#4a3f6b` | `#1a1630` | ~2.0:1 | Fail | ⬜ Open |
 
-Additional ARIA gaps: the filter `<input>` has no `<label>` element; the clear button (`×`) uses only a `title` attribute, which screen readers do not reliably announce — it needs `aria-label="Clear filter"`.
-
-### Recommended next-sprint focus
-
-Fix issues **1 + 2 + 4** together — they share the same root: `GlobalService` needs a `loading` signal and an `error` signal, and the component needs a refresh button. This eliminates the most common learner failure state (believing their code did not work when it did). A "last refreshed" timestamp next to the refresh button addresses issue 4 at the same time.
+Additional ARIA gaps: ~~the filter `<input>` has no `<label>` element~~ → added `aria-label="Filter globals"`. ~~the clear button (`×`) uses only a `title` attribute~~ → replaced with `aria-label="Clear filter"`. Both fixed 2026-03-13.

@@ -191,6 +191,8 @@ ClassMethod Globals() As %Status
     If $Match(tGName, "^\^[A-Za-z][A-Za-z0-9.]*$") {
       Set tGRef = tGName
       Set tGNode = {"name": (tGRef), "children": []}
+      Set tD0 = $Data(@tGRef)
+      If (tD0 = 1) || (tD0 = 11) { Set tGNode.value = $Get(@tGRef) }
 
       // Level 1
       Set tL1Count = 0, tL1Trunc = 0

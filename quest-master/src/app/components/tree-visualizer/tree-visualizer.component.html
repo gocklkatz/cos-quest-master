@@ -2,6 +2,19 @@
   <header class="tree-header">
     <span class="tree-title">Global Tree — USER namespace</span>
     <span class="tree-hint">Run code in Quest View, then return here to inspect globals.</span>
+    <div class="tree-toolbar">
+      @if (globalService.lastRefreshed()) {
+        <span class="last-refreshed">Updated {{ formatTime(globalService.lastRefreshed()!) }}</span>
+      }
+      <button
+        class="refresh-btn"
+        [class.refresh-btn--spinning]="globalService.loading()"
+        (click)="globalService.refresh()"
+        [disabled]="globalService.loading()"
+        title="Refresh globals"
+        aria-label="Refresh globals"
+      >↻</button>
+    </div>
   </header>
 
   <div class="filter-bar">
@@ -10,12 +23,13 @@
         class="filter-input"
         type="text"
         placeholder="Filter globals…"
-        [value]="globalService.filterTerm()"
-        (input)="onFilterInput($event)"
+        aria-label="Filter globals"
+        [ngModel]="globalService.filterTerm()"
+        (ngModelChange)="globalService.filterTerm.set($event)"
         (keydown.escape)="clearFilter()"
       />
       @if (globalService.filterTerm()) {
-        <button class="filter-clear" (click)="clearFilter()" title="Clear filter">×</button>
+        <button class="filter-clear" (click)="clearFilter()" aria-label="Clear filter">×</button>
       }
     </div>
     @if (globalService.globals().length > 0) {
@@ -28,6 +42,13 @@
       </span>
     }
   </div>
+
+  @if (globalService.error()) {
+    <div class="error-banner">
+      ⚠ {{ globalService.error() }}
+      <button class="error-retry" (click)="globalService.refresh()">Retry</button>
+    </div>
+  }
 
   <svg #svgEl class="tree-svg"></svg>
 </div>

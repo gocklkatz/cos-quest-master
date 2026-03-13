@@ -31,7 +31,51 @@
 
 .tree-hint {
   font-size: 0.78rem;
-  color: #6b5f94;
+  color: #9b8fc4;
+}
+
+.tree-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.last-refreshed {
+  font-size: 0.72rem;
+  color: #9b8fc4;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.refresh-btn {
+  background: none;
+  border: 1px solid #3b3058;
+  border-radius: 4px;
+  color: #a89bc4;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 3px 7px;
+  display: inline-flex;
+  align-items: center;
+
+  &:hover:not(:disabled) {
+    border-color: #7c5cbf;
+    color: #c4b5f5;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &--spinning {
+    animation: spin 0.8s linear infinite;
+  }
 }
 
 // ── Filter bar ─────────────────────────────────────────────────────────────────
@@ -93,6 +137,35 @@
 
   &--capped {
     color: #a89bc4;
+  }
+}
+
+// ── Error banner ───────────────────────────────────────────────────────────────
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px;
+  background: #1f0e0e;
+  border-bottom: 1px solid #6b2424;
+  color: #e08080;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.error-retry {
+  background: none;
+  border: 1px solid #6b2424;
+  border-radius: 4px;
+  color: #e08080;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  font-family: inherit;
+
+  &:hover {
+    border-color: #e08080;
   }
 }
 

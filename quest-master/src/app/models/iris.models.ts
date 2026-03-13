@@ -20,6 +20,7 @@ export interface GlobalNode {
 
 export interface GlobalEntry {
   name: string;
+  value?: string | number;
   children: GlobalNode[];
 }
 

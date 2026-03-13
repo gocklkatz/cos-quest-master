@@ -47,7 +47,7 @@
 | 12 | **Branch Progression System** ✅ | phase3-mid | Automatically advances the player to new skill branches after demonstrated mastery, preventing curriculum stall on `setup` | [feature-12-branch-progression.md](feature-12-branch-progression.md) |
 | 13 | **Skip Quest** ✅ | phase3-mid | Allows the player to discard a quest they find unhelpful and immediately generate a new one, preventing frustration-driven dropout | [feature-13-skip-quest.md](feature-13-skip-quest.md) |
 | 14 | **Claude API Error Feedback** ✅ | phase3-high | Surfaces meaningful errors (expired key, exhausted credits, rate-limit) when `ClaudeApiService` fails instead of silently falling back to the simple evaluator | [feature-14-claude-api-error-feedback.md](feature-14-claude-api-error-feedback.md) |
-| 15 | **Tree Visualizer Global Filter** 🚧 | phase3-mid | Client-side filter field lets the learner narrow the tree to globals whose names match a search term; directs attention to the data just created by the current quest | [feature-15-tree-visualizer-filter.md](feature-15-tree-visualizer-filter.md) |
+| 15 | **Tree Visualizer Global Filter** ✅ | phase3-mid | Client-side filter field lets the learner narrow the tree to globals whose names match a search term; directs attention to the data just created by the current quest | [feature-15-tree-visualizer-filter.md](feature-15-tree-visualizer-filter.md) |
 
 ---
 

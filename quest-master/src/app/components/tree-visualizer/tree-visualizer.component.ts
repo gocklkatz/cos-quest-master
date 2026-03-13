@@ -7,6 +7,7 @@ import {
   effect,
   inject,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import * as d3 from 'd3';
 import { GlobalService } from '../../services/global.service';
 import { GlobalEntry, GlobalNode } from '../../models/iris.models'; // GlobalNode used in mapNodeBudgeted
@@ -22,7 +23,7 @@ interface TreeNode {
 @Component({
   selector: 'app-tree-visualizer',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './tree-visualizer.component.html',
   styleUrl: './tree-visualizer.component.scss',
 })
@@ -42,19 +43,20 @@ export class TreeVisualizerComponent implements AfterViewInit {
   constructor() {
     effect(() => {
       const globals = this.filteredGlobals();
+      void this.globalService.loading(); // re-render when loading state changes
       if (this.viewReady) {
         this.render(globals);
       }
     });
   }
 
-  ngAfterViewInit(): void {
-    this.viewReady = true;
-    this.globalService.refresh();
+  formatTime(date: Date): string {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
-  onFilterInput(event: Event): void {
-    this.globalService.filterTerm.set((event.target as HTMLInputElement).value);
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    queueMicrotask(() => this.globalService.refresh());
   }
 
   clearFilter(): void {
@@ -68,9 +70,14 @@ export class TreeVisualizerComponent implements AfterViewInit {
 
     if (globals.length === 0) {
       const term = this.globalService.filterTerm();
-      const msg = term
-        ? `No globals matching '${term}'`
-        : 'Run code that sets globals — they will appear here.';
+      let msg: string;
+      if (this.globalService.loading()) {
+        msg = 'Loading globals…';
+      } else if (term) {
+        msg = `No globals matching '${term}'`;
+      } else {
+        msg = 'Run code that sets globals — they will appear here.';
+      }
       svg
         .append('text')
         .attr('x', '50%')
@@ -191,6 +198,7 @@ export class TreeVisualizerComponent implements AfterViewInit {
           .filter((c): c is TreeNode => c !== null);
         return {
           label: g.name,
+          value: g.value != null ? String(g.value) : undefined,
           children: children.length ? children : undefined,
         };
       }),
