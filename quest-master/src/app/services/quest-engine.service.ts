@@ -73,6 +73,14 @@ export class QuestEngineService {
    */
   readonly resetEpoch = signal(0);
 
+  /** Editor state snapshot preserved across Quest View / Tree Visualizer navigation. */
+  savedEditorState: {
+    questId: string;
+    activeFileId: string;
+    editorCode: string;
+    fileCodeBuffers: Map<string, string>;
+  } | null = null;
+
   private _lastBranch = '';
   private _lastApiKey = '';
 

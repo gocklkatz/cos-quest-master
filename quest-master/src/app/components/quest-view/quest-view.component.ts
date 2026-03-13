@@ -187,17 +187,36 @@ export class QuestViewComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.timeSvc.stopTracking();
+    // Preserve editor state so navigating to Tree Visualizer and back doesn't lose code.
+    const questId = this.questEngine.currentQuest()?.id;
+    if (questId) {
+      this.questEngine.savedEditorState = {
+        questId,
+        activeFileId: this.activeFileId(),
+        editorCode: this.editorCode(),
+        fileCodeBuffers: new Map(this.fileCodeBuffers),
+      };
+    }
   }
 
   ngOnInit(): void {
     this.timeSvc.startTracking();
     this.questEngine.initialize();
 
-    // Load starter code and chat history for the initial quest.
     const initial = this.questEngine.currentQuest();
     if (initial) {
       this.lastLoadedQuestId = initial.id;
-      this.loadQuestCode(initial);
+      const saved = this.questEngine.savedEditorState;
+      if (saved && saved.questId === initial.id) {
+        // Restore code the user was working on before navigating away.
+        this.questFiles.set(initial.files ?? []);
+        this.activeFileId.set(saved.activeFileId);
+        this.editorCode.set(saved.editorCode);
+        this.fileCodeBuffers.clear();
+        saved.fileCodeBuffers.forEach((v, k) => this.fileCodeBuffers.set(k, v));
+      } else {
+        this.loadQuestCode(initial);
+      }
       this.aiPair.loadForQuest(initial.id);
     }
   }
