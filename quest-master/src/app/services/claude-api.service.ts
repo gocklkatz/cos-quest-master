@@ -114,7 +114,7 @@ ${isClassBranch ? `CRITICAL CONSTRAINT — file execution model (classes/capston
   2. A .script file (fileType: "script", id: "main") with "dependsOn": ["cls-main"] containing the embedded SQL operations.
 - The .cls file is compiled first via /api/quest/compile; the .script file runs after via XECUTE.
 - If the quest uses a table that already exists from a prerequisite quest (check prerequisites), use a SINGLE script file only.
-- In script files: use &sql(INSERT...), &sql(DECLARE/OPEN/FETCH/CLOSE), $SQLCODE, host variables (:tVar), WRITE, etc.
+- In script files: use &sql(INSERT...), &sql(DECLARE/OPEN/FETCH/CLOSE), SQLCODE (NOT $SQLCODE — SQLCODE is a plain local variable set by &sql(), not a special variable), host variables (:tVar), WRITE, etc.
 - DO NOT use ClassMethod, Method, or Class definition syntax in script files — this causes a compile error.
 - IMPORTANT: SQLUser.Xyz maps to the ObjectScript class User.Xyz. Use "User.Xyz.cls" as the filename and "Class User.Xyz Extends %Persistent" in the class definition.` : `CRITICAL CONSTRAINT — file execution model:
 - Each quest defines a "files" array. Generated quests for command/globals/snippet branches use a single script file.
