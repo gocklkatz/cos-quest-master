@@ -38,7 +38,7 @@ These are the primary topics requiring discussion and decision before full featu
 3. **Dynamic branch extension** — branches never have a fixed quest count; the AI decides when mastery is sufficient (via evaluation score threshold). The player is never told how many quests remain in a branch.
 4. **Infinite side-quests** — after completing the main curriculum, unlock a free-practice mode with no branch structure, just topic-tagged quests on demand.
 
-**Decision needed**: Which model best balances pedagogical continuity with engagement?
+**Decision**: **Option 2 — Prestige / New Game+** with free-practice mode as a post-Prestige unlock. See [DECISIONS.md → D-P4-01](DECISIONS.md) and [q1-infinite-game-analysis.md](q1-infinite-game-analysis.md).
 
 ---
 
