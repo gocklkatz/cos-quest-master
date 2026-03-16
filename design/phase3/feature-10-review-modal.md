@@ -68,8 +68,8 @@ Acceptance criteria:
 
 ## Open Questions
 
-- [ ] Should the modal also appear for failed quests (where the next quest does NOT load)? Current spec says yes — consistent UX and forces the player to read feedback before returning to the editor.
-- [ ] Should the modal include a "Try Again" shortcut button (for failed quests) in addition to OK? Deferred — keep minimal for now.
+- ~~Should the modal also appear for failed quests (where the next quest does NOT load)?~~ **Yes** — confirmed by Verification Plan step 1; modal appears for pass and fail, consistent UX.
+- ~~Should the modal include a "Try Again" shortcut button (for failed quests) in addition to OK?~~ **Deferred to Phase 4** — keep minimal; OK button is sufficient for now.
 
 ---
 

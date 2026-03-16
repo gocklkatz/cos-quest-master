@@ -66,11 +66,10 @@ export class CodeEditorComponent {
       if (this.editor) {
         const current: string = this.editor.getValue();
         if (current !== newCode) {
-          // Replace content while preserving undo history and cursor position.
-          const model = this.editor.getModel();
-          this.editor.pushUndoStop();
-          this.editor.executeEdits('load', [{ range: model.getFullModelRange(), text: newCode }]);
-          this.editor.pushUndoStop();
+          // Replace content. Use model.setValue() to bypass Monaco's editor-level
+          // read-only guard (which blocks executeEdits on prediction quests) while
+          // still firing onDidChangeModelContent so the user-edit listener stays correct.
+          this.editor.getModel().setValue(newCode);
         }
       }
     });

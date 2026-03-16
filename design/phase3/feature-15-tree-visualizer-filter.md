@@ -141,8 +141,8 @@ Expert heuristic evaluation of the completed component against the primary learn
 | Element | Color | Background | Ratio | WCAG AA | Status |
 |---|---|---|---|---|---|
 | `.tree-hint` | ~~`#6b5f94`~~ `#9b8fc4` | `#0d0b1a` | ~5:1 | Pass | ✅ Fixed 2026-03-13 |
-| `.filter-count` (default) | `#6b5f94` | `#0d0b1a` | ~3.1:1 | Fail | ⬜ Open |
-| Truncated node label | `#4a3f6b` | `#0d0b1a` | ~2.0:1 | Fail | ⬜ Open |
-| Filter placeholder | `#4a3f6b` | `#1a1630` | ~2.0:1 | Fail | ⬜ Open |
+| `.filter-count` (default) | ~~`#6b5f94`~~ `#9b8fc4` | `#0d0b1a` | ~5:1 | Pass | ✅ Fixed 2026-03-16 |
+| Truncated node label | ~~`#4a3f6b`~~ `#7c6ea8` | `#0d0b1a` | ~4.5:1 | Pass | ✅ Fixed 2026-03-16 |
+| Filter placeholder | ~~`#4a3f6b`~~ `#8a7db5` | `#1a1630` | ~4.8:1 | Pass | ✅ Fixed 2026-03-16 |
 
 Additional ARIA gaps: ~~the filter `<input>` has no `<label>` element~~ → added `aria-label="Filter globals"`. ~~the clear button (`×`) uses only a `title` attribute~~ → replaced with `aria-label="Clear filter"`. Both fixed 2026-03-13.

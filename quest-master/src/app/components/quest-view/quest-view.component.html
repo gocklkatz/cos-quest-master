@@ -37,7 +37,7 @@
   <section class="editor-area">
     <div class="editor-pane">
       <app-code-editor
-        [(code)]="editorCode"
+        [code]="editorCode()" (codeChange)="editorCode.set($event)"
         [files]="questFiles()"
         [activeFileId]="activeFileId()"
         [challengeMode]="challengeMode()"

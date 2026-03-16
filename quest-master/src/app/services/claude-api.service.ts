@@ -106,7 +106,8 @@ ${isClassBranch ? `CRITICAL CONSTRAINT — file execution model (classes/capston
 - The .cls file (fileType: "cls") contains the full Class definition. It is compiled via /api/quest/compile.
 - The .script file (fileType: "script") instantiates or uses the compiled class. It runs via XECUTE.
 - The .script file MUST declare "dependsOn": ["<cls-file-id>"] so the class compiles before the script runs.
-- Do NOT put Class/Property/Method syntax inside the script file — it will cause a compile error.` : `CRITICAL CONSTRAINT — file execution model:
+- Do NOT put Class/Property/Method syntax inside the script file — it will cause a compile error.
+- If the concept requires demonstrating multiple classes (e.g. inheritance), use MORE than two files — one .cls file per class, each with a UNIQUE id (e.g. "cls-base", "cls-sub"), plus the .script file with id "main". Every file MUST have a distinct id; duplicate ids break tab navigation.` : `CRITICAL CONSTRAINT — file execution model:
 - Each quest defines a "files" array. Generated quests for command/globals/snippet branches use a single script file.
 - Script files (fileType: "script") run as plain ObjectScript commands via XECUTE — NOT inside a class or method.
 - DO NOT use ClassMethod, Method, Class, or class-definition syntax in script files.

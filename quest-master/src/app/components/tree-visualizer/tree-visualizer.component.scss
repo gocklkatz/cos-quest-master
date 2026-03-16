@@ -107,7 +107,7 @@
   font-family: inherit;
 
   &::placeholder {
-    color: #4a3f6b;
+    color: #8a7db5;
   }
 
   &:focus {
@@ -133,7 +133,7 @@
 
 .filter-count {
   font-size: 0.75rem;
-  color: #6b5f94;
+  color: #9b8fc4;
 
   &--capped {
     color: #a89bc4;
@@ -221,5 +221,5 @@
 }
 
 :host ::ng-deep .node.truncated .node-label {
-  fill: #4a3f6b;
+  fill: #7c6ea8;
 }

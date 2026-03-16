@@ -165,6 +165,13 @@
 
 ---
 
+### 2026-03-16: F10 — Modal for failed quests and no "Try Again" button
+**Context**: Two open questions in F10 were left unresolved at feature completion: (1) whether the modal should appear on failure as well as success, and (2) whether a "Try Again" button should be offered for failed quests.
+**Decision**: (1) Modal appears for **every** submission result (pass and fail). The Verification Plan step 1 tests this explicitly and the implementation was shipped accordingly. (2) No "Try Again" button — the single **OK** button is sufficient; failed quests return the player to the same quest automatically. Keeping the modal minimal avoids mode confusion (the player should not feel locked out of retrying).
+**Rejected alternatives**: Fail-only inline result (no modal) — breaks UX consistency; players expect the same post-submit flow regardless of outcome. "Try Again" button — deferred to Phase 4 if player research shows the modal causes re-attempt confusion.
+
+---
+
 ### 2026-03-11: F4 — Test coverage: Vitest unit test for GlobalService only
 **Context**: CLAUDE.md requires an automated test for every feature. Two options: Vitest unit test for `GlobalService`, or Playwright E2E for the D3 SVG component.
 **Decision**: Vitest unit test (`global.service.spec.ts`). Mock `IrisApiService.getGlobals()` with a JSON fixture and assert the `globals` signal is updated correctly.

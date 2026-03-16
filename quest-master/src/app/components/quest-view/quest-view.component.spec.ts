@@ -11,6 +11,30 @@ import { PaneSizeService } from '../../services/pane-size.service';
 import { AchievementService } from '../../services/achievement.service';
 import { Quest } from '../../models/quest.models';
 
+const THREE_FILE_QUEST: Quest = {
+  id: 'classes-prediction-01',
+  title: 'The Inheritance Scroll',
+  branch: 'classes',
+  questType: 'prediction',
+  tier: 'journeyman',
+  narrative: '',
+  objective: '',
+  evaluationCriteria: '',
+  hints: [],
+  bonusObjectives: [],
+  bonusXP: 0,
+  xpReward: 80,
+  prerequisites: [],
+  conceptsIntroduced: [],
+  choices: ['Name: Sword\nDamage: 10', 'Name: Sword\nDamage: 20', 'Name: Sword\nDamage: 15'],
+  correctAnswer: 'Name: Sword\nDamage: 10',
+  files: [
+    { id: 'cls-main',      filename: 'Quest.Weapon.cls',          fileType: 'cls',    label: 'Base Weapon Class',        starterCode: 'Class Quest.Weapon Extends %RegisteredObject {\nProperty Name As %String;\nProperty BaseDamage As %Integer;\nMethod Describe() {\nWRITE "Name: ", i..Name, !\nWRITE "Damage: ", i..BaseDamage, !\n}\n}' },
+    { id: 'cls-enchanted', filename: 'Quest.EnchantedWeapon.cls', fileType: 'cls',    label: 'EnchantedWeapon Subclass', starterCode: 'Class Quest.EnchantedWeapon Extends Quest.Weapon {\nProperty Enchantment As %String;\nMethod Enchant() {\nSET i..BaseDamage = i..BaseDamage + 5\n}\n}' },
+    { id: 'main',          filename: 'solution.script',           fileType: 'script', label: 'Solution Script',          starterCode: 'SET w = ##class(Quest.EnchantedWeapon).%New()\nSET w.Name = "Sword"\nSET w.BaseDamage = 10\nDO w.Describe()', dependsOn: ['cls-main', 'cls-enchanted'] },
+  ],
+};
+
 const STUB_QUEST: Quest = {
   id: 'quest-zero',
   title: 'Forge the Anvil',
@@ -151,5 +175,73 @@ describe('QuestViewComponent', () => {
     // Assert: output cleared and AI pair reloaded for the new quest.
     expect(component.output()).toBeNull();
     expect(mockAiPair.loadForQuest).toHaveBeenCalledWith('quest-one');
+  });
+
+  describe('onFileSelected — multi-tab prediction quest', () => {
+    it('switches activeFileId when a non-active tab is selected', async () => {
+      const { component, currentQuest } = await setup();
+
+      // Load a 3-file prediction quest via the reactive effect.
+      currentQuest.set(THREE_FILE_QUEST);
+      TestBed.flushEffects();
+
+      // Sanity check: should start on the first file.
+      expect(component.activeFileId()).toBe('cls-main');
+      expect(component.editorCode()).toContain('Quest.Weapon');
+
+      // Act: switch to the second file (EnchantedWeapon Subclass).
+      component.onFileSelected('cls-enchanted');
+
+      // Assert: activeFileId updated.
+      expect(component.activeFileId()).toBe('cls-enchanted');
+      // Assert: editorCode updated to file 2's content.
+      expect(component.editorCode()).toContain('EnchantedWeapon');
+    });
+
+    it('switches to the third file (Solution Script)', async () => {
+      const { component, currentQuest } = await setup();
+
+      currentQuest.set(THREE_FILE_QUEST);
+      TestBed.flushEffects();
+
+      component.onFileSelected('main');
+
+      expect(component.activeFileId()).toBe('main');
+      expect(component.editorCode()).toContain('w.Describe()');
+    });
+
+    it('preserves the previous tab\'s code in the buffer when switching', async () => {
+      const { component, currentQuest } = await setup();
+
+      currentQuest.set(THREE_FILE_QUEST);
+      TestBed.flushEffects();
+
+      // Edit the first file.
+      component.editorCode.set('// edited code');
+
+      // Switch to tab 2.
+      component.onFileSelected('cls-enchanted');
+
+      // Switch back to tab 1.
+      component.onFileSelected('cls-main');
+
+      // The edit should have been preserved in the buffer.
+      expect(component.editorCode()).toBe('// edited code');
+    });
+
+    it('does not emit when clicking the already-active tab (guard in selectFile)', async () => {
+      const { component, currentQuest } = await setup();
+
+      currentQuest.set(THREE_FILE_QUEST);
+      TestBed.flushEffects();
+
+      // First file is already active — calling onFileSelected with same ID is a no-op
+      // in practice (the guard in selectFile prevents emission), but we verify the
+      // component handles it gracefully anyway.
+      const codeBefore = component.editorCode();
+      component.onFileSelected('cls-main'); // same as activeFileId
+      expect(component.activeFileId()).toBe('cls-main');
+      expect(component.editorCode()).toBe(codeBefore);
+    });
   });
 });

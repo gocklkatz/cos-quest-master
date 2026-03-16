@@ -82,6 +82,22 @@ export function normalizeQuest(raw: any): Quest {
       if (file.filename.endsWith('.cls')) file.fileType = 'cls';
       else if (file.filename.endsWith('.script')) file.fileType = 'script';
     }
+    // Defensive: ensure all file IDs are unique. Duplicate IDs prevent tab switching
+    // because the selectFile() guard (fileId !== activeFileId) is always false for
+    // every file that shares the active file's ID. This happens when the AI generates
+    // extra files for a prediction quest without following the schema's unique-ID convention.
+    const seenIds = new Set<string>();
+    for (const file of quest.files) {
+      if (!file.id || seenIds.has(file.id)) {
+        // Generate a unique ID based on the filename (without extension).
+        const base = file.filename?.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() || 'file';
+        let candidate = base;
+        let n = 2;
+        while (seenIds.has(candidate)) candidate = `${base}-${n++}`;
+        file.id = candidate;
+      }
+      seenIds.add(file.id);
+    }
     return quest;
   }
   const isCls = raw.mode === 'class';
