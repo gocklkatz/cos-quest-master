@@ -81,7 +81,7 @@ These are the primary topics requiring discussion and decision before full featu
 4. **Topic tags instead of branches** — Remove the branch concept entirely. Every quest has topic tags (globals, classes, SQL, etc.). The engine selects topics using a weighted probability that ensures coverage and spiraling. More flexible but harder to visualize progress.
 5. **Parallel tracks** — Player chooses a track (e.g., "Data-focused" or "OOP-focused") at start. Both tracks cover all topics but weight them differently.
 
-**Decision needed**: Is the branch metaphor worth keeping as the primary progression structure, or should it be replaced?
+**Decision**: **Option 3 — Sub-branches.** Classes splits into Properties → Methods → Inheritance → Relationships; SQL splits into Queries → Joins → Aggregation → Embedded SQL (3–4 quests per sub-branch). Total curriculum grows to ~41 quests minimum. A bridge fix raises Classes to 8 and SQL to 6 quests in `minQuestsToAdvance` while C5 is implemented. See [DECISIONS.md → D-P4-04](DECISIONS.md) and the supporting analyses: [Game Designer](q4-branch-architecture-game-designer.md) · [UX Research](q4-branch-architecture-ux-research.md).
 
 ---
 

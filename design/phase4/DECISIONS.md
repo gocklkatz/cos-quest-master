@@ -49,6 +49,22 @@ Each entry records a significant fork in the road: what was decided, why, and wh
 
 ---
 
+### D-P4-04 · 2026-03-16: Branch architecture — Sub-branches for Classes and SQL
+
+**Context**: Phase 3 retrospective found 5 quests per branch insufficient, especially for Classes and SQL. Five structural options were evaluated in parallel by a Game Designer and a UX Researcher. Both analyses independently converged on the same recommendation. See [q4-branch-architecture-game-designer.md](q4-branch-architecture-game-designer.md) and [q4-branch-architecture-ux-research.md](q4-branch-architecture-ux-research.md) for the full analyses.
+
+**Decision**: Option 3 — Sub-branches. The Classes branch splits into Properties → Methods → Inheritance → Relationships (3–4 quests each, 13 quests minimum). The SQL branch splits into Queries → Joins → Aggregation → Embedded SQL (3 quests each, 12 quests minimum). Total curriculum grows from ~21 to ~41 quests minimum. Each sub-branch has its own `topicFocus` string passed to `ClaudeApiService.generateQuest()` to constrain AI output to the specific sub-topic. The `BRANCH_PROGRESSION` array expands; no existing service interface changes shape — `currentBranch` remains a string signal. A bridge fix (raise classes to 8, SQL to 6 in `minQuestsToAdvance`) applies immediately while C5 is implemented.
+
+**Rejected alternatives**:
+- **Option 1 (Increase quest count)**: A quota increase, not a depth increase. More generic-branch quests do not improve coverage of inheritance or relationships; they extend the branch without targeting the gap. Retained as a temporary bridge fix only.
+- **Option 2 (Variable-length / mastery gate)**: Correct long-term direction but premature — AI-generated evaluation scores are not reliable enough to gate advancement without creating opaque failure states. Deferred to Phase 5 after Code Prediction quests (F6) provide binary correctness signals.
+- **Option 4 (Topic tags as primary model)**: Destroys branch legibility and progress orientation. Wrong architecture for the main curriculum; correct architecture for the post-Prestige free-practice mode already decided in D-P4-01.
+- **Option 5 (Parallel tracks)**: Doubles the design and maintenance surface for marginal differentiation over what the Q3 manual difficulty toggle already provides. Deferred until learner archetype data validates the track split.
+
+**Affects**: [change-05-branch-architecture.md](change-05-branch-architecture.md)
+
+---
+
 <!-- Add entries as decisions are made. Use the format below. -->
 
 <!--
