@@ -48,6 +48,7 @@
 | 13 | **Skip Quest** ✅ | phase3-mid | Allows the player to discard a quest they find unhelpful and immediately generate a new one, preventing frustration-driven dropout | [feature-13-skip-quest.md](feature-13-skip-quest.md) |
 | 14 | **Claude API Error Feedback** ✅ | phase3-high | Surfaces meaningful errors (expired key, exhausted credits, rate-limit) when `ClaudeApiService` fails instead of silently falling back to the simple evaluator | [feature-14-claude-api-error-feedback.md](feature-14-claude-api-error-feedback.md) |
 | 15 | **Tree Visualizer Global Filter** ✅ | phase3-mid | Client-side filter field lets the learner narrow the tree to globals whose names match a search term; directs attention to the data just created by the current quest | [feature-15-tree-visualizer-filter.md](feature-15-tree-visualizer-filter.md) |
+| 16 | **Victory Screen** ✅ | phase3-high | Full-screen win condition overlay with fireworks animation shown after all three capstone quests are completed; displays player rank, level, and total XP | [feature-16-victory-screen.md](feature-16-victory-screen.md) |
 
 ---
 
@@ -176,6 +177,12 @@ This feature:
 
 - **Goal**: Preserve trust in the AI feedback loop — players should always know whether their evaluation came from Claude or the fallback.
 - **Implementation**: New `ClaudeApiError` class in `claude-api.service.ts`; `evaluationWarning` signal on `QuestViewComponent`; amber inline banner in `quest-view.component.html` below the output pane.
+
+### F16: Victory Screen
+Full-screen overlay triggered once all three capstone quests (`capstone-01`, `capstone-02`, `capstone-03`) are complete. Shows a gold-styled "You Won!" card with the player's rank (derived from level), level, and total XP over a canvas fireworks animation. A Continue button dismisses the overlay without resetting state. `QuestEngineService.gameComplete()` is the computed signal driving the trigger in `QuestViewComponent.onReviewConfirmed()`.
+- **Goal**: Provide a clear, celebratory win condition so the player knows the curriculum is complete.
+- **Implementation**: New `VictoryOverlayComponent`; `gameComplete` computed on `QuestEngineService`; wired into `QuestViewComponent` alongside existing overlay components.
+- See [feature-16-victory-screen.md](feature-16-victory-screen.md) for full spec.
 
 ### F8: Quest Time Tracking & Goal System
 Tracks active time spent on quests and allows users to set daily and weekly goals (e.g., "30 mins/day," "4 hours/week").

@@ -6,6 +6,7 @@ import { XpAnimationComponent } from '../xp-animation/xp-animation.component';
 import { AchievementOverlayComponent } from '../achievement-overlay/achievement-overlay.component';
 import { AiPairChatComponent } from '../ai-pair-chat/ai-pair-chat.component';
 import { ReviewModalComponent } from '../review-modal/review-modal.component';
+import { VictoryOverlayComponent } from '../victory-overlay/victory-overlay.component';
 import { GameStateService } from '../../services/game-state.service';
 import { QuestEngineService } from '../../services/quest-engine.service';
 import { ClassQuestService } from '../../services/class-quest.service';
@@ -32,12 +33,13 @@ import { ClaudeApiError } from '../../services/claude-api.service';
     AiPairChatComponent,
     ResizableDividerDirective,
     ReviewModalComponent,
+    VictoryOverlayComponent,
   ],
   templateUrl: './quest-view.component.html',
   styleUrl: './quest-view.component.scss',
 })
 export class QuestViewComponent implements OnInit, OnDestroy {
-  private gameState = inject(GameStateService);
+  protected gameState = inject(GameStateService);
   private classQuest = inject(ClassQuestService);
   private aiPair = inject(AiPairService);
   private paneSizes = inject(PaneSizeService);
@@ -106,6 +108,11 @@ export class QuestViewComponent implements OnInit, OnDestroy {
   /** Achievement overlay — drives the achievement-overlay component. */
   achievementAnimTrigger = signal(0);
   achievementAnimItem = signal<Achievement | null>(null);
+
+  /** Victory overlay — fires when all capstone quests are completed. */
+  victoryTrigger = signal(0);
+  victoryLevel   = signal(1);
+  victoryXp      = signal(0);
 
   /** Timestamp (ms) when the current quest was loaded — used for the speed-run check. */
   private questStartedAt = 0;
@@ -512,6 +519,11 @@ export class QuestViewComponent implements OnInit, OnDestroy {
     if (this.pendingNextQuest) {
       this.pendingNextQuest();
       this.pendingNextQuest = null;
+    }
+    if (this.questEngine.gameComplete()) {
+      this.victoryLevel.set(this.gameState.level());
+      this.victoryXp.set(this.gameState.xp());
+      this.victoryTrigger.update(n => n + 1);
     }
   }
 

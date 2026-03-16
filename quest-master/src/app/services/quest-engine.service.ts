@@ -65,6 +65,12 @@ export class QuestEngineService {
 
   readonly completedQuestIds = computed(() => this.gameState.completedQuests());
 
+  /** True once all three capstone quests have been completed — the win condition. */
+  readonly gameComplete = computed(() => {
+    const done = new Set(this.gameState.completedQuests());
+    return done.has('capstone-01') && done.has('capstone-02') && done.has('capstone-03');
+  });
+
   /** The full Quest object for the currently selected quest. */
   readonly currentQuest = computed(() => {
     const id = this.gameState.currentQuestId();

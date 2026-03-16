@@ -154,3 +154,10 @@
   [trigger]="achievementAnimTrigger()"
   [achievement]="achievementAnimItem()"
 />
+
+<app-victory-overlay
+  [trigger]="victoryTrigger()"
+  [playerName]="gameState.playerName()"
+  [level]="victoryLevel()"
+  [xp]="victoryXp()"
+/>
