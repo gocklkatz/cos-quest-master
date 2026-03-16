@@ -52,7 +52,7 @@ These are the primary topics requiring discussion and decision before full featu
 3. **Progressive world-building** — Completing quests "unlocks" lore entries about the fictional world, stored in a side panel. Low pedagogical value but high engagement signal.
 4. **No story** — Keep the tool lean and professional. Story may feel childish for developers.
 
-**Decision needed**: Is the target learner profile a student (story helps) or a professional developer (story may be noise)?
+**Decision**: **Option 2 — Story-driven quest titles.** The AI prompt names each quest as a story episode ("Chapter 2, Mission 3: Retrieve the Missing Patient Records"). No structural changes. Register must be dry and enterprise-contextual. See [DECISIONS.md → D-P4-02](DECISIONS.md) and the supporting analyses: [UX Research](q2-narrative-arc-ux-research.md) · [Behavioral Nudge Engine](q2-narrative-arc-behavioral-nudge.md).
 
 ---
 

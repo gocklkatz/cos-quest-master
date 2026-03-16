@@ -19,6 +19,21 @@ Each entry records a significant fork in the road: what was decided, why, and wh
 
 ---
 
+### D-P4-02 · 2026-03-16: Narrative story arc — Story-driven quest titles
+
+**Context**: Quests felt isolated with no connective tissue. Four narrative options were evaluated with parallel input from a UX Researcher and a Behavioral Nudge Engine specialist. Both analyses independently converged on the same recommendation. See [q2-narrative-arc-ux-research.md](q2-narrative-arc-ux-research.md) and [q2-narrative-arc-behavioral-nudge.md](q2-narrative-arc-behavioral-nudge.md) for the full analyses.
+
+**Decision**: Option 2 — Story-driven quest titles. The AI prompt is updated to name each quest as a story episode (e.g., "Chapter 2, Mission 3: Retrieve the Missing Patient Records"). No structural changes to quests, branches, or state. Register must be dry, technically credible, and enterprise-contextual — not heroic or gamified. This acts as both the motivational layer and the instrumentation to validate whether the cohort responds to narrative framing before committing to a full frame narrative (Option 1).
+
+**Rejected alternatives**:
+- **Option 1 (Frame narrative)**: Higher structural cost; commitment before audience response is validated. Retained as the confirmed next step if Option 2 engagement signals are positive.
+- **Option 3 (Progressive world-building / lore)**: Extrinsic reward that crowds out intrinsic motivation (Deci, Koestner & Ryan 1999 meta-analysis); low pedagogical value; cognitive overhead for limited-session professional learners.
+- **Option 4 (No story)**: Risk of narrative feeling childish is a risk of register, not of narrative itself. Research supports narrative for this product category when executed at professional register.
+
+**Affects**: [feature-20-narrative-story-arc.md](feature-20-narrative-story-arc.md)
+
+---
+
 <!-- Add entries as decisions are made. Use the format below. -->
 
 <!--
