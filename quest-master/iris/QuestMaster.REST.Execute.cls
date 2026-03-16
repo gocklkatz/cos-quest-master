@@ -42,6 +42,10 @@ ClassMethod Execute() As %Status
     For i = 1:1:$Length(tCode, $C(10)) {
       Set tLine = $Piece(tCode, $C(10), i)
       Set tSource = tSource _ $Select(tLine'="":$C(9)_tLine, 1:"") _ $C(10)
+      Set tTrimmed = $ZStrip(tLine,"<W")
+      If (tTrimmed [ "&sql(") && ($Extract(tTrimmed,1,2)'="//") {
+        Set tSource = tSource _ $C(9) _ "If SQLCODE<0 { Write ""[SQL Error SQLCODE=""_SQLCODE_""]: ""_$Get(%msg),! }" _ $C(10)
+      }
     }
     Set tSource = tSource _ "}" _ $C(10) _ "}" _ $C(10)
 
