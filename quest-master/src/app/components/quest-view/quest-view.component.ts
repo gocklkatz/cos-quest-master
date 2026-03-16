@@ -437,7 +437,7 @@ export class QuestViewComponent implements OnInit, OnDestroy {
         };
       }
 
-      if (apiKey && this.questEngine.activeQuests().length < 2) {
+      if (apiKey && this.questEngine.needsQuestGeneration()) {
         this.questEngine.generateNextQuest(quest.branch, apiKey);
       }
     }
@@ -499,7 +499,7 @@ export class QuestViewComponent implements OnInit, OnDestroy {
       }
 
       const apiKey = this.gameState.anthropicApiKey();
-      if (apiKey && this.questEngine.activeQuests().length < 2) {
+      if (apiKey && this.questEngine.needsQuestGeneration()) {
         this.questEngine.generateNextQuest(quest.branch, apiKey);
       }
     }

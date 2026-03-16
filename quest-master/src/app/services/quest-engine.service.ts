@@ -24,12 +24,24 @@ export class QuestEngineService {
     const currentBranch = this.gameState.currentBranch();
     const currentBranchIndex = BRANCH_PROGRESSION.findIndex(s => s.branch === currentBranch);
 
-    return this.allQuests().filter(q => {
+    const filtered = this.allQuests().filter(q => {
       if (!q.prerequisites.every(p => completed.has(p))) return false;
       // Only show quests from branches the player has unlocked.
       const questBranchIndex = BRANCH_PROGRESSION.findIndex(s => s.branch === q.branch);
       if (questBranchIndex === -1) return true; // unknown branch — always show
       return questBranchIndex <= currentBranchIndex;
+    });
+
+    // Sort: completed quests first (by branch), then active quests (by branch).
+    // This prevents a completed generated quest from appearing after a not-yet-done
+    // static quest in the same branch, and keeps capstone quests at the end.
+    return filtered.sort((a, b) => {
+      const aDone = completed.has(a.id) ? 0 : 1;
+      const bDone = completed.has(b.id) ? 0 : 1;
+      if (aDone !== bDone) return aDone - bDone;
+      const ai = BRANCH_PROGRESSION.findIndex(s => s.branch === a.branch);
+      const bi = BRANCH_PROGRESSION.findIndex(s => s.branch === b.branch);
+      return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
     });
   });
 
@@ -37,6 +49,18 @@ export class QuestEngineService {
   readonly activeQuests = computed(() => {
     const completed = new Set(this.gameState.completedQuests());
     return this.availableQuests().filter(q => !completed.has(q.id));
+  });
+
+  /**
+   * True when a new quest should be generated via Claude.
+   * False if there are already ≥2 active quests, or if the current branch is
+   * terminal (minQuestsToAdvance === null) — terminal branches like capstone
+   * have all their quests pre-built and need no AI generation.
+   */
+  readonly needsQuestGeneration = computed(() => {
+    if (this.activeQuests().length >= 2) return false;
+    const currentStage = BRANCH_PROGRESSION.find(s => s.branch === this.gameState.currentBranch());
+    return currentStage?.minQuestsToAdvance !== null;
   });
 
   readonly completedQuestIds = computed(() => this.gameState.completedQuests());
