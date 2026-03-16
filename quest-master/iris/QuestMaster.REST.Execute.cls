@@ -39,12 +39,38 @@ ClassMethod Execute() As %Status
                   "ClassMethod Run() [ ProcedureBlock = 1 ] {" _ $C(10)
     
     Set tCode = $Translate(tCode, $C(13), "") // Normalize CRLF
+    // tSqlDepth > 0 means we are inside a multi-line &sql(...) block.
+    // tSqlIsDeclare = 1 means the current &sql() is a DECLARE CURSOR (no runtime SQLCODE set).
+    Set tSqlDepth = 0, tSqlIsDeclare = 0
     For i = 1:1:$Length(tCode, $C(10)) {
       Set tLine = $Piece(tCode, $C(10), i)
       Set tSource = tSource _ $Select(tLine'="":$C(9)_tLine, 1:"") _ $C(10)
       Set tTrimmed = $ZStrip(tLine,"<W")
-      If (tTrimmed [ "&sql(") && ($Extract(tTrimmed,1,2)'="//") {
-        Set tSource = tSource _ $C(9) _ "If SQLCODE<0 { Write ""[SQL Error SQLCODE=""_SQLCODE_""]: ""_$Get(%msg),! }" _ $C(10)
+      If tSqlDepth = 0 {
+        // Not inside &sql() — check whether this line opens one
+        If (tTrimmed [ "&sql(") && ($Extract(tTrimmed,1,2)'="//") {
+          Set tPos = $Find(tLine, "&sql("), tSqlDepth = 1
+          Set tSqlIsDeclare = ($Find($ZConvert(tTrimmed,"U"), "DECLARE") > 0)
+          // Count remaining parens on this line to see if &sql() closes here
+          For j = tPos:1:$Length(tLine) {
+            Set tCh = $Extract(tLine,j)
+            If tCh = "(" { Set tSqlDepth = tSqlDepth + 1 }
+            ElseIf tCh = ")" { Set tSqlDepth = tSqlDepth - 1  If tSqlDepth = 0 { Quit } }
+          }
+          If (tSqlDepth = 0) && ('tSqlIsDeclare) {
+            Set tSource = tSource _ $C(9) _ "If SQLCODE<0 { Write ""[SQL Error SQLCODE=""_SQLCODE_""]: ""_$Get(%msg),! }" _ $C(10)
+          }
+        }
+      } Else {
+        // Inside a multi-line &sql() — scan this line for the closing paren
+        For j = 1:1:$Length(tLine) {
+          Set tCh = $Extract(tLine,j)
+          If tCh = "(" { Set tSqlDepth = tSqlDepth + 1 }
+          ElseIf tCh = ")" { Set tSqlDepth = tSqlDepth - 1  If tSqlDepth = 0 { Quit } }
+        }
+        If (tSqlDepth = 0) && ('tSqlIsDeclare) {
+          Set tSource = tSource _ $C(9) _ "If SQLCODE<0 { Write ""[SQL Error SQLCODE=""_SQLCODE_""]: ""_$Get(%msg),! }" _ $C(10)
+        }
       }
     }
     Set tSource = tSource _ "}" _ $C(10) _ "}" _ $C(10)

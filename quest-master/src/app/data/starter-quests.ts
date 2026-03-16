@@ -84,6 +84,7 @@ export const STARTER_QUESTS: Quest[] = [
         filename: 'User.GuildMember.cls',
         fileType: 'cls',
         label: 'GuildMember',
+        persistent: true,
         starterCode:
           'Class User.GuildMember Extends %Persistent\n' +
           '{\n\n' +

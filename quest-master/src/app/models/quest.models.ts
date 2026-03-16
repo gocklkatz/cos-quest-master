@@ -9,6 +9,7 @@ export interface QuestFile {
   starterCodeHint?: string;
   readOnly?: boolean;
   dependsOn?: string[];    // file IDs that must be compiled before this one
+  persistent?: boolean;    // if true, class is NOT deleted on quest switch (needed by later quests)
 }
 
 export interface Quest {

@@ -10,6 +10,8 @@ export class ClassQuestService {
 
   /** Class names compiled in the last run — tracked for cleanup on quest switch. */
   private lastClassNames: string[] = [];
+  /** Class names marked persistent — excluded from cleanup on quest switch. */
+  private persistentClassNames = new Set<string>();
 
   /**
    * Run all quest files in dependency order:
@@ -53,6 +55,7 @@ export class ClassQuestService {
           };
         }
         newClassNames.push(className);
+        if (file.persistent) this.persistentClassNames.add(className);
         if (compileResp.output?.trim()) {
           outputParts.push(`[${file.label}] ${compileResp.output.trim()}`);
         }
@@ -100,6 +103,7 @@ export class ClassQuestService {
     const names = this.lastClassNames;
     this.lastClassNames = [];
     for (const className of names) {
+      if (this.persistentClassNames.has(className)) continue;
       await firstValueFrom(
         this.irisApi.executeCode(config, `Do ##class(%SYSTEM.OBJ).Delete("${className}", "-d")`)
       ).catch(() => {});
