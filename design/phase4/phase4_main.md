@@ -1,6 +1,6 @@
 # ObjectScript Quest Master — Phase 4 Specification
 
-> **Purpose**: This document defines Phase 4 extensions. Phase 4 follows the pedagogical foundation laid in Phase 3 and focuses on [TBD — describe the phase theme here, e.g. "player retention, social features, advanced curriculum"].
+> **Purpose**: Phase 4 focuses on **long-term engagement and learning depth** — making the game infinite, progressively harder, and more rewarding over time. It addresses curriculum gaps identified after completing Phase 3, and explores structural changes to the branch/quest architecture.
 
 ---
 
@@ -9,8 +9,9 @@
 | Architectural Change | Impact on Phase 4 |
 |---|---|
 | Angular Router + `QuestViewComponent` shell | New views can be added as routes without touching `AppComponent` |
-| Branch Progression System | Phase 4 features must respect `currentBranch` signal from `GameStateService` |
-| `ClaudeApiError` typed errors | All new AI calls must handle the typed error and surface UI feedback |
+| Branch Progression System | Phase 4 must either extend or replace `currentBranch` signal from `GameStateService` |
+| Victory Screen (F16) on 21-quest finish | Game currently ends — Phase 4 must redefine the "end state" entirely |
+| `ClaudeApiError` typed errors | All new AI calls must handle typed errors and surface UI feedback |
 | Global Tree Visualizer on `/tree` route | Extensible — can add filters, depth controls, or history replay |
 
 ---
@@ -23,32 +24,139 @@
 
 ---
 
+## Open Design Questions (Phase 4 Scope)
+
+These are the primary topics requiring discussion and decision before full feature specs can be written.
+
+### Q1 — Infinite Game: How should the game continue after 21 quests?
+
+**Problem**: The game currently ends after 5 branches × ~4 quests + 1 capstone = ~21 quests. This is too short for meaningful skill acquisition.
+
+**Options under consideration**:
+1. **Endless branch loops** — after completing all branches, cycle them again with higher difficulty parameters fed into the AI prompt. Each "lap" = a new difficulty tier.
+2. **Prestige / New Game+** — Victory Screen stays, then offers a "Play Again — Harder" button that resets quest count but increases an internal difficulty level stored in `GameStateService`.
+3. **Dynamic branch extension** — branches never have a fixed quest count; the AI decides when mastery is sufficient (via evaluation score threshold). The player is never told how many quests remain in a branch.
+4. **Infinite side-quests** — after completing the main curriculum, unlock a free-practice mode with no branch structure, just topic-tagged quests on demand.
+
+**Decision needed**: Which model best balances pedagogical continuity with engagement?
+
+---
+
+### Q2 — Narrative Story Arc: Should quests be embedded in a story?
+
+**Problem**: Quests currently feel isolated. A thin narrative layer could increase motivation and give context to otherwise abstract exercises.
+
+**Options under consideration**:
+1. **Frame narrative** — A fictional "mission" (e.g., "You are a new IRIS developer at MedCorp tasked with migrating a legacy database"). Each branch = a chapter. The story is surface-level flavor text in the quest header.
+2. **Story-driven quest titles** — AI is prompted to name quests as story episodes ("Chapter 3, Mission 2: Fix the patient record lookup"). No structural change to quests.
+3. **Progressive world-building** — Completing quests "unlocks" lore entries about the fictional world, stored in a side panel. Low pedagogical value but high engagement signal.
+4. **No story** — Keep the tool lean and professional. Story may feel childish for developers.
+
+**Decision needed**: Is the target learner profile a student (story helps) or a professional developer (story may be noise)?
+
+---
+
+### Q3 — Adaptive Difficulty: How should quest complexity scale with player level?
+
+**Problem**: Phase 3 quests start simple and get harder per branch, but difficulty does not adapt to individual player performance. A skilled developer gets the same easy early quests as a beginner.
+
+**Options under consideration**:
+1. **Level-gated AI prompts** — `QuestEngineService` passes current XP level to the Claude prompt as a difficulty hint. Low cost, already partially supported.
+2. **Score-based adaptation** — If the player completes 3 quests in a row with a perfect AI evaluation score, the next quest is generated at +1 difficulty tier. If they fail 2 in a row, drop a tier.
+3. **Initial skill assessment** — First session: 3-5 diagnostic quests. Based on results, skip early branches.
+4. **Manual difficulty toggle** — Player sets their own difficulty (Beginner / Intermediate / Advanced) before starting. Simple, respects player autonomy.
+
+**Decision needed**: Should difficulty be automatic (adaptive) or player-controlled? Mixing both is possible.
+
+---
+
+### Q4 — Branch Architecture: Is the current branch system the right structure?
+
+**Problem**: The current branch system (setup → globals → classes → sql → capstone) is linear and fixed. After completing Phase 3 the user felt 5 quests per branch (especially classes and SQL) was insufficient.
+
+**Options under consideration**:
+1. **Increase quest count per branch** — Simple fix: raise the quest threshold in `GameStateService` from 5 to 8–10 for complex branches (classes, SQL).
+2. **Variable-length branches** — Each branch has a minimum quest count (e.g., 4) but runs until a mastery score threshold is met, not a fixed number.
+3. **Sub-branches** — Classes splits into: Properties → Methods → Inheritance → Relationships. SQL splits into: Queries → Joins → Aggregation → Embedded SQL. Each sub-branch = its own mini-track.
+4. **Topic tags instead of branches** — Remove the branch concept entirely. Every quest has topic tags (globals, classes, SQL, etc.). The engine selects topics using a weighted probability that ensures coverage and spiraling. More flexible but harder to visualize progress.
+5. **Parallel tracks** — Player chooses a track (e.g., "Data-focused" or "OOP-focused") at start. Both tracks cover all topics but weight them differently.
+
+**Decision needed**: Is the branch metaphor worth keeping as the primary progression structure, or should it be replaced?
+
+---
+
+### Q5 — Code Prediction Frequency: Should Code Prediction quests appear more often?
+
+**Problem**: Code Prediction quests (F6, carry-over from Phase 3) are not yet implemented. Once implemented, the user expects them to appear more often than the current design implies (one type among many, rarely triggered).
+
+**Options under consideration**:
+1. **Guaranteed ratio** — Every Nth quest (e.g., every 3rd) is forced to be a Code Prediction quest, regardless of branch.
+2. **Branch-specific weighting** — Code Prediction quests are more frequent in classes and SQL branches where "reading code" is especially important for understanding.
+3. **Post-failure trigger** — After a failed submission, the next quest is automatically a Code Prediction quest on the same topic (reduces cognitive load, scaffolds recovery).
+4. **Player toggle** — Player can opt into "more reading quests" mode in settings.
+
+**Decision needed**: Frequency mechanism should be defined as part of the F6 implementation spec.
+
+---
+
+### Q6 — Gamification: What engagement mechanics should be added?
+
+**Research direction**: Before designing new features, evaluate what works in comparable tools.
+
+**Comparable products to research**:
+- **Duolingo** — streaks, hearts (lives system), XP leagues, daily goals, friend competition
+- **Codecademy** — progress bars, badges, project-based certificates
+- **Exercism** — mentored tracks, reputation, community solutions
+- **Codewars** — honor system, kyu/dan ranks, kata difficulty ratings, solution discussion
+- **Zed / Vim adventure** — flow-state design, no interruptions
+- **HackerRank** — timed challenges, leaderboards, skill certifications
+
+**Gamification mechanics worth evaluating**:
+| Mechanic | Likely Benefit | Risk |
+|---|---|---|
+| Daily streak tracking | Habit formation | Punishes busy learners |
+| Lives / failure cost | Stakes raise engagement | Frustration-driven dropout |
+| XP leagues / leaderboards | Social motivation | No multiplayer currently |
+| Unlockable cosmetics (themes) | Low-cost engagement boost | Dev overhead |
+| "Combo" bonus XP | Rewards flow state | Trivial to game |
+| Timed challenge mode | Tests under pressure | Anxiety for some learners |
+| Certificate / graduation | Completion motivation | Needs curriculum definition |
+| Boss quests (harder, named) | Narrative structure | AI prompt complexity |
+| Hint system (costs XP) | Reduces rage-quit | May reduce learning depth |
+
+**Decision needed**: Pick 2–3 mechanics to implement. Avoid mechanics that punish legitimate breaks.
+
+---
+
 ## Phase 4 Priority Tiers
 
 | Priority | Theme | Pedagogical Rationale |
 |---|---|---|
-| **P1 — High value, low complexity** | [TBD] | |
-| **P2 — High value, medium complexity** | [TBD] | |
-| **P3 — Future / High complexity** | [TBD] | |
+| **P1 — High value, low complexity** | Infinite game loop + Code Prediction (F6) | Retention requires both content volume and reading practice |
+| **P2 — High value, medium complexity** | Adaptive difficulty + Branch depth expansion | Differentiation and mastery — prevents boredom and frustration |
+| **P3 — Future / High complexity** | Narrative arc + Branch architecture redesign + Gamification systems | High engagement value but significant design and dev cost |
 
 ---
 
 ## Features
 
-| # | Feature | Priority | Rationale | Doc |
-|---|---|---|---|---|
-| 6 | **Code Prediction Quests** *(carry-over)* | phase4-high | Completes the "code literacy" track started in P3 | [feature-06-code-prediction-quests.md](../phase3/feature-06-code-prediction-quests.md) |
-| 17 | [Feature title] | phase4-high | | [feature-17-*.md](feature-17-*.md) |
+| # | Feature | Priority | Status | Rationale | Doc |
+|---|---|---|---|---|---|
+| 6 | **Code Prediction Quests** *(carry-over)* | phase4-high | ⬜ Not started | Completes the "code literacy" track; should appear more frequently (see Q5) | [feature-06-code-prediction-quests.md](../phase3/feature-06-code-prediction-quests.md) |
+| 17 | **Infinite Quest Loop** | phase4-high | ⬜ Not started | Game ends after 21 quests; must support indefinite play (see Q1) | [feature-17-infinite-quest-loop.md](feature-17-infinite-quest-loop.md) |
+| 18 | **Adaptive Difficulty** | phase4-mid | ⬜ Not started | Early quests are too easy for experienced devs; difficulty should scale with demonstrated mastery (see Q3) | [feature-18-adaptive-difficulty.md](feature-18-adaptive-difficulty.md) |
+| 19 | **Enhanced Gamification** | phase4-mid | ⬜ Not started | Research-backed engagement mechanics to improve retention (see Q6) | [feature-19-enhanced-gamification.md](feature-19-enhanced-gamification.md) |
+| 20 | **Narrative Story Arc** | phase4-low | ⬜ Not started | Thin story layer to give context to isolated quests and increase motivation (see Q2) | [feature-20-narrative-story-arc.md](feature-20-narrative-story-arc.md) |
 
-> Feature numbers continue from Phase 3 (last used: F16). Next available: **F17**.
+> Feature numbers continue from Phase 3 (last used: F16). Next available: **F21**.
 
 ---
 
 ## Phase 4 Refactorings & Decommissions
 
-| # | Change | Priority | Rationale | Doc |
-|---|---|---|---|---|
-| — | *(none planned yet)* | — | — | — |
+| # | Change | Priority | Status | Rationale | Doc |
+|---|---|---|---|---|---|
+| C5 | **Branch Architecture Redesign** | phase4-mid | ⬜ Not started | Current 5-quest fixed branches are too short for classes and SQL; evaluate sub-branches, variable-length, or topic-tag alternatives (see Q4) | [change-05-branch-architecture.md](change-05-branch-architecture.md) |
 
 ---
 
@@ -57,7 +165,17 @@
 ```mermaid
 graph TD
     F6[Code Prediction Quests]
-    F17[Feature 17 — TBD]
+    F17[Infinite Quest Loop]
+    F18[Adaptive Difficulty]
+    F19[Enhanced Gamification]
+    F20[Narrative Story Arc]
+    C5[Branch Architecture Redesign]
+
+    C5 --> F17
+    C5 --> F18
+    F17 --> F19
+    F18 --> F6
+    F17 --> F20
 ```
 
 ---
@@ -76,7 +194,8 @@ graph TD
 │  │  Services (Phase 3 baseline)                                 │   │
 │  │  QuestEngineService · GameStateService · ClaudeApiService    │   │
 │  │  TimeTrackingService · GlobalService                         │   │
-│  │  + [new Phase 4 services here]                               │   │
+│  │  + DifficultyService [Phase 4 — F18]                         │   │
+│  │  + NarrativeService  [Phase 4 — F20, optional]               │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 └───────┬──────────────────────────────┬──────────────────────────────┘
         │                              │
@@ -91,15 +210,19 @@ graph TD
 
 ## Development Sequence (Phase 4)
 
-1. **Carry-over**: Complete Code Prediction Quests (F6).
-2. [Next step — TBD]
+1. **Discuss & decide** open design questions Q1–Q6 before writing feature specs.
+2. **Carry-over**: Complete Code Prediction Quests (F6) — implement the quest type and tune frequency.
+3. **Branch depth**: Decide on C5 (branch architecture) — at minimum increase quest count for classes and SQL branches.
+4. **Infinite loop**: Implement F17 based on the chosen infinite game model.
+5. **Adaptive difficulty**: Implement F18 — wire difficulty level into Claude prompt parameters.
+6. **Gamification**: Implement the 2–3 mechanics chosen from the Q6 evaluation (F19).
+7. **Story arc**: Implement F20 if narrative decision favors it (phase4-low, defer if bandwidth is tight).
 
 ---
 
 ## Design Decisions
 
 See [DECISIONS.md](DECISIONS.md) for all architectural forks and rejected alternatives.
-
 
 ---
 
