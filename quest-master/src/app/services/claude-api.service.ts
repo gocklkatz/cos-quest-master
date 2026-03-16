@@ -54,6 +54,7 @@ export class ClaudeApiService {
     questType: 'standard' | 'prediction' = 'standard',
   ): Promise<Quest> {
     const isClassBranch = currentBranch === 'classes' || currentBranch === 'capstone';
+    const isSqlBranch = currentBranch === 'sql';
 
     const isEarlyStage = completedQuests.length === 0 || (completedQuests.length === 1 && completedQuests[0] === 'quest-zero');
     const earlyStageGuidance = isEarlyStage
@@ -107,7 +108,15 @@ ${isClassBranch ? `CRITICAL CONSTRAINT — file execution model (classes/capston
 - The .script file (fileType: "script") instantiates or uses the compiled class. It runs via XECUTE.
 - The .script file MUST declare "dependsOn": ["<cls-file-id>"] so the class compiles before the script runs.
 - Do NOT put Class/Property/Method syntax inside the script file — it will cause a compile error.
-- If the concept requires demonstrating multiple classes (e.g. inheritance), use MORE than two files — one .cls file per class, each with a UNIQUE id (e.g. "cls-base", "cls-sub"), plus the .script file with id "main". Every file MUST have a distinct id; duplicate ids break tab navigation.` : `CRITICAL CONSTRAINT — file execution model:
+- If the concept requires demonstrating multiple classes (e.g. inheritance), use MORE than two files — one .cls file per class, each with a UNIQUE id (e.g. "cls-base", "cls-sub"), plus the .script file with id "main". Every file MUST have a distinct id; duplicate ids break tab navigation.` : isSqlBranch ? `CRITICAL CONSTRAINT — file execution model (sql branch):
+- SQL quests that introduce a NEW %Persistent table/class (e.g. SQLUser.Adventurer → User.Adventurer) MUST use TWO files:
+  1. A .cls file (fileType: "cls", id: "cls-main") defining the class that extends %Persistent with the needed properties.
+  2. A .script file (fileType: "script", id: "main") with "dependsOn": ["cls-main"] containing the embedded SQL operations.
+- The .cls file is compiled first via /api/quest/compile; the .script file runs after via XECUTE.
+- If the quest uses a table that already exists from a prerequisite quest (check prerequisites), use a SINGLE script file only.
+- In script files: use &sql(INSERT...), &sql(DECLARE/OPEN/FETCH/CLOSE), $SQLCODE, host variables (:tVar), WRITE, etc.
+- DO NOT use ClassMethod, Method, or Class definition syntax in script files — this causes a compile error.
+- IMPORTANT: SQLUser.Xyz maps to the ObjectScript class User.Xyz. Use "User.Xyz.cls" as the filename and "Class User.Xyz Extends %Persistent" in the class definition.` : `CRITICAL CONSTRAINT — file execution model:
 - Each quest defines a "files" array. Generated quests for command/globals/snippet branches use a single script file.
 - Script files (fileType: "script") run as plain ObjectScript commands via XECUTE — NOT inside a class or method.
 - DO NOT use ClassMethod, Method, Class, or class-definition syntax in script files.
@@ -146,6 +155,24 @@ Respond with a JSON object with exactly these fields — no markdown fences, no 
       "dependsOn": ["cls-main"],
       "starterCode": "string (ObjectScript commands that use the compiled class)",
       "starterCodeHint": "string (one-line comment orienting the player)"
+    }
+  ],` : isSqlBranch ? `"files": [
+    {
+      "id": "cls-main",
+      "filename": "User.TableName.cls",
+      "fileType": "cls",
+      "label": "Class Definition",
+      "starterCode": "string (Class User.TableName Extends %Persistent { ... } — include all needed properties)",
+      "starterCodeHint": "string (one-line comment orienting the player)"
+    },
+    {
+      "id": "main",
+      "filename": "solution.script",
+      "fileType": "script",
+      "label": "Solution",
+      "dependsOn": ["cls-main"],
+      "starterCode": "string (ObjectScript with &sql(...) embedded SQL — INSERT, DECLARE cursor, OPEN, FETCH, CLOSE)",
+      "starterCodeHint": "string (one-line comment orienting the player without revealing logic)"
     }
   ],` : `"files": [
     {
