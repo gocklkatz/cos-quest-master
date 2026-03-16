@@ -5,6 +5,7 @@
 | Priority | phase2-high |
 | Status | ✅ Complete |
 | Depends On | [Feature 6](feature-06-unified-file-tabs.md) (for multi-file compatibility) |
+| Pedagogical Principle | Desirable Difficulty |
 
 ---
 

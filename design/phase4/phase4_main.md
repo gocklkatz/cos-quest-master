@@ -38,9 +38,9 @@
 | # | Feature | Priority | Rationale | Doc |
 |---|---|---|---|---|
 | 6 | **Code Prediction Quests** *(carry-over)* | phase4-high | Completes the "code literacy" track started in P3 | [feature-06-code-prediction-quests.md](../phase3/feature-06-code-prediction-quests.md) |
-| 15 | [Feature title] | phase4-high | | [feature-15-*.md](feature-15-*.md) |
+| 17 | [Feature title] | phase4-high | | [feature-17-*.md](feature-17-*.md) |
 
-> Feature numbers continue from Phase 3 (last used: F14). Next available: **F15**.
+> Feature numbers continue from Phase 3 (last used: F16). Next available: **F17**.
 
 ---
 
@@ -57,7 +57,7 @@
 ```mermaid
 graph TD
     F6[Code Prediction Quests]
-    F15[Feature 15 — TBD]
+    F17[Feature 17 — TBD]
 ```
 
 ---
@@ -99,3 +99,10 @@ graph TD
 ## Design Decisions
 
 See [DECISIONS.md](DECISIONS.md) for all architectural forks and rejected alternatives.
+
+
+---
+
+## Phase Navigation
+
+- Previous: [Phase 3 — Pedagogical Optimisation](../phase3/phase3_main.md)

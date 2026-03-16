@@ -5,6 +5,7 @@
 | Priority | phase2-mid |
 | Status | ✅ Complete |
 | Depends On | [Feature 3](feature-03-doc-links-hints.md) (doc links precursor) |
+| Pedagogical Principle | Dual Coding |
 
 ---
 

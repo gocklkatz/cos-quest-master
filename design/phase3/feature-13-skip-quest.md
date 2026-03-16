@@ -4,7 +4,7 @@
 |---|---|
 | Priority | phase3-mid |
 | Status | ✅ Complete |
-| Depends On | F1 (Dynamic Quest Regeneration), F9 (Quest Generation Loading Indicator) |
+| Depends On | [F1 — Dynamic Quest Regeneration](feature-01-dynamic-quest-regeneration.md), [F9 — Quest Generation Loading Indicator](feature-09-quest-generation-indicator.md) |
 | Pedagogical Principle | Desirable Difficulty / Engagement Preservation |
 
 ---
@@ -76,3 +76,10 @@ Add a **Skip** button to the Quest Panel. When the player presses it:
 6. Click Skip while quest is generating — button is disabled / non-interactive.
 7. Run `ng build` — zero errors.
 8. Run `ng test` — zero regressions.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

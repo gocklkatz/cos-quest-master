@@ -5,6 +5,7 @@
 | Priority | phase2-mid |
 | Status | ✅ Complete |
 | Depends On | [Feature 1](feature-01-class-quest-track.md) |
+| Pedagogical Principle | Cognitive Load Reduction |
 
 ---
 

@@ -5,7 +5,7 @@
 | Priority | phase3-mid |
 | Status | ✅ Complete |
 | Pedagogical Principle | Spiral Curriculum |
-| Depends On | Feature 04, Feature 02 |
+| Depends On | [Feature 04 — Global Tree Visualizer](feature-04-global-tree-visualizer.md), [Feature 02 — AI Elaborative Interrogation](feature-02-ai-elaborative-interrogation.md) |
 
 ---
 
@@ -59,3 +59,10 @@ Design a capstone quest chain of three linked quests that each interact with the
 3. Proceed to `capstone-03`. Find the raw global entry using `$ORDER`.
 4. Verify all three quests complete individually, each gated by `prerequisites`.
 5. Verify the Global Tree Visualizer shows `^GuildMember.MemberD` during `capstone-03`. *(Requires F04 to be complete.)*
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

@@ -5,6 +5,7 @@
 | Priority | phase2-high |
 | Status | ✅ Complete |
 | Depends On | — |
+| Pedagogical Principle | Dual Coding |
 
 ---
 

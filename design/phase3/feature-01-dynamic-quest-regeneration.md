@@ -5,7 +5,7 @@
 | Priority | phase3-high |
 | Status | ✅ Complete |
 | Pedagogical Principle | Varied Practice |
-| Depends On | Change 01 |
+| Depends On | [Change 01 — Remove Glossary](change-01-remove-glossary.md) |
 
 ---
 
@@ -50,3 +50,10 @@ After "Reset All Progress," keep `quest-zero` ("Forge the Anvil") as the only st
 4. Verify the next quest is already available (pre-generated in the background) — no spinner visible.
 5. Verify the next quest is AI-generated and not a hard-coded entry from `STARTER_QUESTS`.
 6. Confirm XP resets to 0 and level resets to 1.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

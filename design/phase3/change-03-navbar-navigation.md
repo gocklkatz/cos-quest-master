@@ -5,7 +5,7 @@
 | Priority | phase3-mid |
 | Status | ✅ Complete |
 | Pedagogical Principle | Cognitive Load Reduction / Workspace Expansion |
-| Depends On | C4 ✅ (QuestViewComponent must exist as a standalone routed component) |
+| Depends On | [C4 — Migrate AppComponent](change-04-migrate-app-to-quest-view.md) ✅ (QuestViewComponent must exist as a standalone routed component) |
 
 ---
 
@@ -94,3 +94,10 @@ Acceptance criteria:
 6. Open Settings from the AI-disabled banner link inside Quest View — confirm the modal opens correctly via `UiEventService`.
 7. Confirm `ng build` produces zero errors.
 8. Confirm `ng test` produces zero regressions.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

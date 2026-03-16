@@ -4,7 +4,7 @@
 |---|---|
 | Priority | phase3-high |
 | Status | ✅ Complete |
-| Depends On | F1 (Dynamic Quest Regeneration), F10 (AI Review Modal) |
+| Depends On | [F1 — Dynamic Quest Regeneration](feature-01-dynamic-quest-regeneration.md), [F10 — AI Review Modal](feature-10-review-modal.md) |
 | Pedagogical Principle | Trust Calibration — players must know whether feedback came from Claude or the fallback evaluator to correctly weight it |
 
 ---
@@ -68,3 +68,10 @@ When any call to `ClaudeApiService` fails (network error, invalid API key, exhau
 4. Navigate to the next quest — confirm the banner is cleared.
 5. Open Review Modal, submit a reflection with a broken key — confirm the typed error message is shown (not the old static string).
 6. `ng build` — zero errors. `ng test` — zero regressions.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

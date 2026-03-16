@@ -35,3 +35,10 @@ Complete removal of the Glossary component, service, and data from the Angular a
 1. Confirm the Glossary tab is no longer visible in the UI.
 2. Verify that `ng build` succeeds without circular dependencies or missing imports.
 3. Check that Quest hints still render documentation links correctly.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

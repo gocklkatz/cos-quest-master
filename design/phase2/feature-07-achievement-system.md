@@ -5,6 +5,7 @@
 | Priority | phase2-mid |
 | Status | ✅ Complete |
 | Depends On | — |
+| Pedagogical Principle | Habit Formation |
 
 ---
 

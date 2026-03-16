@@ -4,7 +4,7 @@
 |---|---|
 | Priority | phase3-high |
 | Status | ✅ Complete |
-| Depends On | F1 — Dynamic Quest Regeneration |
+| Depends On | [F1 — Dynamic Quest Regeneration](feature-01-dynamic-quest-regeneration.md) |
 | Pedagogical Principle | Motivation & Flow — removing friction and anxiety between learning cycles |
 
 ---
@@ -80,3 +80,10 @@ After a player completes a quest and the app triggers AI quest generation, a sil
 4. Click "Try again" — generation retries and succeeds (or shows error again).
 5. Run `ng build` — zero errors.
 6. Run unit tests — `QuestEngineService` signals tested; `QuestPanel` snapshot updated.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

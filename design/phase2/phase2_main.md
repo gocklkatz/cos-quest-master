@@ -23,6 +23,12 @@
 
 ---
 
+## Carry-overs from Phase 1
+
+*(Phase 1 defined no individually numbered features — it shipped the core loop as a single monolithic deliverable. There are no feature-doc carry-overs into Phase 2.)*
+
+---
+
 ## Phase 2 Priority Tiers
 
 | Priority | Theme |
@@ -44,6 +50,12 @@
 | 6 | Unified File-Tab Quest Interface | phase2-mid | ✅ Complete | [feature-06-unified-file-tabs.md](feature-06-unified-file-tabs.md) |
 | 7 | Achievement System | phase2-mid | ✅ Complete | [feature-07-achievement-system.md](feature-07-achievement-system.md) |
 | 8 | Resizable Panes | phase2-mid | ✅ Complete | [feature-08-resizable-panes.md](feature-08-resizable-panes.md) |
+
+---
+
+## Phase 2 Refactorings & Decommissions
+
+*(No components were decommissioned in Phase 2. The Glossary feature (F5) introduced here is later removed in Phase 3 — see [Phase 3 — change-01-remove-glossary.md](../phase3/change-01-remove-glossary.md).)*
 
 ---
 
@@ -131,3 +143,18 @@ quest-master/
 | 6 | **Resizable panes** — drag dividers for sidebar, editor/output, output/chat | phase2-mid | ✅ Complete |
 | 7 | **Unified file-tab quest interface** — replace snippet/class modes with `files[]`, single Run + Submit | phase2-mid | ✅ Complete |
 | 8 | **Achievement system** — unlock logic, overlay animation, starter achievements | phase2-mid | ✅ Complete |
+
+
+---
+
+## Design Decisions
+
+See [DECISIONS.md](DECISIONS.md).
+
+
+---
+
+## Phase Navigation
+
+- Previous: [Phase 1 — Specification](../phase1/phase1_main.md)
+- Next: [Phase 3 — Pedagogical Optimisation](../phase3/phase3_main.md)

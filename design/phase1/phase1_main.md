@@ -951,3 +951,17 @@ Build in this order:
 - [x] Quest log displays completed quests and earned XP correctly
 - [x] XP gain animation plays on quest completion
 - [x] IRIS setup scripts run cleanly (`docker compose up -d` + `setup.sh` complete without errors)
+
+
+---
+
+## Design Decisions
+
+See [DECISIONS.md](DECISIONS.md).
+
+
+---
+
+## Phase Navigation
+
+- Next: [Phase 2 — Specification](../phase2/phase2_main.md)

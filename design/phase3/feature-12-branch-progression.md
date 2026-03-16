@@ -4,7 +4,7 @@
 |---|---|
 | Priority | phase3-mid |
 | Status | ✅ Complete |
-| Depends On | Feature 01 (Dynamic Quest Regeneration) |
+| Depends On | [Feature 01 — Dynamic Quest Regeneration](feature-01-dynamic-quest-regeneration.md) |
 | Pedagogical Principle | Spiral Curriculum / Mastery-Based Progression |
 
 ---
@@ -130,3 +130,10 @@ No changes required to the system prompt — the branch is already templated as 
 8. Complete 5 `classes` quests. Verify transition to `sql` branch.
 9. Complete 3 `sql` quests. Verify transition to `capstone` branch (F5 Spiral Quests).
 10. Confirm no further advancement occurs from `capstone` (terminal stage).
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

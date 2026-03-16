@@ -52,3 +52,10 @@ Remove the Skill Tree and Quest Log panels from the left pane of the Angular app
 1. Confirm neither the Skill Tree nor the Quest Log panel is visible in the left pane.
 2. Verify `ng build` succeeds with zero errors.
 3. Verify `ng test` produces zero regressions.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

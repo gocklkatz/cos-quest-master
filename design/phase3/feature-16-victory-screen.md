@@ -1,23 +1,32 @@
-# Feature 16 — Victory Screen
+# Feature 16: Victory Screen (Phase 3)
 
-**Priority**: phase3-high
-**Status**: ✅ Implemented
-
-## Goal
-
-After the player completes all three capstone quests (`capstone-01`, `capstone-02`, `capstone-03`), the game reaches its natural end. Previously nothing happened — the quest list went silent and the player was left with no indication that they had finished. This feature closes that loop with a proper win condition.
-
----
-
-## Trigger Condition
-
-The victory screen fires **once**, immediately after the review modal for `capstone-03` is dismissed (`onReviewConfirmed()`), when `QuestEngineService.gameComplete()` is `true`.
-
-`gameComplete` is a computed signal that returns `true` iff all three capstone quest IDs (`capstone-01`, `capstone-02`, `capstone-03`) appear in `completedQuests`.
+| Field | Value |
+|---|---|
+| Phase | Phase 3 |
+| Priority | phase3-high |
+| Status | ✅ Complete |
+| Depends On | [Feature 05 — Unified Spiral Quests](feature-05-unified-spiral-quests.md) |
+| Pedagogical Principle | Habit Formation |
 
 ---
 
-## Visual Design
+## Task Prompt
+
+Implement a full-screen victory overlay that fires once, immediately after the review modal for `capstone-03` is dismissed, when all three capstone quests (`capstone-01`, `capstone-02`, `capstone-03`) are marked complete. The overlay must display the player's rank, level, and XP alongside a canvas-based fireworks animation, and a "Continue" button that dismisses it without reloading the page.
+
+---
+
+## Pedagogical Design
+
+**The Learning Problem**: Without a win condition, completing the final capstone quest produces no closure — the player is left uncertain whether the curriculum is finished.
+
+**The Cognitive Solution**: Habit Formation. A celebratory win-condition overlay closes the practice loop with a clear reward signal, reinforcing the habit of completing the full curriculum and providing closure that makes the achievement memorable.
+
+---
+
+## Implementation Details
+
+### Visual Design
 
 A full-screen fixed overlay (z-index 1200, above everything) that appears on top of the normal game UI.
 
@@ -44,9 +53,7 @@ A full-screen fixed overlay (z-index 1200, above everything) that appears on top
 - Rank label is derived from the player's level at the moment of victory (see rank table below).
 - "Continue" button dismisses the overlay (no page reload; the player can still browse completed quests).
 
----
-
-## Rank Table
+### Rank Table
 
 | Level  | Rank Title       |
 |--------|------------------|
@@ -58,9 +65,7 @@ A full-screen fixed overlay (z-index 1200, above everything) that appears on top
 | 14     | Master           |
 | 15     | Grand Master     |
 
----
-
-## Fireworks Algorithm (Canvas 2D)
+### Fireworks Algorithm (Canvas 2D)
 
 Each frame:
 1. Fade the canvas with a semi-transparent black fill (trail effect).
@@ -70,9 +75,7 @@ Each frame:
 5. Draw each spark as a small filled circle; reduce opacity as lifespan decays. Remove dead sparks.
 6. Loop via `requestAnimationFrame`; cancel on dismiss via `cancelAnimationFrame`.
 
----
-
-## Component API
+### Component API
 
 **Selector**: `app-victory-overlay`
 **File**: `src/app/components/victory-overlay/`
@@ -90,9 +93,7 @@ Each frame:
 |-------------|-------------------------------------|
 | `dismissed` | Emitted when player clicks Continue |
 
----
-
-## Integration Points
+### Integration Points
 
 - **`QuestEngineService`**: `readonly gameComplete = computed(...)` — true when all three capstone IDs are in `completedQuests`.
 - **`QuestViewComponent`**:
@@ -102,9 +103,40 @@ Each frame:
 
 ---
 
+## Files Changed
+
+- `quest-master/src/app/components/victory-overlay/` — new component
+- `quest-master/src/app/services/quest-engine.service.ts` — `gameComplete` computed signal
+- `quest-master/src/app/components/quest-view/quest-view.component.ts` — victory trigger wiring
+
+---
+
+## Open Questions
+
+- [ ] None outstanding.
+
+---
+
+## Verification Plan
+1. Complete capstone-01, capstone-02, and capstone-03 in sequence.
+2. On dismissing the capstone-03 review modal, verify the victory overlay appears full-screen.
+3. Verify the fireworks animation plays.
+4. Verify the player's rank, level, and XP are displayed correctly.
+5. Click Continue — verify the overlay dismisses and the normal game UI is visible.
+6. Verify page reload does not re-trigger the overlay.
+
+---
+
 ## Accessibility
 
 - Overlay is `role="dialog"` with `aria-modal="true"` and `aria-label="Victory"`.
 - Continue button uses `autofocus` so keyboard users can dismiss immediately.
 - Fireworks canvas is `aria-hidden="true"` (decorative).
 - No auto-dismiss timer — player decides when to close.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

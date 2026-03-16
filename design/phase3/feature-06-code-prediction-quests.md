@@ -5,7 +5,7 @@
 | Priority | phase3-low |
 | Status | ⬜ Not started |
 | Pedagogical Principle | Worked Example Effect |
-| Depends On | Feature 02 |
+| Depends On | [Feature 02 — AI Elaborative Interrogation](feature-02-ai-elaborative-interrogation.md) |
 
 ---
 
@@ -122,3 +122,10 @@ None required.
 5. Select the correct answer and click Submit — verify `ReviewModal` opens with `passed: true`, XP equal to `xpReward` is awarded, and next quest loads after dismissal.
 6. On a fresh prediction quest, select a wrong answer — verify `ReviewModal` opens with `passed: false`, the `codeReview` field shows the explanation, XP is zero, and next quest loads after dismissal.
 7. Verify `ng build` and `ng test` produce zero errors/regressions.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

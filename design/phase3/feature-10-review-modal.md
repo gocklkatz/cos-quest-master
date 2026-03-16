@@ -4,7 +4,7 @@
 |---|---|
 | Priority | phase3-high |
 | Status | ✅ Complete |
-| Depends On | F1 Dynamic Quest Regeneration |
+| Depends On | [F1 — Dynamic Quest Regeneration](feature-01-dynamic-quest-regeneration.md) |
 | Pedagogical Principle | Elaborative Feedback / Metacognition |
 
 ---
@@ -81,3 +81,10 @@ Acceptance criteria:
 4. Press Enter immediately after modal appears (without clicking) — modal dismisses.
 5. Click the backdrop — modal dismisses.
 6. Run `ng build` with zero errors.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

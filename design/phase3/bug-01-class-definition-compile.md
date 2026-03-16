@@ -4,7 +4,7 @@
 |---|---|
 | Priority | phase3-high |
 | Status | ✅ Complete |
-| Depends On | F5 (Unified Spiral Quests — introduces class-based quests) |
+| Depends On | [F5 — Unified Spiral Quests](feature-05-unified-spiral-quests.md) — introduces class-based quests |
 
 ---
 
@@ -49,3 +49,10 @@ In `QuestViewComponent` (or wherever the run button is wired):
 ## Files Changed
 
 - `quest-master/src/app/services/claude-api.service.ts` — added `isClassBranch` flag; branches the constraint text and JSON schema in `generateQuest` so `classes`/`capstone` quests receive a two-file template (`.cls` + `.script`) while all other branches keep the single-file script template
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

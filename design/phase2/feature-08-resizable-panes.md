@@ -5,6 +5,7 @@
 | Priority | phase2-mid |
 | Status | ✅ Complete |
 | Depends On | [Feature 2](feature-02-ai-pair-programmer.md) (output-chat divider requires AI chat panel) |
+| Pedagogical Principle | Cognitive Load Reduction |
 
 ---
 

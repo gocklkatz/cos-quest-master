@@ -230,3 +230,10 @@ This keeps the reset reactive, avoids `@ViewChild` coupling, and does not interf
 8. Open Settings → change IRIS config → confirm connection indicator updates.
 9. Confirm `ng build` produces zero errors.
 10. Confirm `ng test` produces zero regressions.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

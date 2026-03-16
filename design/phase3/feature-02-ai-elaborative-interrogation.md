@@ -5,7 +5,7 @@
 | Priority | phase3-high |
 | Status | ✅ Complete |
 | Pedagogical Principle | Metacognition |
-| Depends On | Feature 01 |
+| Depends On | [Feature 01 — Dynamic Quest Regeneration](feature-01-dynamic-quest-regeneration.md) |
 
 ---
 
@@ -62,3 +62,10 @@ Upgrade the Claude evaluation prompt so that passing a quest no longer ends the 
 5. Verify the AI response appears below the textarea without closing the modal.
 6. Click OK — verify the modal closes and the next quest loads normally.
 7. Verify `ng build` succeeds.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

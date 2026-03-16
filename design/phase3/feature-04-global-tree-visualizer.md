@@ -5,7 +5,7 @@
 | Priority | phase3-mid |
 | Status | ✅ Complete |
 | Pedagogical Principle | Dual Coding |
-| Depends On | C3 (Navbar Navigation) — the `/tree` route and `TreeVisualizerComponent` stub are created by C3; F4 implements the component body |
+| Depends On | [C3 — Navbar Navigation](change-03-navbar-navigation.md) — the `/tree` route and `TreeVisualizerComponent` stub are created by C3; F4 implements the component body |
 
 ---
 
@@ -82,3 +82,10 @@ Build a visualizer that renders the structure of IRIS globals as an interactive 
 2. Verify the `GlobalVisualizerComponent` reflects the new node in the tree without a manual page refresh.
 3. Run `KILL ^Test` and click Run again — verify the tree clears.
 4. Verify system globals (`^%`) do not appear in the tree.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID

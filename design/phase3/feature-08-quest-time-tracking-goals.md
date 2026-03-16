@@ -169,3 +169,10 @@ Inject `TimeTrackingService`. When `dailyGoalMinutes === 0` the bar is hidden en
    - `goal-streak-3` fires for 3 consecutive days.
    - `hours-10` fires when `timeLog` total ≥ 36,000 s.
    - `hours-10` does not fire below threshold.
+
+---
+
+## Back-links
+
+- Phase: [Phase 3 Main](phase3_main.md)
+- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID
