@@ -66,7 +66,7 @@ These are the primary topics requiring discussion and decision before full featu
 3. **Initial skill assessment** — First session: 3-5 diagnostic quests. Based on results, skip early branches.
 4. **Manual difficulty toggle** — Player sets their own difficulty (Beginner / Intermediate / Advanced) before starting. Simple, respects player autonomy.
 
-**Decision needed**: Should difficulty be automatic (adaptive) or player-controlled? Mixing both is possible.
+**Decision**: **Option 4 + Option 1 as the execution layer.** A manual difficulty toggle (Beginner / Intermediate / Advanced) at first session sets the starting tier and initial branch; level-gated AI prompting handles continuous progression within that band. Options 2 and 3 are deferred until the scoring substrate and branch architecture are more mature. See [DECISIONS.md → D-P4-03](DECISIONS.md) and the supporting analysis: [Game Designer](q3-adaptive-difficulty-game-designer.md).
 
 ---
 

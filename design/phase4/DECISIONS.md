@@ -34,6 +34,21 @@ Each entry records a significant fork in the road: what was decided, why, and wh
 
 ---
 
+### D-P4-03 · 2026-03-16: Adaptive difficulty — Manual toggle + level-gated prompts
+
+**Context**: Phase 3 difficulty scales linearly with branch progression but does not adapt to individual skill. A skilled developer sees the same beginner quests as a newcomer, risking first-session dropout. Four options were evaluated by a game designer specialising in systems design and player psychology. See [q3-adaptive-difficulty-game-designer.md](q3-adaptive-difficulty-game-designer.md) for the full analysis.
+
+**Decision**: Option 4 (manual difficulty toggle) as the primary control, with Option 1 (level-gated AI prompts) as the continuous scaling layer. At first session, the player selects Beginner / Intermediate / Advanced. This sets the starting tier and initial branch in a new `DifficultyService` that computes `effectiveTier` by merging the manual preference with the XP-derived level. The existing tier signal in `ClaudeApiService.generateQuest()` is preserved as the delivery mechanism.
+
+**Rejected alternatives**:
+- **Option 2 (Score-based adaptation)**: Theoretically sound but premature — AI-generated scores driving AI-generated difficulty creates a co-produced feedback loop with low measurement reliability. Deferred to Phase 5 once Code Prediction quests provide binary correctness signals.
+- **Option 3 (Initial skill assessment)**: High potential value but requires branch-skip architecture (C5) and a calibrated diagnostic quest set that does not yet exist. Deferred to Phase 5.
+- **Option 1 alone**: Already 80% built but XP is a proxy for time-on-task, not mastery. Retained as the execution mechanism within the manually-chosen band, not as the sole control.
+
+**Affects**: [feature-18-adaptive-difficulty.md](feature-18-adaptive-difficulty.md)
+
+---
+
 <!-- Add entries as decisions are made. Use the format below. -->
 
 <!--
