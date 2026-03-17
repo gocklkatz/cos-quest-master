@@ -8,8 +8,8 @@ export const BRANCH_PROGRESSION: BranchStage[] = [
   { branch: 'setup',    minQuestsToAdvance: 3 },   // quest-zero counts; 2 more generated quests needed
   { branch: 'commands', minQuestsToAdvance: 5 },
   { branch: 'globals',  minQuestsToAdvance: 5 },
-  { branch: 'classes',  minQuestsToAdvance: 5 },
-  { branch: 'sql',      minQuestsToAdvance: 3 },   // focused bridge before capstone
+  { branch: 'classes',  minQuestsToAdvance: 8 },
+  { branch: 'sql',      minQuestsToAdvance: 6 },   // focused bridge before capstone
   { branch: 'capstone', minQuestsToAdvance: null }, // terminal — F5 Spiral Quests live here
 ];
 
