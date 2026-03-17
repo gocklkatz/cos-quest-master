@@ -36,8 +36,9 @@ Adding a new feature? Add a row in the relevant principle section and set the `P
 
 **Features using this principle**:
 - [P2-F3 — Documentation Links in Hints](phase2/feature-03-doc-links-hints.md)
-- [P2-F5 — Concept Glossary](phase2/feature-05-concept-glossary.md)
 - [P3-F4 — Global Tree Visualizer](phase3/feature-04-global-tree-visualizer.md)
+
+> Note: P2-F5 (Concept Glossary) was removed in [P3-C1](phase3/change-01-remove-glossary.md).
 
 ---
 

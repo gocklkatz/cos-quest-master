@@ -136,6 +136,9 @@ Each entry records a significant fork in the road: what was decided, why, and wh
 ---
 
 ### D-P3-16 · 2026-03-11: P3-F6 — Prediction quest trigger: fixed ratio (every 4th quest per branch)
+
+> ⚠️ **Superseded by D-P4-05** (2026-03-17). The `completedInBranch % 4 === 3` fixed-ratio rule is replaced by the three-layer system (post-failure trigger + branch-specific weighting + minimum-frequency floor). See [Phase 4 DECISIONS.md → D-P4-05](../phase4/DECISIONS.md) and the updated [feature-06-code-prediction-quests.md](feature-06-code-prediction-quests.md).
+
 **Context**: The spec said "extend `generateQuest()` with a `questType` parameter" but did not specify when `QuestEngineService` should pass `questType: 'prediction'`. Options ranged from a random probability to user-selectable mode to a fixed ratio.
 **Decision**: `QuestEngineService` generates a prediction quest when `completedInBranch >= 1 && completedInBranch % 4 === 3`. This is every 4th quest in a branch, starting from position 3 (the 4th). The minimum of 1 ensures the player has written at least one piece of code in a branch before being asked to read and predict.
 **Rejected alternatives**: Random probability — unpredictable; could cluster prediction quests or skip them entirely in a branch. User-selectable mode — adds UI complexity and reduces the worked-example effect (players would opt out). Branch-level config in `BRANCH_PROGRESSION` — over-engineering for a simple ratio.
