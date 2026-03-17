@@ -1,16 +1,24 @@
-# Feature 06: Code Prediction Quests (Phase 3)
+# Feature 06: Code Prediction Quests (Phase 3 → Phase 4 carry-over)
 
 | Field | Value |
 |---|---|
-| Priority | phase3-low |
+| Phase | Phase 4 (carry-over from Phase 3) |
+| Priority | phase4-high |
 | Status | ⬜ Not started |
 | Pedagogical Principle | Worked Example Effect |
-| Depends On | [Feature 02 — AI Elaborative Interrogation](feature-02-ai-elaborative-interrogation.md) |
+| Depends On | [Feature 02 — AI Elaborative Interrogation](feature-02-ai-elaborative-interrogation.md) · [Change 05 — Branch Architecture](../phase4/change-05-branch-architecture.md) (sub-branch topic strings) |
 
 ---
 
 ## Task Prompt
 Implement a quest type where the user is presented with a short, deterministic routine and must predict its output by selecting from multiple-choice options. The choices and the correct answer are AI-generated alongside the quest. The editor is read-only; grading is local (no Claude call at submission time).
+
+Prediction quests must be triggered by a **three-layer frequency system** (D-P4-05):
+1. **Post-failure trigger (mandatory baseline)**: After any failed Write or Debug submission, the next quest is automatically a Code Prediction quest on the same sub-branch topic. A failed prediction quest must not cascade into another prediction quest.
+2. **Branch-specific weighting (ambient layer)**: `QuestEngineService` carries a per-sub-branch `predictionWeight` coefficient. Higher in Methods, Inheritance, Relationships, Joins, Aggregation, Embedded SQL (target: one Prediction quest per 3-quest window). Lower in Setup and Globals.
+3. **Minimum frequency floor**: One Code Prediction quest per 5 quests in any branch as a backstop for consistently-succeeding learners. Not a scheduling driver.
+
+After each prediction quest, the player is shown an in-quest continuation/exit choice ("Back to writing" pre-selected as default). No settings toggle for prediction frequency.
 
 ---
 
@@ -32,18 +40,39 @@ correctAnswer?: string;   // must match one entry in choices exactly
 `questType` defaults to `'standard'` when absent. The `normalizeQuest()` function requires no changes — the new fields pass through the existing `...rest` spread.
 
 ### Trigger mechanism (`quest-engine.service.ts`)
-`QuestEngineService.generateNextQuest()` determines quest type before calling `ClaudeApiService.generateQuest()`. A prediction quest is generated when **both** conditions hold:
-1. At least 1 quest in the current branch has already been completed (`completedInBranch >= 1`).
-2. The 0-based index of the quest being generated satisfies `completedInBranch % 4 === 3` (i.e. every 4th quest, starting from position 3).
+`QuestEngineService.generateNextQuest()` determines quest type before calling `ClaudeApiService.generateQuest()` using a three-layer priority system:
+
+**Layer 1 — Post-failure trigger (highest priority)**
+If the previous quest was a Write or Debug quest and it was failed (`passed === false`), force `questType = 'prediction'` with the same sub-branch topic. A failed prediction quest does **not** trigger another prediction quest (break the cascade).
+
+**Layer 2 — Branch-specific weighting**
+Each sub-branch carries a `predictionWeight` coefficient (0–1). `QuestEngineService` draws a random value and compares against the weight for the current sub-branch:
 
 ```ts
-const completedInBranch = /* count of completed quests for currentBranch */;
-const questType = (completedInBranch >= 1 && completedInBranch % 4 === 3)
-  ? 'prediction'
-  : 'standard';
+const PREDICTION_WEIGHTS: Record<string, number> = {
+  // High weight — reading comprehension is critical
+  'classes-methods':        0.33,
+  'classes-inheritance':    0.33,
+  'classes-relationships':  0.33,
+  'sql-joins':              0.33,
+  'sql-aggregation':        0.33,
+  'sql-embedded':           0.33,
+  // Low weight — mainly triggered by Layer 1 or Layer 3
+  'setup':                  0.10,
+  'globals':                0.10,
+  'classes-properties':     0.15,
+  'sql-queries':            0.15,
+};
 ```
 
-Pass `questType` to `ClaudeApiService.generateQuest()` as an optional parameter.
+**Layer 3 — Minimum frequency floor (lowest priority)**
+If no prediction quest has been generated in the last 5 quests for the current branch, force `questType = 'prediction'` regardless of weight. This is a backstop only — not a scheduling driver.
+
+```ts
+const questType = resolveQuestType(lastQuestResult, subBranch, recentQuestTypes);
+```
+
+Pass `questType` and the current `subBranch` topic string to `ClaudeApiService.generateQuest()`.
 
 ### AI prompt (`claude-api.service.ts`)
 `generateQuest()` gains an optional `questType: 'standard' | 'prediction' = 'standard'` parameter.
@@ -91,6 +120,13 @@ Pass this `EvaluationResult` through the **existing** evaluation pipeline (same 
 
 **Wrong answer / retry rule**: After a wrong answer the `ReviewModal` reveals the correct answer and the explanation (via `codeReview`). When the player dismisses the modal, quest progression continues normally — no retry is offered. A wrong prediction is treated as a learning moment, not a blocking failure. XP is zero.
 
+### In-quest continuation choice
+After the `ReviewModal` is dismissed for any prediction quest (pass or fail), show an inline choice before generating the next quest:
+- **"Back to writing"** (pre-selected default) — next quest is a standard Write or Debug quest
+- **"Another prediction"** — next quest is another Code Prediction quest on the same sub-branch topic
+
+This replaces the deferred settings-level player toggle (D-P4-05). The choice must not appear after a post-failure-triggered prediction quest — in that case, resume normal quest type selection immediately.
+
 ### IRIS Backend
 None required.
 
@@ -99,10 +135,10 @@ None required.
 ## Files Changed
 
 - `src/app/models/quest.models.ts` — add `questType`, `choices`, `correctAnswer` to `Quest`
-- `src/app/services/claude-api.service.ts` — add `questType` param to `generateQuest()`; extend prompt and JSON schema
-- `src/app/services/quest-engine.service.ts` — compute `questType` before calling `generateQuest()`; pass to service
-- `src/app/components/quest-panel/quest-panel.component.html` — choice radio-button UI, hide Run button for prediction quests
-- `src/app/components/quest-panel/quest-panel.component.ts` — `selectedChoice` signal, `submitPrediction()` method
+- `src/app/services/claude-api.service.ts` — add `questType` and `subBranch` params to `generateQuest()`; extend prompt and JSON schema
+- `src/app/services/quest-engine.service.ts` — implement three-layer `resolveQuestType()` logic; add `PREDICTION_WEIGHTS` map; track `lastQuestResult` and `recentQuestTypes`; pass `subBranch` to `generateQuest()`
+- `src/app/components/quest-panel/quest-panel.component.html` — choice radio-button UI; hide Run button for prediction quests; in-quest continuation/exit choice UI
+- `src/app/components/quest-panel/quest-panel.component.ts` — `selectedChoice` signal; `submitPrediction()` method; `continuationChoice` signal for post-prediction UI
 - `src/app/components/quest-view/quest-view.component.ts` — pass `readOnly` input to `CodeEditorComponent`
 - `src/app/components/code-editor/code-editor.component.ts` — accept and apply `readOnly` input to Monaco
 
@@ -110,22 +146,36 @@ None required.
 
 ## Open Questions
 
-*(none — all design questions resolved; see DECISIONS.md 2026-03-11 F6 entries)*
+- [ ] C5 (Branch Architecture) must define the final `subBranch` string identifiers before `PREDICTION_WEIGHTS` map can be finalised — implementation of F6 trigger layer must follow C5.
 
 ---
 
 ## Verification Plan
-1. Complete enough quests in any branch so that `completedInBranch % 4 === 3` is satisfied; verify `generateQuest()` is called with `questType: 'prediction'`.
-2. Verify the generated `Quest` object contains `questType: 'prediction'`, a `choices` array (3–4 entries), and a `correctAnswer` that matches one choice.
-3. Verify the Monaco editor is read-only (typing has no effect).
-4. Verify the Run button is hidden and the radio-button choice group is rendered.
-5. Select the correct answer and click Submit — verify `ReviewModal` opens with `passed: true`, XP equal to `xpReward` is awarded, and next quest loads after dismissal.
-6. On a fresh prediction quest, select a wrong answer — verify `ReviewModal` opens with `passed: false`, the `codeReview` field shows the explanation, XP is zero, and next quest loads after dismissal.
-7. Verify `ng build` and `ng test` produce zero errors/regressions.
+
+**Quest type resolution**
+1. Fail a Write or Debug quest — verify the immediately following quest has `questType: 'prediction'` and the same `subBranch` topic.
+2. Fail a prediction quest — verify the next quest is **not** a prediction quest (cascade prevention).
+3. Succeed 5 consecutive quests in a branch with `predictionWeight = 0.10` (Setup/Globals) — verify a prediction quest is forced by the minimum floor before the 6th quest.
+4. In a `predictionWeight = 0.33` sub-branch (e.g. `classes-methods`), complete 9 quests — verify at least 2–3 were prediction quests.
+
+**Quest content and UI**
+5. Verify the generated `Quest` object contains `questType: 'prediction'`, a `choices` array (3–4 entries), and a `correctAnswer` that matches one choice exactly.
+6. Verify the Monaco editor is read-only (typing has no effect).
+7. Verify the Run button is hidden and the radio-button choice group is rendered.
+
+**Grading and flow**
+8. Select the correct answer and click Submit — verify `ReviewModal` opens with `passed: true`, XP equal to `xpReward` is awarded.
+9. Dismiss the modal — verify the in-quest continuation choice is shown with "Back to writing" pre-selected.
+10. Select "Another prediction" — verify the next quest is a prediction quest on the same sub-branch.
+11. On a fresh prediction quest, select a wrong answer — verify `ReviewModal` shows `passed: false`, `codeReview` displays the explanation, XP is zero, and next quest loads after dismissal.
+12. Verify the continuation choice does **not** appear after a post-failure-triggered prediction quest.
+
+**Build**
+13. `ng build` and `ng test` produce zero errors/regressions.
 
 ---
 
 ## Back-links
 
-- Phase: [Phase 3 Main](phase3_main.md)
-- Decisions: [DECISIONS.md](DECISIONS.md) — see entries tagged with this feature's ID
+- Phase: [Phase 3 Main](phase3_main.md) · [Phase 4 Main](../phase4/phase4_main.md)
+- Decisions: [Phase 3 DECISIONS.md](DECISIONS.md) · [Phase 4 DECISIONS.md — D-P4-05](../phase4/DECISIONS.md)
