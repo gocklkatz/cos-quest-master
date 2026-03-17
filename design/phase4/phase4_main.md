@@ -157,7 +157,7 @@ These are the primary topics requiring discussion and decision before full featu
 
 | # | Change | Priority | Status | Rationale | Doc |
 |---|---|---|---|---|---|
-| C5 | **Branch Architecture Redesign** | phase4-mid | ⬜ Not started | Current 5-quest fixed branches are too short for classes and SQL; evaluate sub-branches, variable-length, or topic-tag alternatives (see Q4) | [change-05-branch-architecture.md](change-05-branch-architecture.md) |
+| C5 | **Branch Architecture Redesign** | phase4-mid | ✅ Complete | Current 5-quest fixed branches are too short for classes and SQL; evaluate sub-branches, variable-length, or topic-tag alternatives (see Q4) | [change-05-branch-architecture.md](change-05-branch-architecture.md) |
 
 ---
 

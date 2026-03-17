@@ -243,6 +243,16 @@ export class QuestEngineService {
     }
   }
 
+  /** True when the next generated quest in the given branch is the Boss Quest. */
+  isNextQuestBossQuest(branch: string): boolean {
+    const stage = BRANCH_PROGRESSION.find(s => s.branch === branch);
+    if (!stage || stage.minQuestsToAdvance === null) return false;
+    const completedInBranch = this.allQuests().filter(
+      q => q.branch === branch && this.gameState.completedQuests().includes(q.id)
+    ).length;
+    return completedInBranch === stage.minQuestsToAdvance - 1;
+  }
+
   /**
    * Discard the current quest and generate a fresh one in the same branch.
    * Increments skipsThisSession; does NOT call recordQuestComplete().

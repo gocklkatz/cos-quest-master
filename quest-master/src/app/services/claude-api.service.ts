@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Quest, EvaluationResult, QuestTier, normalizeQuest } from '../models/quest.models';
+import { BRANCH_TOPIC_DESCRIPTIONS } from '../data/branch-progression';
 
 export class ClaudeApiError extends Error {
   constructor(public readonly status: number, message: string) {
@@ -53,8 +54,8 @@ export class ClaudeApiService {
     apiKey: string,
     questType: 'standard' | 'prediction' = 'standard',
   ): Promise<Quest> {
-    const isClassBranch = currentBranch === 'classes' || currentBranch === 'capstone';
-    const isSqlBranch = currentBranch === 'sql';
+    const isClassBranch = currentBranch.startsWith('classes') || currentBranch === 'capstone';
+    const isSqlBranch = currentBranch.startsWith('sql');
 
     const isEarlyStage = completedQuests.length === 0 || (completedQuests.length === 1 && completedQuests[0] === 'quest-zero');
     const earlyStageGuidance = isEarlyStage
@@ -65,6 +66,8 @@ export class ClaudeApiService {
 - Keep the objective narrow and achievable in under 10 lines of code
 - Use "tier": "apprentice" and award modest XP (20–50 base)`
       : '';
+
+    const topicDescription = BRANCH_TOPIC_DESCRIPTIONS[currentBranch] ?? currentBranch;
 
     const isPrediction = questType === 'prediction';
 
@@ -92,7 +95,7 @@ This is a "predict the output" quest. The player reads a completed routine and s
 The player has completed these quests: ${completedQuests.join(', ') || 'none'}
 They have covered these concepts: ${coveredConcepts.join(', ') || 'none'}
 Their current tier is: ${tier}
-Their current skill branch is: ${currentBranch}
+Their current skill branch is: ${currentBranch} (${topicDescription})
 ${earlyStageGuidance}${predictionGuidance}
 Generate the NEXT quest in this branch. It should:
 1. Introduce 1-2 new concepts while reinforcing previously learned ones

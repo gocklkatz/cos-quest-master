@@ -149,12 +149,31 @@ export class GameStateService {
         if (Array.isArray(parsed.questBank)) {
           parsed.questBank = parsed.questBank.map(normalizeQuest);
         }
-        return { ...DEFAULT_GAME_STATE, ...parsed };
+        return this.migrateState({ ...DEFAULT_GAME_STATE, ...parsed });
       }
     } catch {
       // ignore parse errors
     }
     return { ...DEFAULT_GAME_STATE };
+  }
+
+  private migrateState(state: GameState): GameState {
+    const BRANCH_MIGRATIONS: Record<string, string> = {
+      classes: 'classes-properties',
+      sql:     'sql-queries',
+    };
+
+    const migratedBranch = BRANCH_MIGRATIONS[state.currentBranch] ?? state.currentBranch;
+
+    const migratedUnlocked = state.unlockedBranches.map(
+      b => BRANCH_MIGRATIONS[b] ?? b
+    );
+
+    return {
+      ...state,
+      currentBranch:    migratedBranch,
+      unlockedBranches: [...new Set(migratedUnlocked)],
+    };
   }
 
   private persist(): void {
