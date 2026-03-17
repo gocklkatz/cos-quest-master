@@ -147,8 +147,9 @@ These are the primary topics requiring discussion and decision before full featu
 | 18 | **Adaptive Difficulty** | phase4-mid | ⬜ Not started | Early quests are too easy for experienced devs; difficulty should scale with demonstrated mastery (see Q3) | [feature-18-adaptive-difficulty.md](feature-18-adaptive-difficulty.md) |
 | 19 | **Enhanced Gamification** | phase4-mid | ⬜ Not started | Research-backed engagement mechanics to improve retention (see Q6) | [feature-19-enhanced-gamification.md](feature-19-enhanced-gamification.md) |
 | 20 | **Narrative Story Arc** | phase4-low | ⬜ Not started | Thin story layer to give context to isolated quests and increase motivation (see Q2) | [feature-20-narrative-story-arc.md](feature-20-narrative-story-arc.md) |
+| 21 | **IDE Quests** | phase4-low | ⬜ Not started | New quest type requiring real implementation in VS Code or ObjectScript Studio, evaluated via Atelier API polling and functional test execution | [feature-21-ide-quests.md](feature-21-ide-quests.md) |
 
-> Feature numbers continue from Phase 3 (last used: F16). Next available: **F21**.
+> Feature numbers continue from Phase 3 (last used: F16). Next available: **F22**.
 
 ---
 
@@ -176,6 +177,8 @@ graph TD
     F17 --> F19
     F18 --> F6
     F17 --> F20
+    F6 --> F21
+    C5 --> F21
 ```
 
 ---
@@ -203,7 +206,8 @@ graph TD
   api.anthropic.com            localhost:52773 (IRIS)
                                ├── /api/quest/execute
                                ├── /api/quest/compile
-                               └── /api/quest/globals
+                               ├── /api/quest/globals
+                               └── /api/atelier/v1/USER/doc/:class  [F21 — poll for IDE-created classes]
 ```
 
 ---
@@ -217,6 +221,7 @@ graph TD
 5. **Adaptive difficulty**: Implement F18 — wire difficulty level into Claude prompt parameters.
 6. **Gamification**: Implement the 2–3 mechanics chosen from the Q6 evaluation (F19).
 7. **Story arc**: Implement F20 if narrative decision favors it (phase4-low, defer if bandwidth is tight).
+8. **IDE Quests**: Implement F21 after F6 establishes the alternative quest type pattern and C5 decides branch placement — verify Atelier polling and functional test runner before wiring into quest engine.
 
 ---
 
