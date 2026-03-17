@@ -399,6 +399,185 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
   });
 });
 
+// ── F6: resolveQuestType — three-layer prediction resolver ───────────────────
+
+describe('QuestEngineService — F6: resolveQuestType', () => {
+  const STANDARD_QUEST: Quest = {
+    id: 'std-quest',
+    title: 'Standard Quest',
+    branch: 'setup',
+    tier: 'apprentice',
+    narrative: '',
+    objective: '',
+    evaluationCriteria: '',
+    hints: [],
+    bonusObjectives: [],
+    bonusXP: 0,
+    xpReward: 50,
+    prerequisites: [],
+    conceptsIntroduced: [],
+    questType: 'standard',
+    files: [{ id: 'f1', filename: 'solution.script', fileType: 'script', label: 'solution.script' }],
+  };
+
+  const PREDICTION_QUEST: Quest = {
+    ...STANDARD_QUEST,
+    id: 'pred-quest',
+    title: 'Prediction Quest',
+    questType: 'prediction',
+    choices: ['A', 'B', 'C', 'D'],
+    correctAnswer: 'A',
+  };
+
+  async function buildF6Service(initialBank: Quest[] = []) {
+    const completedQuestsSignal = signal<string[]>([]);
+    const questBankSignal = signal<Quest[]>(initialBank);
+    const mockGameState = {
+      completedQuests: completedQuestsSignal,
+      coveredConcepts: signal<string[]>([]),
+      xp: signal(0),
+      questBank: questBankSignal,
+      currentQuestId: signal<string | null>(null),
+      currentBranch: signal('setup'),
+      addToQuestBank: vi.fn(),
+      setCurrentQuest: vi.fn(),
+      setCurrentBranch: vi.fn(),
+      completeQuest: vi.fn(),
+    } as unknown as GameStateService;
+
+    const mockClaude = {
+      generateQuest: vi.fn().mockResolvedValue(STANDARD_QUEST),
+      evaluateSubmission: vi.fn(),
+    } as unknown as ClaudeApiService;
+
+    await TestBed.configureTestingModule({
+      providers: [
+        QuestEngineService,
+        { provide: GameStateService, useValue: mockGameState },
+        { provide: ClaudeApiService, useValue: mockClaude },
+      ],
+    }).compileComponents();
+
+    return {
+      service: TestBed.inject(QuestEngineService),
+      mockGameState,
+      mockClaude,
+    };
+  }
+
+  it('Layer 1: after a failed standard quest, generateNextQuest calls claude with questType=prediction', async () => {
+    const { service, mockClaude } = await buildF6Service();
+
+    // Simulate completing a standard quest that was failed (xpEarned = 0 → passed = false).
+    service.completeQuest(STANDARD_QUEST, '', {
+      passed: false,
+      score: 0,
+      bonusAchieved: [],
+      feedback: 'Incorrect',
+      codeReview: '',
+      xpEarned: 0,
+    });
+
+    // Math.random would normally be called for Layer 2 but Layer 1 fires first.
+    await service.generateNextQuest('setup', 'key');
+
+    expect(mockClaude.generateQuest).toHaveBeenCalledWith(
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'prediction'
+    );
+  });
+
+  it('Layer 1: lastPredictionWasPostFailure is true when Layer 1 fires', async () => {
+    const { service } = await buildF6Service();
+
+    service.completeQuest(STANDARD_QUEST, '', {
+      passed: false,
+      score: 0,
+      bonusAchieved: [],
+      feedback: 'Incorrect',
+      codeReview: '',
+      xpEarned: 0,
+    });
+
+    // Mock Math.random so Layer 2 would NOT fire (return value > 0.10).
+    const spy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    await service.generateNextQuest('setup', 'key');
+    spy.mockRestore();
+
+    expect(service.lastPredictionWasPostFailure()).toBe(true);
+  });
+
+  it('Cascade prevention: after a failed prediction quest, Layer 1 does NOT force prediction', async () => {
+    const { service, mockClaude } = await buildF6Service();
+
+    // Simulate failing a prediction quest.
+    service.completeQuest(PREDICTION_QUEST, '', {
+      passed: false,
+      score: 0,
+      bonusAchieved: [],
+      feedback: 'Wrong',
+      codeReview: '',
+      xpEarned: 0,
+    });
+
+    // Force Math.random > 0.10 and ensure no prediction in recent history,
+    // but also fewer than 5 in window — Layer 3 won't fire.
+    // We fill _recentQuestTypes with a prediction to prevent Layer 3 from firing.
+    // Do this by completing a prediction first with passed=true (doesn't trigger Layer 1).
+    // Instead: just mock random and check that questType passed to generateQuest is 'standard'.
+    const spy = vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    await service.generateNextQuest('setup', 'key');
+    spy.mockRestore();
+
+    // Layer 2 won't fire (0.99 > 0.10). Layer 3 won't fire (only 1 quest in history).
+    // Layer 1 must NOT fire because the last quest was a prediction.
+    expect(mockClaude.generateQuest).toHaveBeenCalledWith(
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'standard'
+    );
+    expect(service.lastPredictionWasPostFailure()).toBe(false);
+  });
+
+  it('Layer 3: forces prediction after 5 consecutive standard quests with no prediction', async () => {
+    const { service, mockClaude } = await buildF6Service();
+
+    // Complete 5 standard quests (passed=true so Layer 1 never fires on any subsequent call).
+    for (let i = 0; i < 5; i++) {
+      service.completeQuest(
+        { ...STANDARD_QUEST, id: `std-${i}` },
+        '',
+        { passed: true, score: 80, bonusAchieved: [], feedback: '', codeReview: '', xpEarned: 50 },
+      );
+    }
+
+    // Mock Math.random > 0.10 so Layer 2 doesn't fire.
+    const spy = vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    await service.generateNextQuest('setup', 'key');
+    spy.mockRestore();
+
+    // Layer 3 should force prediction: 5 standard quests and no prediction in window.
+    expect(mockClaude.generateQuest).toHaveBeenCalledWith(
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'prediction'
+    );
+    expect(service.lastPredictionWasPostFailure()).toBe(false);
+  });
+
+  it('forceQuestType bypasses resolver and sets lastPredictionWasPostFailure to false', async () => {
+    const { service, mockClaude } = await buildF6Service();
+
+    // Simulate a failed standard quest so Layer 1 would normally fire.
+    service.completeQuest(STANDARD_QUEST, '', {
+      passed: false, score: 0, bonusAchieved: [], feedback: '', codeReview: '', xpEarned: 0,
+    });
+
+    // Force standard via forceQuestType — bypasses Layer 1.
+    await service.generateNextQuest('setup', 'key', 'standard');
+
+    expect(mockClaude.generateQuest).toHaveBeenCalledWith(
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'standard'
+    );
+    expect(service.lastPredictionWasPostFailure()).toBe(false);
+  });
+});
+
 // ── F5: Capstone quest prerequisite gating ────────────────────────────────────
 
 describe('QuestEngineService — F5: capstone prerequisite gating', () => {

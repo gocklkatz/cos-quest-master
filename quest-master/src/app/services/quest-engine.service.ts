@@ -7,6 +7,20 @@ import { STARTER_QUESTS } from '../data/starter-quests';
 import { calcLevel } from '../data/xp-table';
 import { BRANCH_PROGRESSION } from '../data/branch-progression';
 
+/** Per-branch probability that a given generated quest is a prediction quest. */
+const PREDICTION_WEIGHTS: Record<string, number> = {
+  'classes-methods':        0.33,
+  'classes-inheritance':    0.33,
+  'classes-relationships':  0.33,
+  'sql-joins':              0.33,
+  'sql-aggregation':        0.33,
+  'sql-embedded':           0.33,
+  'setup':                  0.10,
+  'globals':                0.10,
+  'classes-properties':     0.15,
+  'sql-queries':            0.15,
+};
+
 @Injectable({ providedIn: 'root' })
 export class QuestEngineService {
   private gameState = inject(GameStateService);
@@ -114,6 +128,18 @@ export class QuestEngineService {
   private _lastBranch = '';
   private _lastApiKey = '';
 
+  /** Tracks the result of the most recently completed quest (for post-failure prediction logic). */
+  private _lastQuestResult: { passed: boolean; questType: 'standard' | 'prediction' } | null = null;
+
+  /** Rolling window of the last 10 quest types generated (for floor enforcement). */
+  private _recentQuestTypes: Array<'standard' | 'prediction'> = [];
+
+  /**
+   * True when the most recently resolved quest type was forced by Layer 1 (post-failure trigger).
+   * Consumed by QuestViewComponent to decide whether to show the continuation choice.
+   */
+  readonly lastPredictionWasPostFailure = signal(false);
+
   /**
    * Signal a reset to QuestViewComponent. Called by AppComponent.onReset() after
    * resetProgress() and re-initialize(). QuestViewComponent's resetEpoch effect
@@ -188,10 +214,58 @@ export class QuestEngineService {
   }
 
   /**
+   * Three-layer resolver that decides whether the next quest should be a prediction quest.
+   *
+   * Layer 1 (highest priority — post-failure):
+   *   If the previous quest was a standard quest that the player failed, force prediction.
+   *   Cascade prevention: a failed prediction does NOT trigger another prediction.
+   *
+   * Layer 2 (branch weight):
+   *   Draw Math.random() against the branch's configured weight.
+   *   If random < weight → prediction.
+   *
+   * Layer 3 (floor):
+   *   If no prediction has appeared in the last 5 quests → prediction.
+   *
+   * Default: standard.
+   */
+  private resolveQuestType(subBranch: string): 'standard' | 'prediction' {
+    // Layer 1 — post-failure trigger
+    if (
+      this._lastQuestResult !== null &&
+      this._lastQuestResult.questType === 'standard' &&
+      !this._lastQuestResult.passed
+    ) {
+      this.lastPredictionWasPostFailure.set(true);
+      return 'prediction';
+    }
+
+    this.lastPredictionWasPostFailure.set(false);
+
+    // Layer 2 — branch weight
+    const weight = PREDICTION_WEIGHTS[subBranch] ?? 0.10;
+    if (Math.random() < weight) {
+      return 'prediction';
+    }
+
+    // Layer 3 — floor: force prediction if none in the last 5 quests
+    const recentFive = this._recentQuestTypes.slice(-5);
+    if (recentFive.length >= 5 && !recentFive.includes('prediction')) {
+      return 'prediction';
+    }
+
+    return 'standard';
+  }
+
+  /**
    * Generate the next quest via Claude and cache it in the quest bank.
    * Returns the generated quest, or null if generation fails.
+   *
+   * @param branch     The current (or desired) branch to generate for.
+   * @param apiKey     Anthropic API key.
+   * @param forceQuestType  When provided, bypasses the resolver and uses this type directly.
    */
-  async generateNextQuest(branch: string, apiKey: string): Promise<Quest | null> {
+  async generateNextQuest(branch: string, apiKey: string, forceQuestType?: 'standard' | 'prediction'): Promise<Quest | null> {
     const targetBranch = this.resolveBranch(branch);
     if (targetBranch !== branch) {
       this.gameState.setCurrentBranch(targetBranch);
@@ -211,11 +285,15 @@ export class QuestEngineService {
         ? 'journeyman'
         : 'apprentice';
 
-    const completedInBranch = this.allQuests().filter(
-      q => q.branch === targetBranch && completedIds.includes(q.id)
-    ).length;
-    const questType: 'standard' | 'prediction' =
-      completedInBranch >= 1 && completedInBranch % 4 === 3 ? 'prediction' : 'standard';
+    const questType: 'standard' | 'prediction' = forceQuestType !== undefined
+      ? forceQuestType
+      : this.resolveQuestType(targetBranch);
+
+    // When the type was forced by the caller (e.g. continuation choice), it is not a
+    // post-failure trigger — ensure the signal reflects that.
+    if (forceQuestType !== undefined) {
+      this.lastPredictionWasPostFailure.set(false);
+    }
 
     try {
       const quest = await this.claude.generateQuest(completedIds, coveredConcepts, targetBranch, tier, apiKey, questType);
@@ -295,6 +373,11 @@ export class QuestEngineService {
       quest.conceptsIntroduced,
       quest.branch,
     );
+
+    // Update prediction tracking state for the resolver.
+    this._lastQuestResult = { passed: evaluation.passed, questType: quest.questType ?? 'standard' };
+    this._recentQuestTypes.push(quest.questType ?? 'standard');
+    if (this._recentQuestTypes.length > 10) this._recentQuestTypes.shift();
 
     // Advance to the next uncompleted quest automatically.
     const next = this.activeQuests().find(q => q.id !== quest.id);

@@ -20,7 +20,7 @@
 
 | # | Feature | Original Priority | Reason Deferred | Doc |
 |---|---|---|---|---|
-| 6 | **Code Prediction Quests** | phase3-low | Complexity; AI multiple-choice generation not yet stable | [feature-06-code-prediction-quests.md](../phase3/feature-06-code-prediction-quests.md) |
+| 6 | **Code Prediction Quests** | phase3-low | Complexity; AI multiple-choice generation not yet stable | [feature-06-code-prediction-quests.md](../phase3/feature-06-code-prediction-quests.md) | ✅ Complete |
 
 ---
 

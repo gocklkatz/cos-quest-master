@@ -143,6 +143,26 @@
   <app-review-modal [evaluation]="reviewEvaluation()!" [apiKey]="anthropicApiKey()" (confirmed)="onReviewConfirmed()" />
 }
 
+<!-- Post-prediction continuation choice -->
+@if (showContinuationChoice()) {
+  <div class="continuation-choice-overlay">
+    <div class="continuation-choice-panel">
+      <p class="continuation-choice-prompt">What would you like to do next?</p>
+      <div class="continuation-choice-actions">
+        <button
+          class="continuation-btn continuation-btn--writing"
+          (click)="onContinuationChoice('writing')"
+          autofocus
+        >Back to writing</button>
+        <button
+          class="continuation-btn continuation-btn--prediction"
+          (click)="onContinuationChoice('prediction')"
+        >Another prediction</button>
+      </div>
+    </div>
+  </div>
+}
+
 <app-xp-animation
   [trigger]="xpAnimTrigger()"
   [xpEarned]="xpAnimAmount()"

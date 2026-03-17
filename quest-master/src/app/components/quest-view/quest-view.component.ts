@@ -99,6 +99,12 @@ export class QuestViewComponent implements OnInit, OnDestroy {
   /** Next-quest loading logic deferred until the review modal is dismissed. */
   private pendingNextQuest: (() => void) | null = null;
 
+  /** Quest type of the most recently completed quest — stored before the review modal opens. */
+  private _lastCompletedQuestType: 'standard' | 'prediction' = 'standard';
+
+  /** True when the post-prediction continuation choice should be shown. */
+  showContinuationChoice = signal(false);
+
   /** XP animation trigger — increment to fire a new animation. */
   xpAnimTrigger = signal(0);
   xpAnimAmount = signal(0);
@@ -449,6 +455,9 @@ export class QuestViewComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Track quest type before showing review modal (currentQuest may advance after completeQuest).
+    this._lastCompletedQuestType = quest.questType ?? 'standard';
+
     // Show review modal for every result (pass and fail).
     this.reviewEvaluation.set(result);
   }
@@ -511,15 +520,48 @@ export class QuestViewComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Track quest type before showing review modal (currentQuest may advance after completeQuest).
+    this._lastCompletedQuestType = quest.questType ?? 'standard';
+
     this.reviewEvaluation.set(result);
   }
 
   onReviewConfirmed(): void {
     this.reviewEvaluation.set(null);
+
+    // After a prediction quest, show the continuation choice (unless it was post-failure triggered).
+    const wasPrediction = this._lastCompletedQuestType === 'prediction';
+    if (wasPrediction && !this.questEngine.lastPredictionWasPostFailure()) {
+      this.showContinuationChoice.set(true);
+      return;
+    }
+
     if (this.pendingNextQuest) {
       this.pendingNextQuest();
       this.pendingNextQuest = null;
     }
+    if (this.questEngine.gameComplete()) {
+      this.victoryLevel.set(this.gameState.level());
+      this.victoryXp.set(this.gameState.xp());
+      this.victoryTrigger.update(n => n + 1);
+    }
+  }
+
+  onContinuationChoice(type: 'writing' | 'prediction'): void {
+    this.showContinuationChoice.set(false);
+    const forceType: 'standard' | 'prediction' = type === 'prediction' ? 'prediction' : 'standard';
+
+    if (this.pendingNextQuest) {
+      this.pendingNextQuest();
+      this.pendingNextQuest = null;
+    }
+
+    const apiKey = this.gameState.anthropicApiKey();
+    const branch = this.gameState.currentBranch();
+    if (apiKey) {
+      this.questEngine.generateNextQuest(branch, apiKey, forceType);
+    }
+
     if (this.questEngine.gameComplete()) {
       this.victoryLevel.set(this.gameState.level());
       this.victoryXp.set(this.gameState.xp());

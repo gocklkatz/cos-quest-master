@@ -221,6 +221,75 @@
   overflow: hidden;
 }
 
+/* ── Post-prediction continuation choice overlay ─────── */
+.continuation-choice-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.continuation-choice-panel {
+  background: #1a1530;
+  border: 1px solid #3a2f6a;
+  border-radius: 8px;
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  min-width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.continuation-choice-prompt {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #c4b5fd;
+  text-align: center;
+}
+
+.continuation-choice-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.continuation-btn {
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+
+  &--writing {
+    background: #2a2060;
+    border-color: #4e3a8e;
+    color: #c4b5fd;
+
+    &:hover {
+      background: #3a2f80;
+      border-color: #6b52c0;
+    }
+  }
+
+  &--prediction {
+    background: #1e3a28;
+    border-color: #2e5a3a;
+    color: #80d0a0;
+
+    &:hover {
+      background: #284d34;
+      border-color: #3e7a50;
+    }
+  }
+}
+
 /* ── Resize dividers ─────────────────────────────────── */
 .resize-divider {
   flex-shrink: 0;
