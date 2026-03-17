@@ -143,7 +143,7 @@ These are the primary topics requiring discussion and decision before full featu
 | # | Feature | Priority | Status | Rationale | Doc |
 |---|---|---|---|---|---|
 | 6 | **Code Prediction Quests** *(carry-over)* | phase4-high | ⬜ Not started | Completes the "code literacy" track; should appear more frequently (see Q5) | [feature-06-code-prediction-quests.md](../phase3/feature-06-code-prediction-quests.md) |
-| 17 | **Infinite Quest Loop** | phase4-high | ⬜ Not started | Game ends after 21 quests; must support indefinite play (see Q1) | [feature-17-infinite-quest-loop.md](feature-17-infinite-quest-loop.md) |
+| 17 | **Infinite Quest Loop** | phase4-high | ✅ Complete | Game ends after 21 quests; must support indefinite play (see Q1) | [feature-17-infinite-quest-loop.md](feature-17-infinite-quest-loop.md) |
 | 18 | **Adaptive Difficulty** | phase4-mid | ⬜ Not started | Early quests are too easy for experienced devs; difficulty should scale with demonstrated mastery (see Q3) | [feature-18-adaptive-difficulty.md](feature-18-adaptive-difficulty.md) |
 | 19 | **Enhanced Gamification** | phase4-mid | ⬜ Not started | Research-backed engagement mechanics to improve retention (see Q6) | [feature-19-enhanced-gamification.md](feature-19-enhanced-gamification.md) |
 | 20 | **Narrative Story Arc** | phase4-low | ⬜ Not started | Thin story layer to give context to isolated quests and increase motivation (see Q2) | [feature-20-narrative-story-arc.md](feature-20-narrative-story-arc.md) |

@@ -9,7 +9,7 @@
 
       <div class="victory-stats">
         <div class="stat-row">
-          <span class="stat-label">Rank</span>
+          <span class="stat-label">Quest Rank</span>
           <span class="stat-value rank">{{ rank }}</span>
         </div>
         <div class="stat-row">
@@ -17,13 +17,25 @@
           <span class="stat-value">{{ level() }}</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">Total XP</span>
+          <span class="stat-label">XP This Run</span>
           <span class="stat-value">{{ xp() | number }}</span>
         </div>
+        @if (prestigeLevel() > 0) {
+          <div class="stat-row">
+            <span class="stat-label">Total XP across all runs</span>
+            <span class="stat-value">{{ (totalXpAllTime() + xp()) | number }}</span>
+          </div>
+        }
+        @if (prestigeLevel() > 0) {
+          <div class="stat-row">
+            <span class="stat-label">Prestige Track</span>
+            <span class="stat-value">{{ prestigeTitle() }}</span>
+          </div>
+        }
       </div>
 
-      <button class="victory-btn" (click)="onDismiss()" autofocus>
-        Continue
+      <button class="victory-btn" (click)="onPrestige()" autofocus>
+        Begin {{ nextPrestigeTitle() }} Track
       </button>
     </div>
   </div>

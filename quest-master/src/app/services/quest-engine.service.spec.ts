@@ -40,6 +40,7 @@ describe('QuestEngineService — F9: questGenerating / questGenerationError sign
       currentQuestId: signal<string | null>(null),
       currentBranch: signal('setup'),
       allQuests: computed(() => []),
+      questCategory: vi.fn(() => 'write' as const),
       addToQuestBank: vi.fn(),
       setCurrentQuest: vi.fn(),
       setCurrentBranch: vi.fn(),
@@ -144,7 +145,7 @@ describe('QuestEngineService — F9: questGenerating / questGenerationError sign
 
     expect(mockClaude.generateQuest).toHaveBeenCalledTimes(2);
     expect(mockClaude.generateQuest).toHaveBeenLastCalledWith(
-      expect.any(Array), expect.any(Array), 'globals', expect.any(String), 'key-123', expect.any(String)
+      expect.any(Array), expect.any(Array), 'globals', expect.any(String), 'key-123', expect.any(String), expect.any(String)
     );
   });
 
@@ -225,6 +226,7 @@ describe('QuestEngineService — F13: skipQuest()', () => {
       currentQuestId: signal<string | null>('some-quest'),
       currentBranch: signal(currentBranch),
       anthropicApiKey: signal(apiKey),
+      questCategory: vi.fn(() => 'write' as const),
       addToQuestBank: vi.fn(),
       setCurrentQuest: vi.fn(),
       setCurrentBranch: vi.fn(),
@@ -262,7 +264,7 @@ describe('QuestEngineService — F13: skipQuest()', () => {
     const { service, mockClaude } = await buildSkipService('globals', 'my-api-key');
     await service.skipQuest();
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'globals', expect.any(String), 'my-api-key', expect.any(String)
+      expect.any(Array), expect.any(Array), 'globals', expect.any(String), 'my-api-key', expect.any(String), expect.any(String)
     );
   });
 
@@ -319,6 +321,7 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
       questBank: questBankSignal,
       currentQuestId: signal<string | null>(null),
       currentBranch: signal('setup'),
+      questCategory: vi.fn(() => 'write' as const),
       addToQuestBank: vi.fn(),
       setCurrentQuest: vi.fn(),
       setCurrentBranch: vi.fn(),
@@ -353,7 +356,7 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
     await service.generateNextQuest('setup', 'key');
 
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', expect.any(String)
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', expect.any(String), expect.any(String)
     );
     expect(service.branchUnlocked()).toBeNull();
   });
@@ -367,7 +370,7 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
     await service.generateNextQuest('setup', 'key');
 
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'commands', expect.any(String), 'key', expect.any(String)
+      expect.any(Array), expect.any(Array), 'commands', expect.any(String), 'key', expect.any(String), expect.any(String)
     );
     expect(mockGameState.setCurrentBranch).toHaveBeenCalledWith('commands');
     expect(service.branchUnlocked()).toBe('commands');
@@ -393,7 +396,7 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
     await service.generateNextQuest('capstone', 'key');
 
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'capstone', expect.any(String), 'key', expect.any(String)
+      expect.any(Array), expect.any(Array), 'capstone', expect.any(String), 'key', expect.any(String), expect.any(String)
     );
     expect(service.branchUnlocked()).toBeNull();
   });
@@ -439,6 +442,7 @@ describe('QuestEngineService — F6: resolveQuestType', () => {
       questBank: questBankSignal,
       currentQuestId: signal<string | null>(null),
       currentBranch: signal('setup'),
+      questCategory: vi.fn(() => 'write' as const),
       addToQuestBank: vi.fn(),
       setCurrentQuest: vi.fn(),
       setCurrentBranch: vi.fn(),
@@ -482,7 +486,7 @@ describe('QuestEngineService — F6: resolveQuestType', () => {
     await service.generateNextQuest('setup', 'key');
 
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'prediction'
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'prediction', expect.any(String)
     );
   });
 
@@ -531,7 +535,7 @@ describe('QuestEngineService — F6: resolveQuestType', () => {
     // Layer 2 won't fire (0.99 > 0.10). Layer 3 won't fire (only 1 quest in history).
     // Layer 1 must NOT fire because the last quest was a prediction.
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'standard'
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'standard', expect.any(String)
     );
     expect(service.lastPredictionWasPostFailure()).toBe(false);
   });
@@ -555,7 +559,7 @@ describe('QuestEngineService — F6: resolveQuestType', () => {
 
     // Layer 3 should force prediction: 5 standard quests and no prediction in window.
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'prediction'
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'prediction', expect.any(String)
     );
     expect(service.lastPredictionWasPostFailure()).toBe(false);
   });
@@ -572,7 +576,7 @@ describe('QuestEngineService — F6: resolveQuestType', () => {
     await service.generateNextQuest('setup', 'key', 'standard');
 
     expect(mockClaude.generateQuest).toHaveBeenCalledWith(
-      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'standard'
+      expect.any(Array), expect.any(Array), 'setup', expect.any(String), 'key', 'standard', expect.any(String)
     );
     expect(service.lastPredictionWasPostFailure()).toBe(false);
   });

@@ -48,8 +48,12 @@ export class VictoryOverlayComponent implements OnChanges, AfterViewInit, OnDest
   playerName = input('Adventurer');
   level      = input(1);
   xp         = input(0);
+  prestigeLevel    = input(0);
+  totalXpAllTime   = input(0);
+  prestigeTitle    = input('Initiate');
 
   dismissed = output<void>();
+  prestige  = output<void>();
 
   visible = signal(false);
 
@@ -86,6 +90,17 @@ export class VictoryOverlayComponent implements OnChanges, AfterViewInit, OnDest
     this.visible.set(false);
     this.stopAnimation();
     this.dismissed.emit();
+  }
+
+  onPrestige(): void {
+    this.visible.set(false);
+    this.stopAnimation();
+    this.prestige.emit();
+  }
+
+  protected nextPrestigeTitle(): string {
+    const labels = ['Initiate', 'Journeyman', 'Practitioner', 'Expert', 'Master'];
+    return labels[Math.min(this.prestigeLevel() + 1, labels.length - 1)];
   }
 
   ngOnDestroy(): void {

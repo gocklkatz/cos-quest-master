@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { GameState, DEFAULT_GAME_STATE, QuestLogEntry } from '../models/game-state.models';
 import { IRISConfig } from '../models/iris.models';
-import { Quest, normalizeQuest } from '../models/quest.models';
+import { Quest, QuestTier, normalizeQuest } from '../models/quest.models';
 import { calcLevel } from '../data/xp-table';
 
 const STORAGE_KEY = 'questmaster';
@@ -27,6 +27,20 @@ export class GameStateService {
   readonly dailyGoalMinutes = computed(() => this.state().dailyGoalMinutes);
   readonly timeLog = computed(() => this.state().timeLog);
   readonly snapshot = computed(() => this.state());
+  readonly totalXpAllTime = computed(() => this.state().totalXpAllTime);
+  readonly prestigeLevel = computed(() => this.state().prestigeLevel);
+
+  readonly prestigeTitle = computed(() => {
+    const labels: string[] = ['Initiate', 'Journeyman', 'Practitioner', 'Expert', 'Master'];
+    return labels[Math.min(this.prestigeLevel(), labels.length - 1)];
+  });
+
+  readonly questCategory = computed((): 'write' | 'debug' | 'optimize' => {
+    const p = this.prestigeLevel();
+    if (p === 0) return 'write';
+    if (p === 1) return 'debug';
+    return 'optimize';
+  });
 
   /** In-memory only — not persisted. Resets on page reload or resetProgress(). */
   readonly skipsThisSession = signal(0);
@@ -138,6 +152,33 @@ export class GameStateService {
     this.state.set({ ...DEFAULT_GAME_STATE, irisConfig: this.state().irisConfig, anthropicApiKey: this.state().anthropicApiKey });
     this.skipsThisSession.set(0);
     this.persist();
+  }
+
+  triggerPrestige(): void {
+    this.state.update(s => ({
+      ...DEFAULT_GAME_STATE,
+      // Preserved across prestige
+      playerName: s.playerName,
+      irisConfig: s.irisConfig,
+      anthropicApiKey: s.anthropicApiKey,
+      // Accumulated / incremented
+      totalXpAllTime: s.totalXpAllTime + s.xp,
+      prestigeLevel: s.prestigeLevel + 1,
+      // Unlock setup branch for the new run
+      unlockedBranches: ['setup'],
+      currentBranch: 'setup',
+    }));
+    this.persist();
+  }
+
+  /** Returns the current XP-based quest tier.
+   * TODO(F18): replace with DifficultyService.effectiveTier()
+   */
+  currentEffectiveTier(): QuestTier {
+    const xp = this.xp();
+    if (calcLevel(xp) >= 13) return 'master';
+    if (calcLevel(xp) >= 6) return 'journeyman';
+    return 'apprentice';
   }
 
   private loadFromStorage(): GameState {

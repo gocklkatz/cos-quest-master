@@ -1,0 +1,136 @@
+.free-practice {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--bg-primary, #0d1117);
+  color: var(--text-primary, #e6edf3);
+}
+
+.free-practice-header {
+  border-bottom: 1px solid var(--border-color, #30363d);
+  padding-bottom: 1rem;
+}
+
+.free-practice-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: var(--text-primary, #e6edf3);
+}
+
+.free-practice-subtitle {
+  margin: 0;
+  color: var(--text-secondary, #8b949e);
+  font-size: 0.9rem;
+}
+
+.free-practice-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.topic-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #8b949e);
+  white-space: nowrap;
+}
+
+.topic-select {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary, #161b22);
+  border: 1px solid var(--border-color, #30363d);
+  border-radius: 6px;
+  color: var(--text-primary, #e6edf3);
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  &:focus {
+    outline: 2px solid var(--accent, #58a6ff);
+    outline-offset: 1px;
+  }
+}
+
+.generate-btn {
+  padding: 0.5rem 1.25rem;
+  background: var(--accent, #238636);
+  border: 1px solid var(--accent-border, #2ea043);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) {
+    background: var(--accent-hover, #2ea043);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.free-practice-error {
+  padding: 0.75rem 1rem;
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px solid rgba(248, 81, 73, 0.4);
+  border-radius: 6px;
+  color: #f85149;
+  font-size: 0.9rem;
+}
+
+.free-practice-quest {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.quest-info {
+  padding: 1rem;
+  background: var(--bg-secondary, #161b22);
+  border: 1px solid var(--border-color, #30363d);
+  border-radius: 8px;
+}
+
+.quest-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--text-primary, #e6edf3);
+}
+
+.quest-objective {
+  margin: 0;
+  color: var(--text-secondary, #8b949e);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.quest-editor {
+  flex: 1;
+  min-height: 400px;
+  border: 1px solid var(--border-color, #30363d);
+  border-radius: 8px;
+  overflow: hidden;
+}

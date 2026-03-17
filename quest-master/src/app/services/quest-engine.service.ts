@@ -279,7 +279,7 @@ export class QuestEngineService {
 
     const completedIds = this.gameState.completedQuests();
     const coveredConcepts = this.gameState.coveredConcepts();
-    const tier: QuestTier = calcLevel(this.gameState.xp()) >= 13
+    const effectiveTier: QuestTier = calcLevel(this.gameState.xp()) >= 13
       ? 'master'
       : calcLevel(this.gameState.xp()) >= 6
         ? 'journeyman'
@@ -296,7 +296,44 @@ export class QuestEngineService {
     }
 
     try {
-      const quest = await this.claude.generateQuest(completedIds, coveredConcepts, targetBranch, tier, apiKey, questType);
+      const quest = await this.claude.generateQuest(
+        completedIds,
+        coveredConcepts,
+        targetBranch,
+        effectiveTier,
+        apiKey,
+        questType,
+        this.gameState.questCategory(),
+      );
+
+      // Guard: if questCategory is 'debug' and starterCode is empty, retry once.
+      if (
+        this.gameState.questCategory() === 'debug' &&
+        quest.files.every(f => !f.starterCode || f.starterCode.trim() === '')
+      ) {
+        const retry = await this.claude.generateQuest(
+          completedIds,
+          coveredConcepts,
+          targetBranch,
+          effectiveTier,
+          apiKey,
+          questType,
+          this.gameState.questCategory(),
+        ).catch(() => quest);
+        if (retry.files.some(f => f.starterCode && f.starterCode.trim() !== '')) {
+          this.gameState.addToQuestBank(retry);
+          const currentId2 = this.gameState.currentQuestId();
+          const completed2 = this.gameState.completedQuests();
+          if (currentId2 && completed2.includes(currentId2)) {
+            const prereqsMet2 = retry.prerequisites.every(p => completed2.includes(p));
+            if (prereqsMet2) {
+              this.gameState.setCurrentQuest(retry.id);
+            }
+          }
+          this.questGenerating.set(false);
+          return retry;
+        }
+      }
       this.gameState.addToQuestBank(quest);
 
       // Race-condition recovery: if the player finished the current quest while we were

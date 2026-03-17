@@ -4,7 +4,7 @@
 |---|---|
 | Phase | Phase 4 |
 | Priority | phase4-high |
-| Status | ⬜ Not started |
+| Status | ✅ Complete |
 | Depends On | [Change 05 — Branch Architecture](change-05-branch-architecture.md) |
 | Pedagogical Principle | Goal Gradient Effect / Self-Determination Theory (Autonomy) |
 
@@ -355,11 +355,15 @@ This block is inserted as a top-level section in the system prompt, after the ti
 - `quest-master/src/app/components/victory-overlay/victory-overlay.component.ts` — add `prestigeLevel`, `totalXpAllTime`, `prestigeTitle` inputs; add `prestige` output; add `nextPrestigeTitle()` helper
 - `quest-master/src/app/components/victory-overlay/victory-overlay.component.html` — update XP display; replace "Continue" button with "Begin [Next Title] Track" button
 - `quest-master/src/app/components/quest-view/quest-view.component.ts` — wire prestige inputs/output on `VictoryOverlayComponent`; add `onPrestige()` handler
+- `quest-master/src/app/components/quest-view/quest-view.component.html` — add prestige bindings to `<app-victory-overlay>`
+- `quest-master/src/app/components/header-bar/header-bar.component.ts` — inject `GameStateService`
 - `quest-master/src/app/components/header-bar/header-bar.component.html` — add conditional free-practice link
 - `quest-master/src/app/components/free-practice/free-practice.component.ts` *(new)*
 - `quest-master/src/app/components/free-practice/free-practice.component.html` *(new)*
 - `quest-master/src/app/components/free-practice/free-practice.component.scss` *(new)*
-- `quest-master/src/app/app.routes.ts` — add lazy-loaded `/free-practice` route
+- `quest-master/src/app/app.config.ts` — add lazy-loaded `/free-practice` route; import `registerObjectScript` from new `monaco-config.ts`
+- `quest-master/src/app/monaco-config.ts` *(new)* — extracted `registerObjectScript` to break circular dependency (`app.config` → `QuestViewComponent` → `CodeEditorComponent` → `app.config`)
+- `quest-master/src/app/components/code-editor/code-editor.component.ts` — update import to use `monaco-config.ts`
 
 ---
 

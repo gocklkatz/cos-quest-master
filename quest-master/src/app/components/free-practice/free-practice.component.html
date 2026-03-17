@@ -1,0 +1,58 @@
+<div class="free-practice">
+  <header class="free-practice-header">
+    <h1 class="free-practice-title">Free Practice</h1>
+    <p class="free-practice-subtitle">
+      Generate a quest on any topic — no XP, no progression, just practice.
+    </p>
+  </header>
+
+  <div class="free-practice-controls">
+    <label class="topic-label" for="topic-select">Topic</label>
+    <select
+      id="topic-select"
+      class="topic-select"
+      [value]="selectedTopic()"
+      (change)="selectTopic($any($event.target).value)"
+    >
+      @for (entry of branchEntries; track entry[0]) {
+        <option [value]="entry[0]">{{ entry[1] }}</option>
+      }
+    </select>
+
+    <button
+      class="generate-btn"
+      (click)="generateQuest()"
+      [disabled]="isGenerating()"
+    >
+      @if (isGenerating()) {
+        <span class="spinner">&#8635;</span> Generating&hellip;
+      } @else {
+        Generate Quest
+      }
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="free-practice-error" role="alert">{{ error() }}</div>
+  }
+
+  @if (currentQuest(); as quest) {
+    <div class="free-practice-quest">
+      <div class="quest-info">
+        <h2 class="quest-title">{{ quest.title }}</h2>
+        <p class="quest-objective">{{ quest.objective }}</p>
+      </div>
+
+      <div class="quest-editor">
+        <app-code-editor
+          [code]="editorCode()"
+          (codeChange)="editorCode.set($event)"
+          [files]="questFiles()"
+          [activeFileId]="activeFileId()"
+          [challengeMode]="false"
+          [readOnly]="false"
+        />
+      </div>
+    </div>
+  }
+</div>

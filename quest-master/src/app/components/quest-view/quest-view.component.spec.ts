@@ -78,9 +78,15 @@ function buildMocks() {
     challengeMode: signal(false),
     irisConfig: signal({ baseUrl: '', namespace: 'USER', username: '_SYSTEM', password: '' }),
     level: vi.fn(() => 1),
+    prestigeLevel: signal(0),
+    totalXpAllTime: signal(0),
+    prestigeTitle: signal('Initiate'),
     toggleChallengeMode: vi.fn(),
     setCurrentQuest: vi.fn(),
     updateNoHintsStreak: vi.fn(),
+    triggerPrestige: vi.fn(),
+    playerName: signal(''),
+    xp: signal(0),
   } as unknown as GameStateService;
 
   const mockClassQuest = {

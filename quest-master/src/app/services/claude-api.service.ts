@@ -50,9 +50,10 @@ export class ClaudeApiService {
     completedQuests: string[],
     coveredConcepts: string[],
     currentBranch: string,
-    tier: QuestTier,
+    effectiveTier: QuestTier,
     apiKey: string,
     questType: 'standard' | 'prediction' = 'standard',
+    questCategory: 'write' | 'debug' | 'optimize' = 'write',
   ): Promise<Quest> {
     const isClassBranch = currentBranch.startsWith('classes') || currentBranch === 'capstone';
     const isSqlBranch = currentBranch.startsWith('sql');
@@ -90,11 +91,38 @@ This is a "predict the output" quest. The player reads a completed routine and s
   "correctAnswer": "string (must match one entry in choices exactly)",` : `
   "questType": "standard",`;
 
+    const questCategoryBlock = `
+## Quest Category
+
+The quest category for this quest is: ${questCategory}
+
+Apply the following rules strictly based on the category:
+
+write
+  The player must produce ObjectScript code from a written description.
+  starterCode may be empty or may contain scaffolding (e.g. method signature, partial variable declarations).
+  The solution must be writable from scratch by the player.
+
+debug
+  The player must locate and correct a bug in existing code.
+  starterCode MUST be non-empty and MUST contain syntactically valid but semantically incorrect ObjectScript.
+  The bug must be subtle: a wrong operator, an off-by-one index, an incorrect variable reference, or a missing edge-case guard.
+  The objective describes the correct expected behaviour so the player knows what "fixed" means.
+  Do not place the bug in a comment — it must be in executable code.
+
+optimize
+  The player must improve working ObjectScript code along a specific dimension.
+  starterCode MUST be non-empty and MUST produce correct output but be suboptimal.
+  Suboptimal examples: redundant SET statements, IF/ELSE chain replaceable with $SELECT, N+1 query pattern, unnecessary string concatenation in a loop.
+  The objective names the specific optimisation dimension (e.g. "reduce the number of SET statements", "replace the IF/ELSE with $SELECT").
+  The solution must still produce identical output to the original.
+`;
+
     const system = `You are the Quest Master for an ObjectScript learning game. Generate quests that teach InterSystems ObjectScript (COS) concepts progressively.
 
 The player has completed these quests: ${completedQuests.join(', ') || 'none'}
 They have covered these concepts: ${coveredConcepts.join(', ') || 'none'}
-Their current tier is: ${tier}
+Their current tier is: ${effectiveTier}
 Their current skill branch is: ${currentBranch} (${topicDescription})
 ${earlyStageGuidance}${predictionGuidance}
 Generate the NEXT quest in this branch. It should:
@@ -125,7 +153,7 @@ ${isClassBranch ? `CRITICAL CONSTRAINT — file execution model (classes/capston
 - DO NOT use ClassMethod, Method, Class, or class-definition syntax in script files.
 - Valid in script files: SET, WRITE, FOR, IF, DO, XECUTE, $ORDER, globals, etc.
 - Invalid in script files: ClassMethod Foo() { ... } — this causes a compile error`}
-
+${questCategoryBlock}
 Respond with a JSON object with exactly these fields — no markdown fences, no extra commentary:
 {
   "id": "branch-NN (e.g. commands-02)",

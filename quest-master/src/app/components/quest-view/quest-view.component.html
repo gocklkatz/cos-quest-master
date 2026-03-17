@@ -180,4 +180,8 @@
   [playerName]="gameState.playerName()"
   [level]="victoryLevel()"
   [xp]="victoryXp()"
+  [prestigeLevel]="gameState.prestigeLevel()"
+  [totalXpAllTime]="gameState.totalXpAllTime()"
+  [prestigeTitle]="gameState.prestigeTitle()"
+  (prestige)="onPrestige()"
 />

@@ -569,6 +569,14 @@ export class QuestViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  onPrestige(): void {
+    this.gameState.triggerPrestige();
+    // Navigate to /quest for the new prestige run.
+    // Use window.location to avoid injecting Router and causing test environment issues.
+    window.location.hash = '#/quest';
+    window.location.href = '/quest';
+  }
+
   /** Show unlocked achievements sequentially, each after a 3.5 s gap. */
   private showAchievements(achievements: Achievement[]): void {
     achievements.forEach((ach, index) => {

@@ -7,6 +7,9 @@
   <div class="nav-links">
     <a class="nav-link" routerLink="/quest" routerLinkActive="active">Quest View</a>
     <a class="nav-link" routerLink="/tree" routerLinkActive="active">Tree Visualizer</a>
+    @if (gameState.prestigeLevel() >= 1) {
+      <a class="nav-link" routerLink="/free-practice" routerLinkActive="active">Free Practice</a>
+    }
   </div>
 
   <div class="right-section">

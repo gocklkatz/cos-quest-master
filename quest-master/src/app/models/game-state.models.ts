@@ -35,6 +35,10 @@ export interface GameState {
   dailyGoalMinutes: number;
   /** Accumulated active seconds per calendar day. Key = ISO date YYYY-MM-DD. */
   timeLog: Record<string, number>;
+  /** Lifetime XP across all prestige runs. Never resets. */
+  totalXpAllTime: number;
+  /** Number of times the player has completed the full curriculum. Increments on prestige. */
+  prestigeLevel: number;
 }
 
 export const DEFAULT_IRIS_CONFIG: IRISConfig = {
@@ -62,4 +66,6 @@ export const DEFAULT_GAME_STATE: GameState = {
   currentBranch: 'setup',
   dailyGoalMinutes: 20,
   timeLog: {},
+  totalXpAllTime: 0,
+  prestigeLevel: 0,
 };

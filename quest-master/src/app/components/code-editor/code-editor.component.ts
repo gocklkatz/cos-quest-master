@@ -1,7 +1,7 @@
 import { Component, computed, effect, input, model, output } from '@angular/core';
 import { EditorComponent } from 'ngx-monaco-editor-v2';
 import { QuestFile } from '../../models/quest.models';
-import { registerObjectScript } from '../../app.config';
+import { registerObjectScript } from '../../monaco-config';
 
 @Component({
   selector: 'app-code-editor',
