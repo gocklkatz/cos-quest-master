@@ -124,7 +124,7 @@ These are the primary topics requiring discussion and decision before full featu
 | Boss quests (harder, named) | Narrative structure | AI prompt complexity |
 | Hint system (costs XP) | Reduces rage-quit | May reduce learning depth |
 
-**Decision needed**: Pick 2–3 mechanics to implement. Avoid mechanics that punish legitimate breaks.
+**Decision**: **Boss Quests + Hint System (XP cost) + Unlockable Cosmetics.** Both independent analyses converged on the same three mechanics. Boss Quests provide intrinsic mastery milestones at branch climaxes and integrate with D-P4-01 (Prestige re-generates them at higher difficulty) and D-P4-02 (story titles frame them as chapter climaxes). The Hint System is dropout prevention, not accessibility aid — an XP-cost trade-off that preserves autonomy while ensuring learners always have a path forward. Unlockable Cosmetics (branch-themed editor themes) carry zero punishment risk and provide goal-gradient milestone signaling. All mechanics that punish breaks (streaks, lives) and all mechanics requiring a multiplayer population (leaderboards) are rejected. Timed mode and Certificates are deferred. See the supporting analyses: [UX Research](q6-gamification-ux-research.md) · [Behavioral Nudge Engine](q6-gamification-behavioral-nudge.md).
 
 ---
 
