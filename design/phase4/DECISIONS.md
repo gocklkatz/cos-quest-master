@@ -65,6 +65,24 @@ Each entry records a significant fork in the road: what was decided, why, and wh
 
 ---
 
+### D-P4-05 · 2026-03-17: Code Prediction quest frequency — post-failure trigger + branch weighting
+
+**Context**: Code Prediction quests (F6) are not yet implemented. The user expects them to appear more often than the original design implied (one type among many, rarely triggered). Four options were evaluated in parallel by a Behavioral Nudge Engine specialist and a Game Designer. See [q5-code-prediction-frequency-behavioral-nudge.md](q5-code-prediction-frequency-behavioral-nudge.md) and [q5-code-prediction-frequency-game-designer.md](q5-code-prediction-frequency-game-designer.md) for the full analyses.
+
+**Decision**: Three-layer system following the Behavioral Nudge Engine recommendation:
+1. **Option 3 (post-failure trigger) — mandatory baseline**: After any failed Write or Debug submission, the next quest is automatically a Code Prediction quest on the same sub-branch topic. Topic continuity is a hard requirement before shipping. A failed prediction quest must not cascade into another prediction quest.
+2. **Option 2 (branch-specific weighting) — ambient layer**: `QuestEngineService` carries a per-sub-branch `predictionWeight` coefficient. Highest in Methods, Inheritance, Relationships, Joins, Aggregation, Embedded SQL (target: one Prediction quest per 3-quest window). Lower in Setup and Globals (triggered mainly by Option 3).
+3. **Option 1 (guaranteed ratio) — minimum-frequency floor only**: One Code Prediction quest per 5 quests in any branch, as a backstop to prevent complete absence for consistently-succeeding learners. Not a scheduling driver.
+4. **Option 4 (player toggle) — deferred**: Replaced by an in-quest continuation/exit choice after each prediction quest ("Back to writing" pre-selected as default). Settings toggle deferred until engagement data validates demand.
+
+**Rejected alternatives**:
+- **Option 1 as primary mechanism**: Fixed ratios produce a predictable pattern that destroys the variable-reward loop; indifferent to learner state. Retained only as a minimum floor.
+- **Option 4 (settings toggle) as primary autonomy mechanism**: Discovered only by already-engaged learners; those who need scaffolding most will never find it. Replaced by in-quest choice at the natural decision point.
+
+**Affects**: [feature-06-code-prediction-quests.md](../phase3/feature-06-code-prediction-quests.md)
+
+---
+
 <!-- Add entries as decisions are made. Use the format below. -->
 
 <!--

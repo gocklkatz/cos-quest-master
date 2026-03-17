@@ -95,7 +95,7 @@ These are the primary topics requiring discussion and decision before full featu
 3. **Post-failure trigger** — After a failed submission, the next quest is automatically a Code Prediction quest on the same topic (reduces cognitive load, scaffolds recovery).
 4. **Player toggle** — Player can opt into "more reading quests" mode in settings.
 
-**Decision needed**: Frequency mechanism should be defined as part of the F6 implementation spec.
+**Decision**: **Option 3 (post-failure trigger) as mandatory baseline + Option 2 (branch-specific weighting) as ambient layer + Option 1 (guaranteed ratio) as minimum-frequency floor only (1-in-5). Option 4 (player toggle) deferred — replaced by an in-quest continuation/exit choice after each prediction quest.** See [DECISIONS.md → D-P4-05](DECISIONS.md) and the supporting analyses: [Behavioral Nudge Engine](q5-code-prediction-frequency-behavioral-nudge.md) · [Game Designer](q5-code-prediction-frequency-game-designer.md).
 
 ---
 
