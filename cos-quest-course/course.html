@@ -1,0 +1,2591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COS Quest Master: An Interactive Course</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+:root {
+  /* --- BACKGROUNDS --- */
+  --color-bg:             #FAF7F2;
+  --color-bg-warm:        #F5F0E8;
+  --color-bg-code:        #1E1E2E;
+  --color-text:           #2C2A28;
+  --color-text-secondary: #6B6560;
+  --color-text-muted:     #9E9790;
+  --color-border:         #E5DFD6;
+  --color-border-light:   #EEEBE5;
+  --color-surface:        #FFFFFF;
+  --color-surface-warm:   #FDF9F3;
+
+  /* --- ACCENT --- */
+  --color-accent:         #D94F30;
+  --color-accent-hover:   #C4432A;
+  --color-accent-light:   #FDEEE9;
+  --color-accent-muted:   #E8836C;
+
+  /* --- SEMANTIC --- */
+  --color-success:        #2D8B55;
+  --color-success-light:  #E8F5EE;
+  --color-error:          #C93B3B;
+  --color-error-light:    #FDE8E8;
+  --color-info:           #2A7B9B;
+  --color-info-light:     #E4F2F7;
+
+  /* --- ACTOR COLORS --- */
+  --color-actor-1:        #D94F30;
+  --color-actor-2:        #2A7B9B;
+  --color-actor-3:        #7B6DAA;
+  --color-actor-4:        #D4A843;
+  --color-actor-5:        #2D8B55;
+}
+
+:root {
+  --font-display:  'Bricolage Grotesque', Georgia, serif;
+  --font-body:     'DM Sans', -apple-system, sans-serif;
+  --font-mono:     'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl:  3rem;
+  --text-6xl:  3.75rem;
+
+  --leading-tight:  1.15;
+  --leading-snug:   1.3;
+  --leading-normal: 1.6;
+  --leading-loose:  1.8;
+}
+
+:root {
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  --content-width:     800px;
+  --content-width-wide: 1000px;
+  --nav-height:        50px;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-full: 9999px;
+}
+
+:root {
+  --shadow-sm:  0 1px 2px rgba(44, 42, 40, 0.05);
+  --shadow-md:  0 4px 12px rgba(44, 42, 40, 0.08);
+  --shadow-lg:  0 8px 24px rgba(44, 42, 40, 0.1);
+  --shadow-xl:  0 16px 48px rgba(44, 42, 40, 0.12);
+}
+
+:root {
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast:   150ms;
+  --duration-normal: 300ms;
+  --duration-slow:   500ms;
+  --stagger-delay:   120ms;
+}
+
+/* --- BASE STYLES --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  background-image: radial-gradient(ellipse at 20% 50%, rgba(217, 79, 48, 0.03) 0%, transparent 50%);
+  color: var(--color-text);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- NAVIGATION --- */
+#course-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-4);
+}
+
+.nav-inner {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-base);
+  color: var(--color-accent);
+}
+
+.nav-dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.nav-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  background: transparent;
+}
+
+.nav-dot:hover {
+  transform: scale(1.3);
+}
+
+.nav-dot.current {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  box-shadow: 0 0 10px rgba(217, 79, 48, 0.3);
+}
+
+.nav-dot.visited {
+  background: var(--color-accent);
+}
+
+/* --- FLOW ANIMATION CSS --- */
+.flow-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.flow-step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+.flow-step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: white;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  flex-shrink: 0;
+}
+.flow-step-body {
+  flex: 1;
+}
+.flow-step-body p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.flow-actor-icon.active {
+  box-shadow: 0 0 0 3px var(--color-accent), 0 0 20px rgba(217, 79, 48, 0.2);
+  transform: scale(1.1);
+}
+.flow-actor span.active {
+  color: var(--color-accent);
+}
+
+.bug-target {
+  background: rgba(217, 79, 48, 0.1);
+}
+.bug-target:hover {
+  background: rgba(217, 79, 48, 0.2);
+}
+
+/* --- MAIN LAYOUT --- */
+main {
+  padding: var(--space-24) var(--space-6);
+}
+
+section.module {
+  min-height: 100dvh;
+  scroll-snap-align: start;
+  padding: var(--space-16) var(--space-6);
+  padding-top: calc(var(--nav-height) + var(--space-16));
+}
+
+.module-content {
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+
+/* --- MODULE STYLES --- */
+.module-header {
+  margin-bottom: var(--space-16);
+}
+
+.module-number {
+  font-family: var(--font-display);
+  font-size: var(--text-6xl);
+  font-weight: 800;
+  color: var(--color-accent);
+  opacity: 0.15;
+  margin-bottom: var(--space-3);
+}
+
+.module-title {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: var(--leading-tight);
+}
+
+.module-subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-2);
+}
+
+/* --- SCREENS --- */
+.screen {
+  margin-bottom: var(--space-16);
+  animation: fadeInUp var(--duration-slow) var(--ease-out) forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.screen.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.screen-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+/* --- CODE BLOCKS --- */
+.code-keyword { color: #CBA6F7; }
+.code-string { color: #A6E3A1; }
+.code-function { color: #89B4FA; }
+.code-comment { color: #6C7086; }
+.code-number { color: #FAB387; }
+.code-property { color: #F9E2AF; }
+.code-operator { color: #94E2D5; }
+.code-tag { color: #F38BA8; }
+
+.translation-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin: var(--space-8) 0;
+}
+
+.translation-code {
+  background: var(--color-bg-code);
+  color: #CDD6F4;
+  padding: var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+.translation-code pre,
+.translation-code code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: hidden;
+}
+
+.translation-english {
+  background: var(--color-surface-warm);
+  padding: var(--space-6);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  border-left: 3px solid var(--color-accent);
+}
+
+.translation-label {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-3);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.5;
+}
+
+.translation-english .translation-label {
+  color: var(--color-text-muted);
+}
+
+/* --- QUIZ STYLES --- */
+.quiz-container {
+  margin: var(--space-8) 0;
+}
+
+.quiz-question-block {
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.quiz-question {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.quiz-option:hover {
+  border-color: var(--color-accent-muted);
+}
+
+.quiz-option.selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+.quiz-option.correct {
+  border-color: var(--color-success);
+  background: var(--color-success-light);
+}
+
+.quiz-option.incorrect {
+  border-color: var(--color-error);
+  background: var(--color-error-light);
+}
+
+.quiz-option-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  transition: all var(--duration-fast);
+}
+
+.quiz-option.selected .quiz-option-radio {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 3px white;
+}
+
+.quiz-feedback {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height var(--duration-normal), opacity var(--duration-normal);
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.quiz-feedback.show {
+  max-height: 200px;
+  opacity: 1;
+}
+
+.quiz-feedback.success {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.quiz-feedback.error {
+  background: var(--color-error-light);
+  color: var(--color-error);
+}
+
+.quiz-check-btn,
+.quiz-reset-btn {
+  padding: var(--space-3) var(--space-6);
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+  margin-right: var(--space-2);
+}
+
+.quiz-check-btn:hover,
+.quiz-reset-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.quiz-reset-btn {
+  background: var(--color-text-muted);
+}
+
+/* --- CHAT WINDOW --- */
+.chat-window {
+  margin: var(--space-8) 0;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.chat-messages {
+  padding: var(--space-6);
+  min-height: 200px;
+  background: #f8f9fa;
+}
+
+.chat-message {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  animation: fadeSlideUp 0.3s var(--ease-out);
+}
+
+.chat-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.chat-bubble {
+  background: white;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  max-width: 100%;
+  box-shadow: var(--shadow-sm);
+}
+
+.chat-sender {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+  opacity: 0.7;
+}
+
+.chat-typing {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.chat-typing-dots {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  animation: typingBounce 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+.chat-controls {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+}
+
+.chat-controls button {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  background: white;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.chat-controls button:hover {
+  border-color: var(--color-accent-muted);
+}
+
+.chat-progress {
+  margin-left: auto;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* --- FLOW ANIMATION --- */
+.flow-animation {
+  margin: var(--space-8) 0;
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.flow-actors {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: var(--space-8);
+  position: relative;
+}
+
+.flow-actor {
+  text-align: center;
+}
+
+.flow-actor-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: var(--color-bg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-2);
+}
+
+.flow-actor span {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.flow-actor.active {
+  transform: scale(1.1);
+}
+
+.flow-step-label {
+  text-align: center;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.flow-progress {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* --- CALLOUT BOXES --- */
+.callout {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  margin: var(--space-8) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.callout-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.callout-content {
+  flex: 1;
+}
+
+.callout-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-base);
+}
+
+.callout-accent {
+  border-left: 4px solid var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+.callout-info {
+  border-left: 4px solid var(--color-info);
+  background: var(--color-info-light);
+}
+
+.callout-warning {
+  border-left: 4px solid var(--color-error);
+  background: var(--color-error-light);
+}
+
+/* --- PATTERN CARDS --- */
+.pattern-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-8) 0;
+}
+
+.pattern-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.pattern-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.pattern-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: var(--space-3);
+}
+
+.pattern-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-base);
+  margin-bottom: var(--space-2);
+}
+
+.pattern-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* --- FILE TREE --- */
+.file-tree {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  margin: var(--space-6) 0;
+}
+
+.ft-folder, .ft-file {
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--color-border-light);
+  margin-left: var(--space-4);
+}
+
+.ft-folder > .ft-name, .ft-file > .ft-name {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.ft-folder > .ft-name::before { content: '📁 '; }
+.ft-file > .ft-name::before { content: '📄 '; }
+
+.ft-desc {
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  margin-left: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.ft-children { margin-left: var(--space-4); }
+
+/* --- GLOSSARY TOOLTIPS --- */
+.term {
+  border-bottom: 1.5px dashed var(--color-accent-muted);
+  cursor: pointer;
+  position: relative;
+}
+
+.term:hover, .term.active {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.term-tooltip {
+  position: fixed;
+  background: var(--color-bg-code);
+  color: #CDD6F4;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  line-height: var(--leading-normal);
+  width: max(200px, min(320px, 80vw));
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-fast);
+  z-index: 10000;
+  margin-top: 8px;
+}
+
+.term-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--color-bg-code);
+}
+
+.term-tooltip.visible { opacity: 1; }
+
+/* --- ANIMATIONS --- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+.animate-in { opacity: 0; transform: translateY(20px); transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out); }
+.animate-in.visible { opacity: 1; transform: translateY(0); }
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  :root {
+    --text-4xl: 1.875rem;
+    --text-5xl: 2.25rem;
+    --text-6xl: 3rem;
+  }
+
+  .translation-block { grid-template-columns: 1fr; }
+  .translation-english { border-left: none; border-top: 3px solid var(--color-accent); }
+
+  .module { padding: var(--space-8) var(--space-4); }
+  .module-content { padding: 0 var(--space-4); }
+
+  .chat-window { overflow-x: auto; }
+
+  .nav-title { font-size: var(--text-sm); }
+}
+
+/* --- SCROLLBAR --- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+  </style>
+</head>
+<body>
+  <nav id="course-nav"><!-- nav placeholder --></nav>
+  <main>
+    <section id="module-1" class="module" style="background: var(--color-bg)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">01</span>
+          <h1 class="module-title">What is COS Quest Master?</h1>
+          <p class="module-subtitle">A gamified ObjectScript learning platform that teaches programming through quests, coding challenges, and instant feedback</p>
+        </header>
+
+        <div class="module-body">
+          <!-- Screen 1: The Big Picture -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Your AI-Powered Coding Mentor</h2>
+            <p><strong>COS Quest Master</strong> is an interactive learning platform that teaches <span class="term" data-definition="ObjectScript is the programming language used by InterSystems IRIS, a high-performance database and application platform known for its speed and scalability.">InterSystems ObjectScript</span> through a gamified quest system.</p>
+            <p>Think of it like an RPG game where instead of slaying dragons, you write ObjectScript code to complete quests and level up your skills.</p>
+          </section>
+
+          <!-- Screen 2: The Core Loop -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">The Learning Loop</h2>
+            <div class="pattern-cards">
+              <div class="pattern-card">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">📜</div>
+                <h4 class="pattern-title">Quest Received</h4>
+                <p class="pattern-desc">Get a clear, focused coding challenge tailored to your current skill level</p>
+              </div>
+              <div class="pattern-card">
+                <div class="pattern-icon" style="background: var(--color-actor-2)">⌨️</div>
+                <h4 class="pattern-title">Write Code</h4>
+                <p class="pattern-desc">Use the built-in code editor with ObjectScript syntax highlighting</p>
+              </div>
+              <div class="pattern-card">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">⚡</div>
+                <h4 class="pattern-title">Execute & Get Feedback</h4>
+                <p class="pattern-desc">Run your code on a live IRIS instance and get instant evaluation</p>
+              </div>
+              <div class="pattern-card">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">⭐</div>
+                <h4 class="pattern-title">Level Up</h4>
+                <p class="pattern-desc">Earn XP, unlock new skill branches, and progress through tiers</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Meet the Team -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Meet the Team Behind the Platform</h2>
+            <div class="file-tree">
+              <div class="ft-folder">
+                <span class="ft-name">Browser (Angular App)</span>
+                <span class="ft-desc">What you see and interact with</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">Quest UI</span>
+                    <span class="ft-desc">Displays quests, hints, and feedback</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">Monaco Editor</span>
+                    <span class="ft-desc">The code editor with ObjectScript syntax highlighting</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">State Manager</span>
+                    <span class="ft-desc">Tracks your XP, level, and quest progress</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">AI Services</span>
+                <span class="ft-desc">Your coding companions</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">Claude API</span>
+                    <span class="ft-desc">Generates quests and evaluates your code</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">IRIS Backend</span>
+                <span class="ft-desc">The runtime engine</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">REST Endpoint</span>
+                    <span class="ft-desc">Accepts code, runs it, returns results</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">IRIS Database</span>
+                    <span class="ft-desc">Runs your ObjectScript and stores data</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Tech Stack Overview -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">The Tech Stack</h2>
+            <p>Understanding what powers COS Quest Master helps you steer AI better when you want to build similar tools.</p>
+
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-keyword">const</span> techStack = {
+  <span class="code-property">frontend</span>: <span class="code-string">'Angular 21'</span>,
+  <span class="code-property">editor</span>: <span class="code-string">'Monaco Editor'</span>,
+  <span class="code-property">ai</span>: <span class="code-string">'Claude API'</span>,
+  <span class="code-property">runtime</span>: <span class="code-string">'InterSystems IRIS'</span>,
+  <span class="code-property">state</span>: <span class="code-string">'Angular Signals'</span>
+};</code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">This is the "ingredient list" of what the app is made of</p>
+                <p class="tl">Angular powers the user interface you navigate</p>
+                <p class="tl">Monaco is the same editor technology as VS Code</p>
+                <p class="tl">Claude generates quests and reviews your code</p>
+                <p class="tl">IRIS is where your code actually runs</p>
+                <p class="tl">Signals keep the UI responsive without complex code</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Quiz for Module 1 -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Check Your Understanding</h2>
+            <div class="quiz-container" id="module-1-quiz">
+              <div class="quiz-question-block" data-question="q1" data-correct="option-b">
+                <h3 class="quiz-question">What does the Monaco Editor provide in COS Quest Master?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Live IRIS database connection</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>The code editor with ObjectScript syntax highlighting</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>The API that calls Claude for quest generation</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q2" data-correct="option-c">
+                <h3 class="quiz-question">Where does your ObjectScript code actually execute?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>In the browser's JavaScript engine</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Inside the Angular application</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>On a live InterSystems IRIS instance in Docker</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q3" data-correct="option-a">
+                <h3 class="quiz-question">How does COS Quest Master handle quest generation and code evaluation?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Directly through the Claude API from the browser</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Through a separate backend server</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Using pre-written static quests only</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div style="margin-top: var(--space-4);">
+                <button class="quiz-check-btn" onclick="checkQuiz('module-1-quiz')">Check Answers</button>
+                <button class="quiz-reset-btn" onclick="resetQuiz('module-1-quiz')">Try Again</button>
+                <div class="quiz-overall-feedback" id="module-1-overall"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+    <section id="module-2" class="module" style="background: var(--color-bg-warm)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">02</span>
+          <h1 class="module-title">Meet the Actors</h1>
+          <p class="module-subtitle">The key components and services that make up the COS Quest Master platform</p>
+        </header>
+
+        <div class="module-body">
+          <!-- Screen 1: Component Architecture -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">The Main Characters</h2>
+            <p>Every application has "actors" — components that play specific roles. In COS Quest Master, these work together like a well-rehearsed play.</p>
+
+            <div class="icon-rows">
+              <div class="icon-row">
+                <div class="icon-circle" style="background: var(--color-actor-1)">👤</div>
+                <div>
+                  <strong>AppState (GameStateService)</strong>
+                  <p class="icon-row-desc">The memory keeper - stores XP, level, completed quests, and settings</p>
+                </div>
+              </div>
+              <div class="icon-row">
+                <div class="icon-circle" style="background: var(--color-actor-2)">📜</div>
+                <div>
+                  <strong>Quest Engine</strong>
+                  <p class="icon-row-desc">The quest master - generates quests via Claude and evaluates submissions</p>
+                </div>
+              </div>
+              <div class="icon-row">
+                <div class="icon-circle" style="background: var(--color-actor-3)">🌐</div>
+                <div>
+                  <strong>IrisApiService</strong>
+                  <p class="icon-row-desc">The messenger - sends code to IRIS and returns results</p>
+                </div>
+              </div>
+              <div class="icon-row">
+                <div class="icon-circle" style="background: var(--color-actor-4)">🎨</div>
+                <div>
+                  <strong>UI Components</strong>
+                  <p class="icon-row-desc">The performers - render quests, editor, output, and controls</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Component Roles in Detail -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Deep Dive: Component Responsibilities</h2>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">Why Separation of Concerns Matters</strong>
+                <p>Each component has one job and does it well. When you understand this, you can tell AI: "Put the XP display logic in HeaderBar, not in the QuestPanel"</p>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); margin-top: var(--space-8);">
+              <div style="background: white; padding: var(--space-4); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                <h4 style="font-family: var(--font-display); color: var(--color-accent); margin-bottom: var(--space-2);">HeaderBarComponent</h4>
+                <p style="font-size: var(--text-sm); color: var(--color-text-secondary);">Top navigation with XP/Level progress, settings button</p>
+              </div>
+              <div style="background: white; padding: var(--space-4); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                <h4 style="font-family: var(--font-display); color: var(--color-accent); margin-bottom: var(--space-2);">QuestPanelComponent</h4>
+                <p style="font-size: var(--text-sm); color: var(--color-text-secondary);">Left sidebar showing current quest, hints, and quest history</p>
+              </div>
+              <div style="background: white; padding: var(--space-4); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                <h4 style="font-family: var(--font-display); color: var(--color-accent); margin-bottom: var(--space-2);">CodeEditorComponent</h4>
+                <p style="font-size: var(--text-sm); color: var(--color-text-secondary);">The Monaco-based code editor with ObjectScript support</p>
+              </div>
+              <div style="background: white; padding: var(--space-4); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                <h4 style="font-family: var(--font-display); color: var(--color-accent); margin-bottom: var(--space-2);">OutputPanelComponent</h4>
+                <p style="font-size: var(--text-sm); color: var(--color-text-secondary);">Shows execution results and Claude's code review feedback</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Service Layer -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Services: The Invisible Workers</h2>
+            <p>Services handle logic that multiple components might need. They're like support staff — you don't see them on stage, but the show can't happen without them.</p>
+
+            <div class="pattern-cards">
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon">💾</div>
+                <h4 class="pattern-title">GameStateService</h4>
+                <p class="pattern-desc">Manages all state (XP, completed quests, settings) with <span class="term" data-definition="Angular Signals are reactive values that automatically update dependent values. When you change a signal, anything that reads it updates automatically.">signals</span> and localStorage persistence</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+                <div class="pattern-icon">🤖</div>
+                <h4 class="pattern-title">QuestEngineService</h4>
+                <p class="pattern-desc">Decides which quests to show next, generates AI quests, and tracks progress through branches</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon">🌐</div>
+                <h4 class="pattern-title">IrisApiService</h4>
+                <p class="pattern-desc">Makes HTTP calls to the IRIS REST endpoints for execution and compilation</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon">🧠</div>
+                <h4 class="pattern-title">ClaudeApiService</h4>
+                <p class="pattern-desc">Calls the Anthropic API with system prompts for quest generation and code evaluation</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Chat Animation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">How Components Communicate</h2>
+            <p>Services broadcast changes via signals. Components react to these changes. Here's what happens when you complete a quest:</p>
+
+            <div class="chat-window">
+              <div class="chat-messages" id="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="actor-1" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">GS</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">GameStateService</span>
+                    <p>CompleteQuest called for quest 'commands-01'!</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="actor-2" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">QE</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">QuestEngineService</span>
+                    <p>Calculating XP reward and next available quest...</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="actor-3" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-3)">UI</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-3)">UI Components</span>
+                    <p>XP increased to 50/50, level up triggered!</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="3" data-sender="actor-4" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-4)">VS</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-4)">View</span>
+                    <p>Re-rendering header bar and quest panel with new state</p>
+                  </div>
+                </div>
+              </div>
+              <div class="chat-controls">
+                <button onclick="playChatAll()">Play Animation</button>
+                <button onclick="window.chatIndex=0; window.playChatAll()">Replay</button>
+                <span class="chat-progress">0 / 4 messages</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Quiz for Module 2 -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Check Your Understanding</h2>
+            <div class="quiz-container" id="module-2-quiz">
+              <div class="quiz-question-block" data-question="q1" data-correct="option-c">
+                <h3 class="quiz-question">What happens when GameStateService's state changes?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Nothing — the state is static</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>A full page reload occurs</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Dependent UI components automatically update</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q2" data-correct="option-b">
+                <h3 class="quiz-question">Which service is responsible for generating new quests?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>IrisApiService</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>QuestEngineService</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>ClaudeApiService</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q3" data-correct="option-a">
+                <h3 class="quiz-question">Where is quest data stored between page reloads?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Browser localStorage</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>In the Angular component memory</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>In IRIS database</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div style="margin-top: var(--space-4);">
+                <button class="quiz-check-btn" onclick="checkQuiz('module-2-quiz')">Check Answers</button>
+                <button class="quiz-reset-btn" onclick="resetQuiz('module-2-quiz')">Try Again</button>
+                <div class="quiz-overall-feedback" id="module-2-overall"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+    <section id="module-3" class="module" style="background: var(--color-bg)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">03</span>
+          <h1 class="module-title">How the Pieces Talk</h1>
+          <p class="module-subtitle">Data flow, event handling, and how components communicate within the app</p>
+        </header>
+
+        <div class="module-body">
+          <!-- Screen 1: The User Journey -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Your First Quest: A Data Flow Story</h2>
+            <p>Let's trace what happens when you start COS Quest Master and work on your first quest:</p>
+
+            <div class="flow-animation">
+              <div class="flow-actors">
+                <div class="flow-actor active" id="flow-actor-1">
+                  <div class="flow-actor-icon">👤</div>
+                  <span>You</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-2">
+                  <div class="flow-actor-icon">📄</div>
+                  <span>QuestPanel</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-3">
+                  <div class="flow-actor-icon">💻</div>
+                  <span>QuestEngine</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-4">
+                  <div class="flow-actor-icon">🧠</div>
+                  <span>GameState</span>
+                </div>
+              </div>
+
+              <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+
+              <div class="flow-controls">
+                <button onclick="flowNext()">Next Step</button>
+                <button onclick="flowReset()">Restart</button>
+                <span class="flow-progress">Step <span id="flow-step-num">0</span> / 7</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Data Flow Explained -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Understanding Data Flow</h2>
+            <p>Apps move data around like a relay race. Each component gets the baton, does its work, and passes it on.</p>
+
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-keyword">const</span> questData = {
+  <span class="code-property">id</span>: <span class="code-string">'commands-01'</span>,
+  <span class="code-property">title</span>: <span class="code-string">'Hello, Guildmate'</span>,
+  <span class="code-property">narrative</span>: <span class="code-string">'Write code to output...'</span>,
+  <span class="code-property">objective</span>: <span class="code-string">'Use WRITE and SET...'</span>,
+  <span class="code-property">tier</span>: <span class="code-string">'apprentice'</span>
+};
+
+<span class="code-comment">// Component receives quest data</span>
+quest.set(questData);</code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">Quest data is structured like a JSON object</p>
+                <p class="tl">Each field tells the component something specific</p>
+                <p class="tl">The component receives this data as a signal</p>
+                <p class="tl">When the quest changes, the component updates automatically</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Event Flow -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Event Flow: User Actions to State Changes</h2>
+            <p>When you click buttons or type in the editor, events flow through the system:</p>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">ℹ️</div>
+              <div class="callout-content">
+                <strong class="callout-title">Unidirectional Data Flow</strong>
+                <p>User Action → Event → Service → State Change → UI Update. This pattern prevents bugs where "something changed but I don't know why."</p>
+              </div>
+            </div>
+
+            <div style="margin-top: var(--space-8); display: flex; flex-direction: column; gap: var(--space-4);">
+              <div style="display: flex; align-items: flex-start; gap: var(--space-4); padding: var(--space-4); background: var(--color-surface); border-radius: var(--radius-md);">
+                <div style="flex-shrink: 0; font-weight: 700; color: var(--color-accent);">1</div>
+                <div>
+                  <strong>User clicks "Reveal Hint"</strong>
+                  <p style="font-size: var(--text-sm); color: var(--color-text-secondary);">QuestPanel emits hintRevealed event</p>
+                </div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: var(--space-4); padding: var(--space-4); background: var(--color-surface); border-radius: var(--radius-md);">
+                <div style="flex-shrink: 0; font-weight: 700; color: var(--color-accent);">2</div>
+                <div>
+                  <strong>QuestEngine receives the event</strong>
+                  <p style="font-size: var(--text-sm); color: var(--color-text-secondary);">Component calls hintsRevealed.update() to increment counter</p>
+                </div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: var(--space-4); padding: var(--space-4); background: var(--color-surface); border-radius: var(--radius-md);">
+                <div style="flex-shrink: 0; font-weight: 700; color: var(--color-accent);">3</div>
+                <div>
+                  <strong>UI automatically updates</strong>
+                  <p style="font-size: var(--text-sm); color: var(--color-text-secondary);">QuestPanel's hints computed signal triggers change</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Code ↔ English Translation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Tracing Data Through a Real Quest</h2>
+            <p>Here's how a quest actually flows through the system from start to finish:</p>
+
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-comment">// Quest data loaded from storage or API</span>
+<span class="code-keyword">const</span> quest = <span class="code-function">loadQuest</span>(<span class="code-string">'commands-01'</span>);
+
+<span class="code-comment">// Component receives quest via input() signal</span>
+<span class="code-keyword">const</span> questSignal = <span class="code-function">input</span>&lt;Quest | <span class="code-keyword">null</span>&gt;(<span class="code-keyword">null</span>);
+questSignal.set(quest);
+
+<span class="code-comment">// Component uses quest data to render UI</span>
+<span class="code-keyword">const</span> displayedTitle = <span class="code-function">computed</span>(() => questSignal()?.title ?? <span class="code-string">'No Quest'</span>);</code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">Quest data is fetched or loaded from storage</p>
+                <p class="tl">The component receives the quest through its input signal</p>
+                <p class="tl">The component computes what to display from that quest</p>
+                <p class="tl">The UI updates automatically when quest changes</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Quiz for Module 3 -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Check Your Understanding</h2>
+            <div class="quiz-container" id="module-3-quiz">
+              <div class="quiz-question-block" data-question="q1" data-correct="option-d">
+                <h3 class="quiz-question">What happens when a component's input signal changes?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>The component destroys and recreates itself</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Nothing happens until you refresh the page</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>A full application re-render occurs</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Any computed values that depend on it automatically update</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q2" data-correct="option-b">
+                <h3 class="quiz-question">How does the UI know to update when XP changes?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Events are broadcast to all components</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Components use computed signals that auto-update</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>A timer checks for state changes every 100ms</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>The developer manually calls render() functions</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q3" data-correct="option-c">
+                <h3 class="quiz-question">In what order does data flow in COS Quest Master?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>UI → State → Event → Services → UI</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>State → UI → Services → UI → State</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Event → Services → State → UI → Event</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Data flows in a circular pattern with no direction</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div style="margin-top: var(--space-4);">
+                <button class="quiz-check-btn" onclick="checkQuiz('module-3-quiz')">Check Answers</button>
+                <button class="quiz-reset-btn" onclick="resetQuiz('module-3-quiz')">Try Again</button>
+                <div class="quiz-overall-feedback" id="module-3-overall"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+    <section id="module-4" class="module" style="background: var(--color-bg-warm)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">04</span>
+          <h1 class="module-title">The Outside World</h1>
+          <p class="module-subtitle">How the app talks to IRIS, Claude API, and what happens "behind the curtain"</p>
+        </header>
+
+        <div class="module-body">
+          <!-- Screen 1: API Architecture -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Two External Services</h2>
+            <p>COS Quest Master connects to two external systems:</p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-8); margin-top: var(--space-8);">
+              <!-- IRIS Connection -->
+              <div style="background: var(--color-surface); padding: var(--space-5); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                <div style="font-size: 2rem; margin-bottom: var(--space-3);">🐳</div>
+                <h3 style="font-family: var(--font-display); color: var(--color-accent);">InterSystems IRIS</h3>
+                <p style="color: var(--color-text-secondary);">The database and application server where your ObjectScript code runs. It's containerized in Docker for easy setup.</p>
+                <div style="margin-top: var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); background: #111; padding: var(--space-3); border-radius: var(--radius-sm);">
+                  <pre><code><span class="code-comment"># curl command from the browser</span>
+<span class="code-keyword">POST</span> /api/quest/execute
+<span class="code-keyword">Body:</span> { <span class="code-property">"code"</span>: <span class="code-string">"WRITE 1+1"</span> }
+<span class="code-comment"># Response:</span>
+{ <span class="code-property">"success"</span>: <span class="code-keyword">true</span>, <span class="code-property">"output"</span>: <span class="code-string">"2\n"</span> }</code></pre>
+                </div>
+              </div>
+
+              <!-- Claude API -->
+              <div style="background: var(--color-surface); padding: var(--space-5); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                <div style="font-size: 2rem; margin-bottom: var(--space-3);">🧠</div>
+                <h3 style="font-family: var(--font-display); color: var(--color-accent);">Claude API</h3>
+                <p style="color: var(--color-text-secondary);">Generates quests and evaluates your code. Your API key is stored locally and sent directly to Anthropic.</p>
+                <div style="margin-top: var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); background: #111; padding: var(--space-3); border-radius: var(--radius-sm);">
+                  <pre><code><span class="code-comment"># API call structure</span>
+<span class="code-keyword">POST</span> https://api.anthropic.com/v1/messages
+<span class="code-header">Authorization:</span> Bearer sk-ant-...
+<span class="code-header">Content-Type:</span> application/json
+<span class="code-keyword">Body:</span> { <span class="code-property">"model"</span>: <span class="code-string">"claude-sonnet-4-6"</span>, ... }</code></pre>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: REST Endpoints -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">IRIS REST Endpoints</h2>
+            <p>IRIS exposes a REST API with three main endpoints:</p>
+
+            <div class="pattern-cards">
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+                <div class="pattern-icon">🏥</div>
+                <h4 class="pattern-title">GET /api/quest/health</h4>
+                <p class="pattern-desc">Checks if IRIS is reachable. Returns <code>{"status":"ok","namespace":"USER"}</code>. Used to show connection status in the header.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+                <div class="pattern-icon">⚡</div>
+                <h4 class="pattern-title">POST /api/quest/execute</h4>
+                <p class="pattern-desc">Executes ObjectScript code. Sends code as JSON, returns success boolean and captured output. This is your code's main execution path.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+                <div class="pattern-icon">💾</div>
+                <h4 class="pattern-title">POST /api/quest/compile</h4>
+                <p class="pattern-desc">Compiles ObjectScript classes (.cls files). Used for quests that involve defining new classes or methods.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: CORS & Proxy Setup -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">CORS and the Proxy Conundrum</h2>
+            <p>Browser security prevents direct API calls from localhost:4200 to localhost:52773. Here's how the app handles it:</p>
+
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-comment">// angular.json devServer config</span>
+{
+  <span class="code-property">"proxyConfig"</span>: <span class="code-string">"proxy.conf.json"</span>
+}
+
+<span class="code-comment">// proxy.conf.json</span>
+{
+  <span class="code-property">"/api/quest"</span>: {
+    <span class="code-property">"target"</span>: <span class="code-string">"http://localhost:52773"</span>,
+    <span class="code-property">"secure"</span>: <span class="code-keyword">false</span>,
+    <span class="code-property">"changeOrigin"</span>: <span class="code-keyword">true</span>
+  }
+}</code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">The dev server proxies requests to IRIS</p>
+                <p class="tl">Angular sends /api/quest/execute (same origin)</p>
+                <p class="tl">CLI forwards it to the IRIS Docker container</p>
+                <p class="tl">The app appears to make same-origin requests</p>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">ℹ️</div>
+              <div class="callout-content">
+                <strong class="callout-title">Production vs Development</strong>
+                <p>In production, you'd configure CORS headers on IRIS instead of using a proxy. The proxy only exists in the Angular dev server.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: IRIS Backend Implementation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">What's in the IRIS REST Class?</h2>
+            <p>The ObjectScript REST class handles requests. Here's the core structure:</p>
+
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-keyword">Class</span> QuestMaster.REST.Execute <span class="code-keyword">Extends</span> %CSP.REST
+{
+<span class="code-keyword">Parameter</span> CONTENTTYPE = <span class="code-string">"application/json"</span>;
+<span class="code-keyword">Parameter</span> HandleCorsRequest = <span class="code-number">1</span>;
+
+<span class="code-comment">// Route definitions</span>
+<span class="code-keyword">XData</span> UrlMap
+{
+<span class="code-tag">&lt;Routes&gt;</span>
+  <span class="code-tag">&lt;Route</span> Url=<span class="code-string">"/execute"</span> Method=<span class="code-string">"POST"</span> Call=<span class="code-string">"Execute"</span><span class="code-tag">&gt;</span><span class="code-tag">&lt;/Route&gt;</span>
+  <span class="code-tag">&lt;Route</span> Url=<span class="code-string">"/health"</span> Method=<span class="code-string">"GET"</span> Call=<span class="code-string">"Health"</span><span class="code-tag">&gt;</span><span class="code-tag">&lt;/Route&gt;</span>
+  <span class="code-tag">&lt;Route</span> Url=<span class="code-string">"/compile"</span> Method=<span class="code-string">"POST"</span> Call=<span class="code-string">"Compile"</span><span class="code-tag">&gt;</span><span class="code-tag">&lt;/Route&gt;</span>
+<span class="code-tag">&lt;/Routes&gt;</span>
+}
+
+<span class="code-keyword">Method</span> Execute() <span class="code-keyword">As</span> %Status
+{
+  <span class="code-comment">// Get request body</span>
+  <span class="code-keyword">Set</span> body = {}.<span class="code-function">%FromJSON</span>(%request.Content)
+  <span class="code-keyword">Set</span> code = body.%Get(<span class="code-string">"code"</span>)
+
+  <span class="code-comment">// Redirect IO to capture output</span>
+  <span class="code-keyword">Set</span> oldIO = $IO
+  <span class="code-keyword">Set</span> tempFile = ##<span class="code-function">class</span>(%File).TempFilename(<span class="code-string">"txt"</span>)
+  <span class="code-keyword">Open</span> tempFile:<span class="code-string">"WN"</span>
+  <span class="code-keyword">Use</span> tempFile
+
+  <span class="code-keyword">Try</span> {
+    <span class="code-keyword">XECUTE</span> code  <span class="code-comment">// Execute the ObjectScript</span>
+  } <span class="code-keyword">Catch</span> ex {
+    <span class="code-keyword">Write</span> <span class="code-string">"ERROR: "</span> _ ex.DisplayString()
+  }
+
+  <span class="code-comment">// Restore and read captured output</span>
+  <span class="code-keyword">Use</span> oldIO
+  <span class="code-keyword">Close</span> tempFile
+  <span class="code-comment">// ... read file, return JSON response</span>
+}</code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">Extends %CSP.REST to become a REST endpoint</p>
+                <p class="tl">UrlMap XData defines available routes</p>
+                <p class="tl">XECUTE runs the ObjectScript code</p>
+                <p class="tl">$IO redirection captures WRITE output</p>
+                <p class="tl">CATCH handles errors gracefully</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Quiz for Module 4 -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Check Your Understanding</h2>
+            <div class="quiz-container" id="module-4-quiz">
+              <div class="quiz-question-block" data-question="q1" data-correct="option-b">
+                <h3 class="quiz-question">What does the /api/quest/execute endpoint do?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Compiles ObjectScript class definitions</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Executes ObjectScript code and returns output</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Generates new quests via Claude AI</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Saves user preferences to localStorage</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q2" data-correct="option-c">
+                <h3 class="quiz-question">How does the app communicate with IRIS during development?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Direct HTTP calls with CORS enabled</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>A separate Node.js backend server</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Angular dev server proxy forwards to IRIS</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>WebSockets for bidirectional communication</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q3" data-correct="option-a">
+                <h3 class="quiz-question">Where is your Anthropic API key stored?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Browser localStorage, sent directly to Anthropic</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>On the IRIS server for security</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>In the Angular application's source code</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>In a global cookie that persists across sites</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div style="margin-top: var(--space-4);">
+                <button class="quiz-check-btn" onclick="checkQuiz('module-4-quiz')">Check Answers</button>
+                <button class="quiz-reset-btn" onclick="resetQuiz('module-4-quiz')">Try Again</button>
+                <div class="quiz-overall-feedback" id="module-4-overall"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+    <section id="module-5" class="module" style="background: var(--color-bg)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">05</span>
+          <h1 class="module-title">The Clever Tricks</h1>
+          <p class="module-subtitle">Engineering patterns and clever solutions that make the app work smoothly</p>
+        </header>
+
+        <div class="module-body">
+          <!-- Screen 1: Signal-Based State -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Signals: Reactive State</h2>
+            <p>Angular Signals are the heart of COS Quest Master. They make state management simple yet powerful.</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">Why Signals Beat Old-School State</strong>
+                <p>Before signals, you'd use observables or manually call change detection. Signals automatically update dependent values. No more forgotten "detectChanges()" calls!</p>
+              </div>
+            </div>
+
+            <div style="margin-top: var(--space-8);">
+              <h4 style="font-family: var(--font-display); margin-bottom: var(--space-4);">Before Signals (Old Pattern):</h4>
+              <div class="translation-block">
+                <div class="translation-code">
+                  <pre><code><span class="code-keyword">export class</span> GameStateService {
+  <span class="code-keyword">private</span> xpSubject = <span class="code-keyword">new</span> BehaviorSubject(<span class="code-number">0</span>);
+  xp$ = <span class="code-keyword">this</span>.xpSubject.<span class="code-function">asObservable</span>();
+
+  <span class="code-function">updateXp</span>(amount: <span class="code-keyword">number</span>) {
+    <span class="code-keyword">const</span> newXp = <span class="code-keyword">this</span>.xpSubject.<span class="code-function">getValue</span>() + amount;
+    <span class="code-keyword">this</span>.xpSubject.<span class="code-function">next</span>(newXp);
+  }
+}</code></pre>
+                </div>
+                <div class="translation-english">
+                  <p class="tl">Create a BehaviorSubject to hold state</p>
+                  <p class="tl">Convert to Observable for components</p>
+                  <p class="tl">Manually get current value, update, and push</p>
+                  <p class="tl">Components subscribe to get updates</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Signal Pattern -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">After Signals (Modern Pattern):</h2>
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-keyword">export class</span> GameStateService {
+  <span class="code-keyword">private</span> state = <span class="code-function">signal</span>&lt;GameState&gt;(<span class="code-keyword">new</span> GameState());
+
+  <span class="code-comment">// Selectors</span>
+  xp = <span class="code-function">computed</span>(() => <span class="code-keyword">this</span>.state().xp);
+  level = <span class="code-function">computed</span>(() => <span class="code-function">calcLevel</span>(<span class="code-keyword">this</span>.xp()));
+
+  <span class="code-comment">// Mutations</span>
+  <span class="code-function">completeQuest</span>(questId: <span class="code-keyword">string</span>) {
+    <span class="code-keyword">this</span>.state.<span class="code-function">update</span>(s =<span class="code-operator">&gt;</span> ({
+      ...s,
+      xp: s.xp + quest.xpReward,
+      completedQuests: [...s.completedQuests, questId]
+    }));
+  }
+}</code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">Signal holds the state object</p>
+                <p class="tl">Computed signals auto-calculate from state</p>
+                <p class="tl">Update applies changes immutably</p>
+                <p class="tl">Any reading signal updates automatically</p>
+              </div>
+            </div>
+
+            <div style="margin-top: var(--space-4); font-size: var(--text-sm); color: var(--color-text-secondary);">
+              <p><strong>Key benefits:</strong></p>
+              <ul style="margin-left: var(--space-6); margin-top: var(--space-2);">
+                <li style="margin-bottom: var(--space-2);">No subscription cleanup needed</li>
+                <li style="margin-bottom: var(--space-2);">No manual change detection</li>
+                <li style="margin-bottom: var(--space-2);">Computed values are cached automatically</li>
+                <li style="margin-bottom: var(--space-2);">Update is atomic and safe</li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- Screen 3: localStorage Persistence -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">localStorage: Browser File System</h2>
+            <p>Your progress is saved to localStorage — a small database that lives in your browser. Even after closing the tab, your XP, completed quests, and settings remain.</p>
+
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-comment">// The storage key</span>
+<span class="code-keyword">const</span> STORAGE_KEY = <span class="code-string">'questmaster'</span>;
+
+<span class="code-comment">// Load from storage on startup</span>
+<span class="code-keyword">private</span> <span class="code-function">loadFromStorage</span>(): GameState {
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> raw = <span class="code-function">localStorage.getItem</span>(STORAGE_KEY);
+    <span class="code-keyword">if</span> (raw) {
+      <span class="code-keyword">return</span> { <span class="code-operator">...</span><span class="code-function">JSON.parse</span>(raw) };
+    }
+  } <span class="code-keyword">catch</span> {
+    <span class="code-comment">// Ignore errors</span>
+  }
+  <span class="code-keyword">return</span> <span class="code-keyword">new</span> GameState();
+}
+
+<span class="code-comment">// Save to storage after every change</span>
+<span class="code-keyword">private</span> <span class="code-function">persist</span>() {
+  <span class="code-function">localStorage.setItem</span>(
+    STORAGE_KEY,
+    <span class="code-function">JSON.stringify</span>(<span class="code-keyword">this</span>.state())
+  );
+}</code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">localStorage is key-value storage in browser</p>
+                <p class="tl">Data persists across page reloads</p>
+                <p class="tl">All state is serialized to JSON</p>
+                <p class="tl">Changes are saved immediately</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Quest Generation Pattern -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">AI-Powered Quest Generation</h2>
+            <p>Instead of hard-coding hundreds of quests, Claude generates them dynamically based on what you've learned.</p>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">ℹ️</div>
+              <div class="callout-content">
+                <strong class="callout-title">The "Quest Bank" Pattern</strong>
+                <p>Generated quests are cached in state (the "quest bank"). This means if you skip a quest and come back, it's still available — no regeneration needed.</p>
+              </div>
+            </div>
+
+            <div style="margin-top: var(--space-8);">
+              <h4 style="font-family: var(--font-display); margin-bottom: var(--space-4);">How Quest Generation Works:</h4>
+              <div class="icon-rows">
+                <div class="icon-row">
+                  <div class="icon-circle" style="background: var(--color-actor-4)">📝</div>
+                  <div>
+                    <strong>1. Collect Context</strong>
+                    <p class="icon-row-desc">What quests completed, concepts covered, current tier, branch</p>
+                  </div>
+                </div>
+                <div class="icon-row">
+                  <div class="icon-circle" style="background: var(--color-actor-4)">🧠</div>
+                  <div>
+                    <strong>2. Send to Claude</strong>
+                    <p class="icon-row-desc">System prompt + context with request for next quest</p>
+                  </div>
+                </div>
+                <div class="icon-row">
+                  <div class="icon-circle" style="background: var(--color-actor-4)">📋</div>
+                  <div>
+                    <strong>3. Parse & Store</strong>
+                    <p class="icon-row-desc">Parse Claude's JSON response, add to quest bank</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: File Tabs & Execution Model -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">File Tabs & Execution Model</h2>
+            <p>COS Quest Master handles both class files (.cls) and script files (.script) in a unified way.</p>
+
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-comment">// Quest files array</span>
+<span class="code-keyword">const</span> files = [
+  {
+    <span class="code-property">id</span>: <span class="code-string">'cls-main'</span>,
+    <span class="code-property">filename</span>: <span class="code-string">'User.GuildMember.cls'</span>,
+    <span class="code-property">fileType</span>: <span class="code-string">'cls'</span>,
+    <span class="code-property">label</span>: <span class="code-string">'Class Definition'</span>,
+    <span class="code-property">starterCode</span>: <span class="code-string">'Class User.GuildMember Extends %Persistent...'</span>
+  },
+  {
+    <span class="code-property">id</span>: <span class="code-string">'main'</span>,
+    <span class="code-property">filename</span>: <span class="code-string">'solution.script'</span>,
+    <span class="code-property">fileType</span>: <span class="code-string">'script'</span>,
+    <span class="code-property">label</span>: <span class="code-string">'Solution'</span>,
+    <span class="code-property">dependsOn</span>: [<span class="code-string">'cls-main'</span>],  <span class="code-comment">// Compile class first</span>
+    <span class="code-property">starterCode</span>: <span class="code-string">'SET member = ##class(User.GuildMember).%New()...'</span>
+  }
+];
+
+<span class="code-comment">// Execution order:</span>
+<span class="code-comment">// 1. Compile all .cls files in order</span>
+<span class="code-comment">// 2. Execute all .script files in order</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">Each quest defines multiple files</p>
+                <p class="tl">Files have unique IDs for tab navigation</p>
+                <p class="tl">dependsOn ensures proper compilation order</p>
+                <p class="tl">Class files compile first, scripts second</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Quiz for Module 5 -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Check Your Understanding</h2>
+            <div class="quiz-container" id="module-5-quiz">
+              <div class="quiz-question-block" data-question="q1" data-correct="option-d">
+                <h3 class="quiz-question">What happens when you update a signal's value?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>The browser freezes for 1 second</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Only manual UI updates will reflect the change</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>A browser event fires that you must handle</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>All computed signals that depend on it update automatically</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q2" data-correct="option-a">
+                <h3 class="quiz-question">How does localStorage make progress persistent?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Data survives page reloads and browser restarts</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Data is sent to a remote server</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Data is cached in the browser's memory only</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Data persists only during the current session</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q3" data-correct="option-b">
+                <h3 class="quiz-question">Why do some script files have a "dependsOn" property?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>To ensure files execute in random order</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>To compile dependent classes before running scripts</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>To track which user created which files</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>To enable file drag-and-drop reordering</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div style="margin-top: var(--space-4);">
+                <button class="quiz-check-btn" onclick="checkQuiz('module-5-quiz')">Check Answers</button>
+                <button class="quiz-reset-btn" onclick="resetQuiz('module-5-quiz')">Try Again</button>
+                <div class="quiz-overall-feedback" id="module-5-overall"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+    <section id="module-6" class="module" style="background: var(--color-bg-warm)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">06</span>
+          <h1 class="module-title">When Things Break</h1>
+          <p class="module-subtitle">Debugging common issues, understanding errors, and escaping AI bug loops</p>
+        </header>
+
+        <div class="module-body">
+          <!-- Screen 1: Common Error Types -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Three Categories of Errors</h2>
+            <p>When your code doesn't work, the error falls into one of these categories. Knowing which helps you debug faster.</p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); margin-top: var(--space-8);">
+              <div style="background: var(--color-error-light); padding: var(--space-4); border-radius: var(--radius-md); border-left: 4px solid var(--color-error);">
+                <h4 style="font-family: var(--font-display); color: var(--color-error); margin-bottom: var(--space-2);">Syntax Error</h4>
+                <p style="color: var(--color-text-secondary);">The code is malformed. IRIS can't even parse it.</p>
+                <div style="margin-top: var(--space-3); font-family: var(--font-mono); font-size: var(--text-sm); background: #111; padding: var(--space-3); border-radius: var(--radius-sm);">
+                  <pre><code>WRITE "Hello <span class="code-keyword">World</span>  <span class="code-comment">// Missing closing quote</span></code></pre>
+                </div>
+              </div>
+
+              <div style="background: var(--color-error-light); padding: var(--space-4); border-radius: var(--radius-md); border-left: 4px solid var(--color-error);">
+                <h4 style="font-family: var(--font-display); color: var(--color-error); margin-bottom: var(--space-2);">Runtime Error</h4>
+                <p style="color: var(--color-text-secondary);">Code parses but fails when executed.</p>
+                <div style="margin-top: var(--space-3); font-family: var(--font-mono); font-size: var(--text-sm); background: #111; padding: var(--space-3); border-radius: var(--radius-sm);">
+                  <pre><code>SET x = <span class="code-number">10</span> / <span class="code-number">0</span>  <span class="code-comment">// <DIVIDE error</span></code></pre>
+                </div>
+              </div>
+
+              <div style="background: var(--color-info-light); padding: var(--space-4); border-radius: var(--radius-md); border-left: 4px solid var(--color-info);">
+                <h4 style="font-family: var(--font-display); color: var(--color-info); margin-bottom: var(--space-2);">Logic Error</h4>
+                <p style="color: var(--color-text-secondary);">Code runs but produces wrong output. Hardest to detect!</p>
+                <div style="margin-top: var(--space-3); font-family: var(--font-mono); font-size: var(--text-sm); background: #111; padding: var(--space-3); border-radius: var(--radius-sm);">
+                  <pre><code>FOR i = <span class="code-number">1</span>:1:count  <span class="code-comment">// Off-by-one error</span></code></pre>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Debugging Flow -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Debugging Flow: Your First 5 Minutes</h2>
+            <p>When something breaks, follow this path:</p>
+
+            <div class="flow-steps" style="display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-8);">
+              <div class="flow-step">
+                <div class="flow-step-num">1</div>
+                <div>
+                  <strong>Read the error message</strong>
+                  <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">IRIS errors look like <code>&lt;ERROR&gt;: &lt;DIVIDE&gt;</code>. The error type tells you the category.</p>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-num">2</div>
+                <div>
+                  <strong>Locate the line number</strong>
+                  <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">Errors include line numbers. Check the code editor gutter or scroll to find it.</p>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-num">3</div>
+                <div>
+                  <strong>Check for common issues</strong>
+                  <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">Missing quotes, unmatched brackets, wrong function names, division by zero.</p>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-num">4</div>
+                <div>
+                  <strong>Use WRITE for debugging</strong>
+                  <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">Add <code>WRITE "Debug: x = ", x, !</code> to trace values before the error.</p>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-num">5</div>
+                <div>
+                  <strong>Break it down</strong>
+                  <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">Simplify the code. Test smaller pieces until the error disappears.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Common Bugs in ObjectScript -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Common ObjectScript Bugs</h2>
+            <p>These bugs trip up beginners constantly. Recognizing them helps you fix issues faster:</p>
+
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-comment">// BUG 1: Missing quotes in WRITE</span>
+WRITE Hello World, !  <span class="code-comment">// ERROR: 'Hello' undefined variable</span>
+
+<span class="code-comment">// FIX: Wrap string in quotes</span>
+WRITE "Hello World", !</code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">ObjectScript requires quoted strings</p>
+                <p class="tl">Unquoted text is treated as variable names</p>
+              </div>
+            </div>
+
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-comment">// BUG 2: Wrong string concatenation</span>
+WRITE "Hello" "World", !  <span class="code-comment">// Outputs: "Hello" "World"</span>
+
+<span class="code-comment">// FIX: Use underscore (_) for concatenation</span>
+WRITE "Hello " _ "World", !  <span class="code-comment">// Outputs: Hello World</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">Adjacent strings aren't concatenated automatically</p>
+                <p class="tl">Use <code>_</code> operator to join strings</p>
+              </div>
+            </div>
+
+            <div class="translation-block">
+              <div class="translation-code">
+                <pre><code><span class="code-comment">// BUG 3: Missing % in method calls</span>
+SET obj = MyClass.New()  <span class="code-comment">// ERROR: 'New' undefined function</span>
+
+<span class="code-comment">// FIX: Use ##class() and % prefix for methods</span>
+SET obj = ##class(MyClass).%New()</code></pre>
+              </div>
+              <div class="translation-english">
+                <p class="tl">Instance methods need <code>.%MethodName()</code> syntax</p>
+                <p class="tl">Class methods use <code>##class().MethodName()</code></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: AI Bug Loop Prevention -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Escaping the AI Bug Loop</h2>
+            <p>When AI keeps generating broken code, try these strategies:</p>
+
+            <div class="pattern-cards">
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon">🔍</div>
+                <h4 class="pattern-title">Read the Error First</h4>
+                <p class="pattern-desc">Before asking AI to fix it, understand what the error means. The error line number is your anchor.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon">🧩</div>
+                <h4 class="pattern-title">Simplify the Code</h4>
+                <p class="pattern-desc">Create a minimal example that reproduces the issue. AI struggles with complex, multi-file bugs.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon">📝</div>
+                <h4 class="pattern-title">Ask for Explanations</h4>
+                <p class="pattern-desc">Instead of "fix this," ask "why does this error occur?" Understanding beats copy-paste.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon">🧪</div>
+                <h4 class="pattern-title">Test Small Pieces</h4>
+                <p class="pattern-desc">Compile and run individual classes before testing the full integration. Isolate the problem.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Spot the Bug Challenge -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Spot the Bug Challenge</h2>
+            <p>Find the bug in this ObjectScript code:</p>
+
+            <div style="background: var(--color-bg-code); padding: var(--space-4); border-radius: var(--radius-md); font-family: var(--font-mono); font-size: var(--text-sm); color: #CDD6F4; margin-top: var(--space-4);">
+              <div style="margin-bottom: var(--space-3);">
+                <div class="bug-line" style="padding: var(--space-2) var(--space-3); cursor: pointer; border-radius: var(--radius-sm); transition: background var(--duration-fast);">1 <code><span class="code-keyword">WRITE</span> "Starting...", !</code></div>
+                <div class="bug-line" style="padding: var(--space-2) var(--space-3); cursor: pointer; border-radius: var(--radius-sm); transition: background var(--duration-fast);">2 <code><span class="code-keyword">SET</span> x = <span class="code-number">5</span></code></div>
+                <div class="bug-line bug-target" style="padding: var(--space-2) var(--space-3); cursor: pointer; border-radius: var(--radius-sm); transition: background var(--duration-fast);">3 <code><span class="code-keyword">SET</span> y = x + 3</code></div>
+                <div class="bug-line" style="padding: var(--space-2) var(--space-3); cursor: pointer; border-radius: var(--radius-sm); transition: background var(--duration-fast);">4 <code><span class="code-keyword">WRITE</span> x y, !  <span class="code-comment">// BUG: Missing underscore</span></code></div>
+                <div class="bug-line" style="padding: var(--space-2) var(--space-3); cursor: pointer; border-radius: var(--radius-sm); transition: background var(--duration-fast);">5 <code><span class="code-keyword">QUIT</span></code></div>
+              </div>
+            </div>
+
+            <p style="margin-top: var(--space-4); font-size: var(--text-sm); color: var(--color-text-secondary);">Click on the line that has the bug.</p>
+
+            <div id="bug-feedback" style="margin-top: var(--space-4); padding: var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-sm);"></div>
+          </section>
+
+          <!-- Quiz for Module 6 -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Check Your Understanding</h2>
+            <div class="quiz-container" id="module-6-quiz">
+              <div class="quiz-question-block" data-question="q1" data-correct="option-b">
+                <h3 class="quiz-question">What does the error <code>&lt;DIVIDE&gt;</code> mean?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>The code file wasn't found</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>You tried to divide by zero</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>The IRIS server crashed</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Your API key is invalid</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q2" data-correct="option-c">
+                <h3 class="quiz-question">Which is the correct way to concatenate strings in ObjectScript?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span><code>WRITE "Hello" "World"</code></span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span><code>WRITE "Hello", "World"</code></span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span><code>WRITE "Hello" _ "World"</code></span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span><code>WRITE "Hello" + "World"</code></span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block" data-question="q3" data-correct="option-a">
+                <h3 class="quiz-question">When debugging, what's the best first step after seeing an error?</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Read the error message to identify the line number and error type</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Ask AI to rewrite the entire file</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Start adding more code to "fix" it</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Restart the browser</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div style="margin-top: var(--space-4);">
+                <button class="quiz-check-btn" onclick="checkQuiz('module-6-quiz')">Check Answers</button>
+                <button class="quiz-reset-btn" onclick="resetQuiz('module-6-quiz')">Try Again</button>
+                <div class="quiz-overall-feedback" id="module-6-overall"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+(function() {
+  'use strict';
+
+  // --- NAVIGATION & PROGRESS ---
+  const progressBar = document.querySelector('.progress-bar');
+  const navDots = document.querySelectorAll('.nav-dot');
+  const modules = document.querySelectorAll('.section.module');
+  let currentSectionIndex = 0;
+
+  function updateProgressBar() {
+    const scrollTop = window.scrollY;
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = (scrollTop / scrollHeight) * 100;
+
+    if (progressBar) progressBar.style.width = progress + '%';
+  }
+
+  function updateNavDots() {
+    const scrollPosition = window.scrollY;
+    const windowHeight = window.innerHeight;
+
+    modules.forEach((module, index) => {
+      const rect = module.getBoundingClientRect();
+      const offsetTop = window.scrollY + rect.top;
+
+      if (offsetTop <= scrollPosition + windowHeight * 0.5) {
+        currentSectionIndex = index;
+        navDots.forEach(dot => dot.classList.remove('current'));
+        if (navDots[index]) {
+          navDots[index].classList.add('current');
+          navDots.forEach((dot, i) => {
+            if (i <= index) dot.classList.add('visited');
+          });
+        }
+      }
+    });
+  }
+
+  window.addEventListener('scroll', () => {
+    requestAnimationFrame(updateProgressBar);
+    requestAnimationFrame(updateNavDots);
+  }, { passive: true });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+    const moduleCount = modules.length;
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      const next = currentSectionIndex + 1;
+      if (next < moduleCount) {
+        modules[next].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        e.preventDefault();
+      }
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      const prev = currentSectionIndex - 1;
+      if (prev >= 0) {
+        modules[prev].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        e.preventDefault();
+      }
+    }
+  });
+
+  // Initialize nav dots
+  navDots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      if (modules[index]) {
+        modules[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // --- INTERSECTION OBSERVER ---
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+  document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+  // --- CHAT ANIMATION ---
+  let chatIndex = 0;
+  const chatMessages = document.querySelectorAll('.chat-message');
+
+  window.playChatNext = function() {
+    if (chatIndex >= chatMessages.length) return;
+    const msg = chatMessages[chatIndex];
+    msg.style.display = 'flex';
+    msg.style.animation = 'fadeSlideUp 0.3s var(--ease-out)';
+    chatIndex++;
+  };
+
+  window.playChatAll = function() {
+    chatIndex = 0;
+    chatMessages.forEach(msg => msg.style.display = 'none');
+    const interval = setInterval(() => {
+      if (chatIndex >= chatMessages.length) {
+        clearInterval(interval);
+        return;
+      }
+      playChatNext();
+    }, 1200);
+  };
+
+  // --- QUIZ FUNCTIONS ---
+  window.selectOption = function(btn) {
+    const block = btn.closest('.quiz-question-block');
+    if (!block) return;
+    block.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+    btn.classList.add('selected');
+  };
+
+  window.checkQuiz = function(sectionId) {
+    const container = document.querySelector(`#${sectionId} .quiz-container`);
+    if (!container) return;
+
+    const questions = container.querySelectorAll('.quiz-question-block');
+    let correct = 0;
+    let total = 0;
+
+    questions.forEach(q => {
+      total++;
+      const selected = q.querySelector('.quiz-option.selected');
+      const feedback = q.querySelector('.quiz-feedback');
+      const correctValue = q.dataset.correct;
+
+      if (!selected) {
+        feedback.textContent = 'Please pick an answer first!';
+        feedback.className = 'quiz-feedback show error';
+        return;
+      }
+
+      if (selected.dataset.value === correctValue) {
+        correct++;
+        selected.classList.add('correct');
+        feedback.innerHTML = '<strong>Exactly!</strong> ' + (q.dataset.explanation || '');
+        feedback.className = 'quiz-feedback show success';
+      } else {
+        selected.classList.add('incorrect');
+        q.querySelector(`[data-value="${correctValue}"]`).classList.add('correct');
+        feedback.innerHTML = '<strong>Not quite.</strong> ' + (q.dataset.explanation || '');
+        feedback.className = 'quiz-feedback show error';
+      }
+
+      q.querySelectorAll('.quiz-option').forEach(o => o.disabled = true);
+    });
+
+    const overall = document.querySelector(`#${sectionId} .quiz-overall-feedback`);
+    if (overall) {
+      overall.textContent = `You got ${correct}/${total} correct!`;
+      overall.className = 'quiz-overall-feedback ' + (correct === total ? 'success' : 'need-practice');
+    }
+  };
+
+  window.resetQuiz = function(sectionId) {
+    const container = document.querySelector(`#${sectionId} .quiz-container`);
+    if (!container) return;
+
+    container.querySelectorAll('.quiz-option').forEach(o => {
+      o.classList.remove('selected', 'correct', 'incorrect');
+      o.disabled = false;
+    });
+    container.querySelectorAll('.quiz-feedback').forEach(f => {
+      f.className = 'quiz-feedback';
+      f.textContent = '';
+    });
+    const overall = document.querySelector(`#${sectionId} .quiz-overall-feedback`);
+    if (overall) overall.textContent = '';
+  };
+
+  // --- FLOW ANIMATION FUNCTIONS ---
+  let flowStep = 0;
+  const flowSteps = [
+    { actor: 'actor-1', label: 'You work on a quest', highlight: 'actor-1' },
+    { actor: 'actor-2', label: 'QuestPanel displays the quest', highlight: 'actor-2' },
+    { actor: 'actor-3', label: 'CodeEditor shows the editor area', highlight: 'actor-3' },
+    { actor: 'actor-4', label: 'User writes code and clicks Run', highlight: 'actor-4' },
+    { actor: 'actor-1', label: 'OutputPanel shows results', highlight: 'actor-1' },
+  ];
+
+  window.flowNext = function() {
+    if (flowStep >= flowSteps.length) return;
+    const step = flowSteps[flowStep];
+
+    // Remove previous highlights
+    document.querySelectorAll('.flow-actor').forEach(a => a.classList.remove('active'));
+
+    // Highlight current actor
+    const actorEl = document.getElementById('flow-' + step.actor);
+    if (actorEl) actorEl.classList.add('active');
+
+    // Update label
+    const label = document.getElementById('flow-label');
+    if (label) label.textContent = step.label;
+
+    // Update step number
+    const stepNum = document.getElementById('flow-step-num');
+    if (stepNum) stepNum.textContent = flowStep + 1;
+
+    flowStep++;
+  };
+
+  window.flowReset = function() {
+    flowStep = 0;
+    document.querySelectorAll('.flow-actor').forEach(a => a.classList.remove('active'));
+    document.getElementById('flow-actor-1').classList.add('active');
+    document.getElementById('flow-label').textContent = 'Click "Next Step" to begin';
+    document.getElementById('flow-step-num').textContent = '0';
+  };
+
+  // --- BUG CHALLENGE FUNCTION ---
+  let bugChecked = false;
+  window.checkBugLine = function(el, isCorrect) {
+    if (bugChecked) return;
+    bugChecked = true;
+
+    const feedback = document.getElementById('bug-feedback');
+    if (isCorrect) {
+      el.classList.add('correct');
+      feedback.innerHTML = '<strong>Found it!</strong> Line 4 is missing the underscore (_) between "x" and "y". In ObjectScript, adjacent strings or variables need <code>_</code> to be concatenated. Without it, they are treated as separate items in the WRITE list.';
+      feedback.className = 'quiz-feedback show success';
+    } else {
+      el.classList.add('incorrect');
+      feedback.innerHTML = 'Not this line — look at line 4 where the variables are printed together...';
+      feedback.className = 'quiz-feedback show error';
+      setTimeout(() => { el.classList.remove('incorrect'); }, 2000);
+    }
+  };
+
+  // --- TOOLTIP SYSTEM ---
+  let activeTooltip = null;
+
+  function positionTooltip(term, tip) {
+    const rect = term.getBoundingClientRect();
+    const tipWidth = 300;
+    let left = rect.left + rect.width / 2 - tipWidth / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tipWidth - 8));
+
+    let top = rect.top - 8;
+    tip.style.left = left + 'px';
+
+    document.body.appendChild(tip);
+    const tipHeight = tip.offsetHeight;
+    if (rect.top - tipHeight - 8 < 0) {
+      tip.style.top = (rect.bottom + 8) + 'px';
+      tip.classList.add('flip');
+    } else {
+      tip.style.top = (rect.top - tipHeight - 8) + 'px';
+      tip.classList.remove('flip');
+    }
+  }
+
+  document.querySelectorAll('.term').forEach(term => {
+    const tip = document.createElement('span');
+    tip.className = 'term-tooltip';
+    tip.textContent = term.dataset.definition;
+
+    term.addEventListener('mouseenter', () => {
+      if (activeTooltip && activeTooltip !== tip) {
+        activeTooltip.classList.remove('visible');
+        activeTooltip.remove();
+      }
+      positionTooltip(term, tip);
+      requestAnimationFrame(() => tip.classList.add('visible'));
+      activeTooltip = tip;
+    });
+
+    term.addEventListener('mouseleave', () => {
+      tip.classList.remove('visible');
+      setTimeout(() => { if (!tip.classList.contains('visible')) tip.remove(); }, 150);
+      activeTooltip = null;
+    });
+
+    term.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeTooltip && activeTooltip !== tip) {
+        activeTooltip.classList.remove('visible');
+        activeTooltip.remove();
+      }
+      if (tip.classList.contains('visible')) {
+        tip.classList.remove('visible');
+        tip.remove();
+        activeTooltip = null;
+      } else {
+        positionTooltip(term, tip);
+        requestAnimationFrame(() => tip.classList.add('visible'));
+        activeTooltip = tip;
+      }
+    });
+  });
+
+  document.addEventListener('click', () => {
+    if (activeTooltip) {
+      activeTooltip.classList.remove('visible');
+      activeTooltip.remove();
+      activeTooltip = null;
+    }
+  });
+
+})();
+  </script>
+</body>
+</html>
