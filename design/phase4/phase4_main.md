@@ -147,7 +147,7 @@ These are the primary topics requiring discussion and decision before full featu
 | 6 | **Code Prediction Quests** *(carry-over)* | phase4-high | ✅ Complete | Completes the "code literacy" track; should appear more frequently (see Q5) | [feature-06-code-prediction-quests.md](../phase3/feature-06-code-prediction-quests.md) |
 | 17 | **Infinite Quest Loop** | phase4-high | ✅ Complete | Game ends after 21 quests; must support indefinite play (see Q1) | [feature-17-infinite-quest-loop.md](feature-17-infinite-quest-loop.md) |
 | 18 | **Adaptive Difficulty** | phase4-mid | ✅ Complete | Early quests are too easy for experienced devs; difficulty should scale with demonstrated mastery (see Q3, D-P4-03, D-P4-08) | [specs/018-adaptive-difficulty/](../../specs/018-adaptive-difficulty/) |
-| 19 | **Enhanced Gamification** | phase4-mid | ⬜ Not started | Research-backed engagement mechanics to improve retention (see Q6, D-P4-06, D-P4-07) | [specs/019-enhanced-gamification/](../../specs/019-enhanced-gamification/) |
+| 19 | **Enhanced Gamification** | phase4-mid | 🚧 In progress | Research-backed engagement mechanics to improve retention (see Q6, D-P4-06, D-P4-07) | [specs/019-enhanced-gamification/](../../specs/019-enhanced-gamification/) |
 | 20 | **Narrative Story Arc** | phase4-low | ⬜ Not started | Thin story layer to give context to isolated quests and increase motivation (see Q2, D-P4-02) | [specs/020-narrative-story-arc/](../../specs/020-narrative-story-arc/) |
 | 21 | **IDE Quests** | phase4-low | ⬜ Not started | New quest type requiring real implementation in VS Code or ObjectScript Studio, evaluated via Atelier API polling and functional test execution | [feature-21-ide-quests.md](feature-21-ide-quests.md) |
 
