@@ -12,7 +12,7 @@
     "objectscript.conn": {
         "server": "local-iris",
         "ns": "USER",
-        "active": true
+        "active": false
     },
     "objectscript.export.folder": "src",
     "chat.promptFilesRecommendations": {
