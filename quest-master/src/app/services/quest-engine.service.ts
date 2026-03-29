@@ -1,10 +1,10 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { GameStateService } from './game-state.service';
+import { DifficultyService } from './difficulty.service';
 import { ClaudeApiService } from './claude-api.service';
-import { Quest, EvaluationResult, QuestTier } from '../models/quest.models';
+import { Quest, EvaluationResult } from '../models/quest.models';
 import { QuestLogEntry } from '../models/game-state.models';
 import { STARTER_QUESTS } from '../data/starter-quests';
-import { calcLevel } from '../data/xp-table';
 import { BRANCH_PROGRESSION } from '../data/branch-progression';
 
 /** Per-branch probability that a given generated quest is a prediction quest. */
@@ -24,6 +24,7 @@ const PREDICTION_WEIGHTS: Record<string, number> = {
 @Injectable({ providedIn: 'root' })
 export class QuestEngineService {
   private gameState = inject(GameStateService);
+  private difficulty = inject(DifficultyService);
   private claude = inject(ClaudeApiService);
 
   /** All known quests: hard-coded starters + any AI-generated ones cached in state. */
@@ -139,6 +140,10 @@ export class QuestEngineService {
    * Consumed by QuestViewComponent to decide whether to show the continuation choice.
    */
   readonly lastPredictionWasPostFailure = signal(false);
+
+  /** Set to true after 2 consecutive low-score (< 70) completions in a session. */
+  readonly suggestDifficultyAdjustment = signal(false);
+  private consecutiveLowScores = 0;
 
   /**
    * Signal a reset to QuestViewComponent. Called by AppComponent.onReset() after
@@ -279,11 +284,7 @@ export class QuestEngineService {
 
     const completedIds = this.gameState.completedQuests();
     const coveredConcepts = this.gameState.coveredConcepts();
-    const effectiveTier: QuestTier = calcLevel(this.gameState.xp()) >= 13
-      ? 'master'
-      : calcLevel(this.gameState.xp()) >= 6
-        ? 'journeyman'
-        : 'apprentice';
+    const effectiveTier = this.difficulty.effectiveTier();
 
     const questType: 'standard' | 'prediction' = forceQuestType !== undefined
       ? forceQuestType
@@ -415,6 +416,17 @@ export class QuestEngineService {
     this._lastQuestResult = { passed: evaluation.passed, questType: quest.questType ?? 'standard' };
     this._recentQuestTypes.push(quest.questType ?? 'standard');
     if (this._recentQuestTypes.length > 10) this._recentQuestTypes.shift();
+
+    // Recalibration nudge: track consecutive low scores.
+    if (evaluation.score < 70) {
+      this.consecutiveLowScores++;
+      if (this.consecutiveLowScores >= 2) {
+        this.suggestDifficultyAdjustment.set(true);
+        this.consecutiveLowScores = 0;
+      }
+    } else {
+      this.consecutiveLowScores = 0;
+    }
 
     // Advance to the next uncompleted quest automatically.
     const next = this.activeQuests().find(q => q.id !== quest.id);

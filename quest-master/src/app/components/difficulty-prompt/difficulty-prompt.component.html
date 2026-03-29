@@ -1,0 +1,61 @@
+<div class="prompt-backdrop">
+  <div class="prompt-panel">
+    <h2 class="prompt-title">Welcome, Adventurer!</h2>
+    <p class="prompt-subtitle">Choose your starting difficulty to tailor the curriculum to your experience.</p>
+
+    <div class="option-group">
+      <button
+        class="option-btn"
+        [class.selected]="selectedPreference() === 'beginner'"
+        (click)="selectPreference('beginner')"
+      >
+        <span class="option-label">Beginner</span>
+        <span class="option-desc">Start from the very basics — variables, output, and simple commands.</span>
+      </button>
+
+      <button
+        class="option-btn"
+        [class.selected]="selectedPreference() === 'intermediate'"
+        (click)="selectPreference('intermediate')"
+      >
+        <span class="option-label">Intermediate</span>
+        <span class="option-desc">You know some programming — jump into classes and properties.</span>
+      </button>
+
+      <button
+        class="option-btn"
+        [class.selected]="selectedPreference() === 'advanced'"
+        (click)="selectPreference('advanced')"
+      >
+        <span class="option-label">Advanced</span>
+        <span class="option-desc">Experienced developer — dive straight into advanced ObjectScript.</span>
+      </button>
+    </div>
+
+    @if (selectedPreference() === 'advanced') {
+      <div class="focus-group">
+        <p class="focus-label">What's your stronger background?</p>
+        <div class="focus-options">
+          <button
+            class="focus-btn"
+            [class.selected]="selectedFocus() === 'oop'"
+            (click)="selectFocus('oop')"
+          >OOP / Classes</button>
+          <button
+            class="focus-btn"
+            [class.selected]="selectedFocus() === 'sql'"
+            (click)="selectFocus('sql')"
+          >SQL / Databases</button>
+        </div>
+      </div>
+    }
+
+    <button
+      class="confirm-btn"
+      [disabled]="isConfirmDisabled()"
+      (click)="confirm()"
+    >
+      Start My Quest
+    </button>
+  </div>
+</div>

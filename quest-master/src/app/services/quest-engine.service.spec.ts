@@ -3,6 +3,7 @@ import { signal, computed } from '@angular/core';
 import { vi } from 'vitest';
 import { QuestEngineService } from './quest-engine.service';
 import { GameStateService } from './game-state.service';
+import { DifficultyService } from './difficulty.service';
 import { ClaudeApiService } from './claude-api.service';
 import { Quest } from '../models/quest.models';
 import { BRANCH_PROGRESSION } from '../data/branch-progression';
@@ -39,6 +40,8 @@ describe('QuestEngineService — F9: questGenerating / questGenerationError sign
       questBank,
       currentQuestId: signal<string | null>(null),
       currentBranch: signal('setup'),
+      difficultyPreference: signal(null),
+      advancedFocus: signal(null),
       allQuests: computed(() => []),
       questCategory: vi.fn(() => 'write' as const),
       addToQuestBank: vi.fn(),
@@ -47,6 +50,10 @@ describe('QuestEngineService — F9: questGenerating / questGenerationError sign
       completeQuest: vi.fn(),
     } as unknown as GameStateService;
   }
+
+  const MOCK_DIFFICULTY = {
+    effectiveTier: vi.fn(() => 'apprentice' as const),
+  } as unknown as DifficultyService;
 
   function buildMockClaude(resolveWith: Quest | 'error') {
     return {
@@ -65,6 +72,7 @@ describe('QuestEngineService — F9: questGenerating / questGenerationError sign
       providers: [
         QuestEngineService,
         { provide: GameStateService, useValue: mockGameState },
+        { provide: DifficultyService, useValue: MOCK_DIFFICULTY },
         { provide: ClaudeApiService, useValue: mockClaude },
       ],
     }).compileComponents();
@@ -226,6 +234,8 @@ describe('QuestEngineService — F13: skipQuest()', () => {
       currentQuestId: signal<string | null>('some-quest'),
       currentBranch: signal(currentBranch),
       anthropicApiKey: signal(apiKey),
+      difficultyPreference: signal(null),
+      advancedFocus: signal(null),
       questCategory: vi.fn(() => 'write' as const),
       addToQuestBank: vi.fn(),
       setCurrentQuest: vi.fn(),
@@ -239,10 +249,15 @@ describe('QuestEngineService — F13: skipQuest()', () => {
       evaluateSubmission: vi.fn(),
     } as unknown as ClaudeApiService;
 
+    const mockDifficulty = {
+      effectiveTier: vi.fn(() => 'apprentice' as const),
+    } as unknown as DifficultyService;
+
     await TestBed.configureTestingModule({
       providers: [
         QuestEngineService,
         { provide: GameStateService, useValue: mockGameState },
+        { provide: DifficultyService, useValue: mockDifficulty },
         { provide: ClaudeApiService, useValue: mockClaude },
       ],
     }).compileComponents();
@@ -321,6 +336,8 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
       questBank: questBankSignal,
       currentQuestId: signal<string | null>(null),
       currentBranch: signal('setup'),
+      difficultyPreference: signal(null),
+      advancedFocus: signal(null),
       questCategory: vi.fn(() => 'write' as const),
       addToQuestBank: vi.fn(),
       setCurrentQuest: vi.fn(),
@@ -333,10 +350,15 @@ describe('QuestEngineService — F12: resolveBranch / branch progression', () =>
       evaluateSubmission: vi.fn(),
     } as unknown as ClaudeApiService;
 
+    const mockDifficulty = {
+      effectiveTier: vi.fn(() => 'apprentice' as const),
+    } as unknown as DifficultyService;
+
     await TestBed.configureTestingModule({
       providers: [
         QuestEngineService,
         { provide: GameStateService, useValue: mockGameState },
+        { provide: DifficultyService, useValue: mockDifficulty },
         { provide: ClaudeApiService, useValue: mockClaude },
       ],
     }).compileComponents();
@@ -442,6 +464,8 @@ describe('QuestEngineService — F6: resolveQuestType', () => {
       questBank: questBankSignal,
       currentQuestId: signal<string | null>(null),
       currentBranch: signal('setup'),
+      difficultyPreference: signal(null),
+      advancedFocus: signal(null),
       questCategory: vi.fn(() => 'write' as const),
       addToQuestBank: vi.fn(),
       setCurrentQuest: vi.fn(),
@@ -454,10 +478,15 @@ describe('QuestEngineService — F6: resolveQuestType', () => {
       evaluateSubmission: vi.fn(),
     } as unknown as ClaudeApiService;
 
+    const mockDifficulty = {
+      effectiveTier: vi.fn(() => 'apprentice' as const),
+    } as unknown as DifficultyService;
+
     await TestBed.configureTestingModule({
       providers: [
         QuestEngineService,
         { provide: GameStateService, useValue: mockGameState },
+        { provide: DifficultyService, useValue: mockDifficulty },
         { provide: ClaudeApiService, useValue: mockClaude },
       ],
     }).compileComponents();
@@ -597,6 +626,8 @@ describe('QuestEngineService — F5: capstone prerequisite gating', () => {
       questBank: signal<Quest[]>([]),
       currentQuestId: signal<string | null>(null),
       currentBranch: signal('capstone'),
+      difficultyPreference: signal(null),
+      advancedFocus: signal(null),
       allQuests: computed(() => []),
       addToQuestBank: vi.fn(),
       setCurrentQuest: vi.fn(),
@@ -609,10 +640,15 @@ describe('QuestEngineService — F5: capstone prerequisite gating', () => {
       evaluateSubmission: vi.fn(),
     } as unknown as ClaudeApiService;
 
+    const mockDifficulty = {
+      effectiveTier: vi.fn(() => 'apprentice' as const),
+    } as unknown as DifficultyService;
+
     await TestBed.configureTestingModule({
       providers: [
         QuestEngineService,
         { provide: GameStateService, useValue: mockGameState },
+        { provide: DifficultyService, useValue: mockDifficulty },
         { provide: ClaudeApiService, useValue: mockClaude },
       ],
     }).compileComponents();
@@ -667,5 +703,105 @@ describe('QuestEngineService — F5: capstone prerequisite gating', () => {
   it('capstone-03 unlocks after capstone-02 is completed', async () => {
     const service = await buildService(['capstone-01', 'capstone-02']);
     expect(service.availableQuests().map(q => q.id)).toContain('capstone-03');
+  });
+});
+
+// ── F18: Recalibration nudge — suggestDifficultyAdjustment ───────────────────
+
+describe('QuestEngineService — F18: suggestDifficultyAdjustment', () => {
+  const BASE_QUEST: Quest = {
+    id: 'q1',
+    title: 'Q1',
+    branch: 'setup',
+    tier: 'apprentice',
+    narrative: '',
+    objective: '',
+    evaluationCriteria: '',
+    hints: [],
+    bonusObjectives: [],
+    bonusXP: 0,
+    xpReward: 50,
+    prerequisites: [],
+    conceptsIntroduced: [],
+    files: [{ id: 'f1', filename: 'solution.script', fileType: 'script', label: 'Solution' }],
+  };
+
+  async function buildNudgeService() {
+    const mockGameState = {
+      completedQuests: signal<string[]>([]),
+      coveredConcepts: signal<string[]>([]),
+      xp: signal(0),
+      questBank: signal<Quest[]>([]),
+      currentQuestId: signal<string | null>(null),
+      currentBranch: signal('setup'),
+      difficultyPreference: signal(null),
+      advancedFocus: signal(null),
+      questCategory: vi.fn(() => 'write' as const),
+      addToQuestBank: vi.fn(),
+      setCurrentQuest: vi.fn(),
+      setCurrentBranch: vi.fn(),
+      completeQuest: vi.fn(),
+    } as unknown as GameStateService;
+
+    const mockDifficulty = {
+      effectiveTier: vi.fn(() => 'apprentice' as const),
+    } as unknown as DifficultyService;
+
+    await TestBed.configureTestingModule({
+      providers: [
+        QuestEngineService,
+        { provide: GameStateService, useValue: mockGameState },
+        { provide: DifficultyService, useValue: mockDifficulty },
+        { provide: ClaudeApiService, useValue: { generateQuest: vi.fn(), evaluateSubmission: vi.fn() } },
+      ],
+    }).compileComponents();
+
+    return TestBed.inject(QuestEngineService);
+  }
+
+  function makeResult(score: number) {
+    return { passed: score >= 70, score, bonusAchieved: [], feedback: '', codeReview: '', xpEarned: 0 };
+  }
+
+  it('starts with suggestDifficultyAdjustment = false', async () => {
+    const svc = await buildNudgeService();
+    expect(svc.suggestDifficultyAdjustment()).toBe(false);
+  });
+
+  it('does not suggest after one low score', async () => {
+    const svc = await buildNudgeService();
+    svc.completeQuest({ ...BASE_QUEST, id: 'q1' }, '', makeResult(60));
+    expect(svc.suggestDifficultyAdjustment()).toBe(false);
+  });
+
+  it('suggests after two consecutive scores < 70', async () => {
+    const svc = await buildNudgeService();
+    svc.completeQuest({ ...BASE_QUEST, id: 'q1' }, '', makeResult(50));
+    svc.completeQuest({ ...BASE_QUEST, id: 'q2' }, '', makeResult(60));
+    expect(svc.suggestDifficultyAdjustment()).toBe(true);
+  });
+
+  it('resets counter after a score >= 70, so two more low scores are needed', async () => {
+    const svc = await buildNudgeService();
+    svc.completeQuest({ ...BASE_QUEST, id: 'q1' }, '', makeResult(50));
+    svc.completeQuest({ ...BASE_QUEST, id: 'q2' }, '', makeResult(80)); // resets counter
+    svc.completeQuest({ ...BASE_QUEST, id: 'q3' }, '', makeResult(60));
+    expect(svc.suggestDifficultyAdjustment()).toBe(false);
+  });
+
+  it('resets counter after triggering, so two more low scores are needed again', async () => {
+    const svc = await buildNudgeService();
+    svc.completeQuest({ ...BASE_QUEST, id: 'q1' }, '', makeResult(50));
+    svc.completeQuest({ ...BASE_QUEST, id: 'q2' }, '', makeResult(60));
+    expect(svc.suggestDifficultyAdjustment()).toBe(true);
+    // Counter resets after trigger — one more low score not enough
+    svc.completeQuest({ ...BASE_QUEST, id: 'q3' }, '', makeResult(40));
+    // Still true (external dismiss didn't happen)
+    expect(svc.suggestDifficultyAdjustment()).toBe(true);
+    // If we set it false externally (dismiss) and then get two more low scores, it fires again
+    svc.suggestDifficultyAdjustment.set(false);
+    svc.completeQuest({ ...BASE_QUEST, id: 'q4' }, '', makeResult(55));
+    svc.completeQuest({ ...BASE_QUEST, id: 'q5' }, '', makeResult(65));
+    expect(svc.suggestDifficultyAdjustment()).toBe(true);
   });
 });

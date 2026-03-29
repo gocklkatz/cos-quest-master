@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GameStateService } from '../../services/game-state.service';
+import { DifficultyService } from '../../services/difficulty.service';
 import { ClaudeApiService } from '../../services/claude-api.service';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import { Quest, QuestFile } from '../../models/quest.models';
@@ -15,6 +16,7 @@ import { BRANCH_DISPLAY_NAMES } from '../../data/branch-progression';
 })
 export class FreePracticeComponent {
   protected gameState = inject(GameStateService);
+  private difficulty = inject(DifficultyService);
   private claudeApi = inject(ClaudeApiService);
 
   protected readonly branchEntries = Object.entries(BRANCH_DISPLAY_NAMES);
@@ -52,7 +54,7 @@ export class FreePracticeComponent {
         [],
         [],
         this.selectedTopic(),
-        this.gameState.currentEffectiveTier(),
+        this.difficulty.effectiveTier(),
         apiKey,
         'standard',
         this.gameState.questCategory(),

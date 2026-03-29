@@ -599,3 +599,100 @@ test('Claude API: live evaluation call returns a valid EvaluationResult', async 
   await expect(evalSection).toHaveClass(/passed/);
   await expect(evalSection).toContainText('XP earned');
 });
+
+// ---------------------------------------------------------------------------
+// F18: Adaptive Difficulty
+// ---------------------------------------------------------------------------
+
+test.describe('F18 US1 — First-session difficulty prompt', () => {
+  test('shows difficulty prompt on fresh session (no difficultyPreference in localStorage)', async ({ page }) => {
+    await page.goto('/quest');
+    // Clear any saved state so we start fresh
+    await page.evaluate(() => localStorage.removeItem('questmaster'));
+    await page.reload();
+
+    await expect(page.locator('app-difficulty-prompt')).toBeVisible();
+    await expect(page.getByText('Welcome, Adventurer!')).toBeVisible();
+  });
+
+  test('Beginner selection dismisses prompt and starts at setup branch', async ({ page }) => {
+    await page.goto('/quest');
+    await page.evaluate(() => localStorage.removeItem('questmaster'));
+    await page.reload();
+
+    await page.getByRole('button', { name: /Beginner/i }).first().click();
+    await page.getByRole('button', { name: /Start My Quest/i }).click();
+
+    await expect(page.locator('app-difficulty-prompt')).not.toBeVisible();
+
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('questmaster') ?? '{}'));
+    expect(stored.difficultyPreference).toBe('beginner');
+    expect(stored.currentBranch).toBe('setup');
+  });
+
+  test('Advanced + OOP sets currentBranch to classes-methods', async ({ page }) => {
+    await page.goto('/quest');
+    await page.evaluate(() => localStorage.removeItem('questmaster'));
+    await page.reload();
+
+    await page.getByRole('button', { name: /Advanced/i }).first().click();
+    await page.getByRole('button', { name: /OOP/i }).click();
+    await page.getByRole('button', { name: /Start My Quest/i }).click();
+
+    await expect(page.locator('app-difficulty-prompt')).not.toBeVisible();
+
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('questmaster') ?? '{}'));
+    expect(stored.difficultyPreference).toBe('advanced');
+    expect(stored.advancedFocus).toBe('oop');
+    expect(stored.currentBranch).toBe('classes-methods');
+  });
+
+  test('preference persists after page reload', async ({ page }) => {
+    await page.goto('/quest');
+    await page.evaluate(() => localStorage.removeItem('questmaster'));
+    await page.reload();
+
+    await page.getByRole('button', { name: /Intermediate/i }).first().click();
+    await page.getByRole('button', { name: /Start My Quest/i }).click();
+    await page.reload();
+
+    await expect(page.locator('app-difficulty-prompt')).not.toBeVisible();
+  });
+});
+
+test.describe('F18 US2 — Difficulty preference in Settings', () => {
+  async function seedStateWithPreference(page: Page, pref: string) {
+    const base = { playerName: 'Tester', xp: 0, level: 1, completedQuests: [], currentQuestId: null,
+      questLog: [], coveredConcepts: [], unlockedBranches: ['setup'],
+      irisConfig: { baseUrl: 'http://localhost:52773', namespace: 'USER', username: '_SYSTEM', password: 'SYS' },
+      anthropicApiKey: '', questBank: [], challengeMode: false, unlockedAchievements: [],
+      noHintsStreak: 0, currentBranch: 'setup', dailyGoalMinutes: 20, timeLog: {},
+      totalXpAllTime: 0, prestigeLevel: 0, difficultyPreference: pref, advancedFocus: null };
+    await page.evaluate((s) => localStorage.setItem('questmaster', JSON.stringify(s)), base);
+  }
+
+  test('Settings panel shows current difficulty preference', async ({ page }) => {
+    await page.goto('/quest');
+    await seedStateWithPreference(page, 'intermediate');
+    await page.reload();
+
+    await page.locator('app-header-bar').getByRole('button', { name: /Settings/i }).click();
+
+    // The Intermediate button should have the "active" class in the segmented control
+    const intermediateBtn = page.locator('.segmented-control .seg-btn.active');
+    await expect(intermediateBtn).toContainText('Intermediate');
+  });
+
+  test('changing difficulty in Settings persists to localStorage', async ({ page }) => {
+    await page.goto('/quest');
+    await seedStateWithPreference(page, 'beginner');
+    await page.reload();
+
+    await page.locator('app-header-bar').getByRole('button', { name: /Settings/i }).click();
+    await page.locator('.segmented-control .seg-btn', { hasText: 'Intermediate' }).click();
+    await page.getByRole('button', { name: /Save Settings/i }).click();
+
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('questmaster') ?? '{}'));
+    expect(stored.difficultyPreference).toBe('intermediate');
+  });
+});

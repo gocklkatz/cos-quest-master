@@ -4,6 +4,7 @@ import { signal } from '@angular/core';
 import { vi } from 'vitest';
 import { QuestViewComponent } from './quest-view.component';
 import { GameStateService } from '../../services/game-state.service';
+import { DifficultyService } from '../../services/difficulty.service';
 import { QuestEngineService } from '../../services/quest-engine.service';
 import { ClassQuestService } from '../../services/class-quest.service';
 import { AiPairService } from '../../services/ai-pair.service';
@@ -65,6 +66,8 @@ function buildMocks() {
     completedQuestIds: signal<string[]>([]),
     allQuests: signal<Quest[]>([]),
     activeQuests: signal<Quest[]>([]),
+    lastPredictionWasPostFailure: signal(false),
+    suggestDifficultyAdjustment: signal(false),
     initialize: vi.fn(),
     triggerReset: vi.fn(() => resetEpoch.update(n => n + 1)),
     evaluateWithClaude: vi.fn(),
@@ -81,9 +84,13 @@ function buildMocks() {
     prestigeLevel: signal(0),
     totalXpAllTime: signal(0),
     prestigeTitle: signal('Initiate'),
+    difficultyPreference: signal(null),
+    advancedFocus: signal(null),
     toggleChallengeMode: vi.fn(),
     setCurrentQuest: vi.fn(),
+    setCurrentBranch: vi.fn(),
     updateNoHintsStreak: vi.fn(),
+    updateDifficultyPreference: vi.fn(),
     triggerPrestige: vi.fn(),
     playerName: signal(''),
     xp: signal(0),
@@ -113,11 +120,17 @@ function buildMocks() {
 async function setup() {
   const mocks = buildMocks();
 
+  const mockDifficulty = {
+    effectiveTier: signal('apprentice' as const),
+    initialSubBranch: signal('setup'),
+  } as unknown as DifficultyService;
+
   await TestBed.configureTestingModule({
     imports: [QuestViewComponent],
     providers: [
       { provide: QuestEngineService, useValue: mocks.mockQuestEngine },
       { provide: GameStateService, useValue: mocks.mockGameState },
+      { provide: DifficultyService, useValue: mockDifficulty },
       { provide: ClassQuestService, useValue: mocks.mockClassQuest },
       { provide: AiPairService, useValue: mocks.mockAiPair },
       { provide: PaneSizeService, useValue: mocks.mockPaneSizes },

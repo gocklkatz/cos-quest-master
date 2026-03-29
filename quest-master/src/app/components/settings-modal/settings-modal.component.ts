@@ -4,6 +4,7 @@ import { GameStateService } from '../../services/game-state.service';
 import { IrisConnectionService } from '../../services/iris-connection.service';
 import { QuestEngineService } from '../../services/quest-engine.service';
 import { IRISConfig } from '../../models/iris.models';
+import { DifficultyPreference, AdvancedFocus } from '../../models/game-state.models';
 
 @Component({
   selector: 'app-settings-modal',
@@ -28,8 +29,17 @@ export class SettingsModalComponent {
   anthropicApiKey = signal(this.gameState.anthropicApiKey());
   playerName = signal(this.gameState.playerName());
   dailyGoalMinutes = signal(this.gameState.dailyGoalMinutes());
+  difficultyPreference = signal<DifficultyPreference>(
+    this.gameState.difficultyPreference() ?? 'beginner'
+  );
+  advancedFocus = signal<AdvancedFocus | null>(this.gameState.advancedFocus());
 
   showResetConfirm = signal(false);
+
+  selectDifficulty(pref: DifficultyPreference): void {
+    this.difficultyPreference.set(pref);
+    if (pref !== 'advanced') this.advancedFocus.set(null);
+  }
 
   save(): void {
     const config: IRISConfig = {
@@ -40,6 +50,7 @@ export class SettingsModalComponent {
     };
     this.gameState.updateSettings(config, this.anthropicApiKey(), this.playerName());
     this.gameState.setDailyGoal(this.dailyGoalMinutes());
+    this.gameState.updateDifficultyPreference(this.difficultyPreference(), this.advancedFocus());
     this.connectionSvc.startPolling(config);
     this.closed.emit();
   }

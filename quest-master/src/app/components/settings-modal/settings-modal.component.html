@@ -52,6 +52,42 @@
         <p class="hint">Set to 0 to hide the daily progress bar.</p>
       </section>
 
+      <section>
+        <h3>Learning Difficulty</h3>
+        <div class="segmented-control">
+          <button
+            class="seg-btn"
+            [class.active]="difficultyPreference() === 'beginner'"
+            (click)="selectDifficulty('beginner')"
+          >Beginner</button>
+          <button
+            class="seg-btn"
+            [class.active]="difficultyPreference() === 'intermediate'"
+            (click)="selectDifficulty('intermediate')"
+          >Intermediate</button>
+          <button
+            class="seg-btn"
+            [class.active]="difficultyPreference() === 'advanced'"
+            (click)="selectDifficulty('advanced')"
+          >Advanced</button>
+        </div>
+        @if (difficultyPreference() === 'advanced') {
+          <div class="focus-row">
+            <span class="focus-label">Focus:</span>
+            <button
+              class="seg-btn seg-btn--sm"
+              [class.active]="advancedFocus() === 'oop'"
+              (click)="advancedFocus.set('oop')"
+            >OOP / Classes</button>
+            <button
+              class="seg-btn seg-btn--sm"
+              [class.active]="advancedFocus() === 'sql'"
+              (click)="advancedFocus.set('sql')"
+            >SQL</button>
+          </div>
+        }
+      </section>
+
       <section class="danger-zone">
         <h3>Danger Zone</h3>
         <button class="btn-warning" (click)="clearQuestBank()">Clear AI-Generated Quests</button>

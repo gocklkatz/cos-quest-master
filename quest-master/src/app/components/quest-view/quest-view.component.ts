@@ -7,7 +7,9 @@ import { AchievementOverlayComponent } from '../achievement-overlay/achievement-
 import { AiPairChatComponent } from '../ai-pair-chat/ai-pair-chat.component';
 import { ReviewModalComponent } from '../review-modal/review-modal.component';
 import { VictoryOverlayComponent } from '../victory-overlay/victory-overlay.component';
+import { DifficultyPromptComponent } from '../difficulty-prompt/difficulty-prompt.component';
 import { GameStateService } from '../../services/game-state.service';
+import { DifficultyService } from '../../services/difficulty.service';
 import { QuestEngineService } from '../../services/quest-engine.service';
 import { ClassQuestService } from '../../services/class-quest.service';
 import { AiPairService } from '../../services/ai-pair.service';
@@ -20,6 +22,7 @@ import { ResizableDividerDirective } from '../../directives/resizable-divider.di
 import { Achievement } from '../../models/achievement.models';
 import { CompileError, EvaluationResult, QuestFile } from '../../models/quest.models';
 import { ClaudeApiError } from '../../services/claude-api.service';
+import { DifficultyPreference, AdvancedFocus } from '../../models/game-state.models';
 
 @Component({
   selector: 'app-quest-view',
@@ -34,12 +37,14 @@ import { ClaudeApiError } from '../../services/claude-api.service';
     ResizableDividerDirective,
     ReviewModalComponent,
     VictoryOverlayComponent,
+    DifficultyPromptComponent,
   ],
   templateUrl: './quest-view.component.html',
   styleUrl: './quest-view.component.scss',
 })
 export class QuestViewComponent implements OnInit, OnDestroy {
   protected gameState = inject(GameStateService);
+  protected difficulty = inject(DifficultyService);
   private classQuest = inject(ClassQuestService);
   private aiPair = inject(AiPairService);
   private paneSizes = inject(PaneSizeService);
@@ -232,6 +237,20 @@ export class QuestViewComponent implements OnInit, OnDestroy {
       }
       this.aiPair.loadForQuest(initial.id);
     }
+  }
+
+  dismissDifficultyNudge(): void {
+    this.questEngine.suggestDifficultyAdjustment.set(false);
+  }
+
+  openSettingsFromNudge(): void {
+    this.questEngine.suggestDifficultyAdjustment.set(false);
+    this.uiEvents.requestSettings();
+  }
+
+  onDifficultyConfirmed(event: { preference: DifficultyPreference; focus: AdvancedFocus | null }): void {
+    this.gameState.updateDifficultyPreference(event.preference, event.focus);
+    this.gameState.setCurrentBranch(this.difficulty.initialSubBranch());
   }
 
   toggleChat(): void {

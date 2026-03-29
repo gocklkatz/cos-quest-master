@@ -139,6 +139,19 @@
   </section>
 </div>
 
+@if (gameState.difficultyPreference() === null) {
+  <app-difficulty-prompt (confirmed)="onDifficultyConfirmed($event)" />
+}
+
+@if (questEngine.suggestDifficultyAdjustment()) {
+  <div class="difficulty-nudge">
+    <span class="nudge-icon">&#128161;</span>
+    <span class="nudge-text">Struggling? Consider adjusting your difficulty in Settings.</span>
+    <button class="nudge-settings-btn" (click)="openSettingsFromNudge()">Adjust in Settings</button>
+    <button class="nudge-dismiss-btn" (click)="dismissDifficultyNudge()" title="Dismiss">&#x2715;</button>
+  </div>
+}
+
 @if (reviewEvaluation()) {
   <app-review-modal [evaluation]="reviewEvaluation()!" [apiKey]="anthropicApiKey()" (confirmed)="onReviewConfirmed()" />
 }
