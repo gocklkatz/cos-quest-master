@@ -90,6 +90,46 @@ input {
   &::placeholder { color: #6b6080; }
 }
 
+.segmented-control {
+  display: flex;
+  gap: 6px;
+}
+
+.seg-btn {
+  flex: 1;
+  background: #110f1e;
+  border: 1px solid #3b3058;
+  border-radius: 6px;
+  padding: 7px 12px;
+  color: #9b8ec4;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+
+  &:hover { border-color: #7c5cbf; color: #e2d9f3; }
+
+  &.active {
+    border-color: #a78bfa;
+    background: #2d2550;
+    color: #e2d9f3;
+    font-weight: 600;
+  }
+
+  &--sm { flex: 0 1 auto; }
+}
+
+.focus-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  .focus-label {
+    font-size: 0.8rem;
+    color: #9b8ec4;
+  }
+}
+
 .hint {
   font-size: 0.75rem;
   color: #6b6080;

@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { GameState, DEFAULT_GAME_STATE, QuestLogEntry } from '../models/game-state.models';
+import { GameState, DEFAULT_GAME_STATE, QuestLogEntry, DifficultyPreference, AdvancedFocus } from '../models/game-state.models';
 import { IRISConfig } from '../models/iris.models';
-import { Quest, QuestTier, normalizeQuest } from '../models/quest.models';
+import { Quest, normalizeQuest } from '../models/quest.models';
 import { calcLevel } from '../data/xp-table';
 
 const STORAGE_KEY = 'questmaster';
@@ -29,6 +29,8 @@ export class GameStateService {
   readonly snapshot = computed(() => this.state());
   readonly totalXpAllTime = computed(() => this.state().totalXpAllTime);
   readonly prestigeLevel = computed(() => this.state().prestigeLevel);
+  readonly difficultyPreference = computed(() => this.state().difficultyPreference);
+  readonly advancedFocus = computed(() => this.state().advancedFocus);
 
   readonly prestigeTitle = computed(() => {
     const labels: string[] = ['Initiate', 'Journeyman', 'Practitioner', 'Expert', 'Master'];
@@ -44,6 +46,11 @@ export class GameStateService {
 
   /** In-memory only — not persisted. Resets on page reload or resetProgress(). */
   readonly skipsThisSession = signal(0);
+
+  updateDifficultyPreference(preference: DifficultyPreference, focus: AdvancedFocus | null): void {
+    this.state.update(s => ({ ...s, difficultyPreference: preference, advancedFocus: focus }));
+    this.persist();
+  }
 
   updateSettings(irisConfig: IRISConfig, anthropicApiKey: string, playerName?: string): void {
     this.state.update(s => ({
@@ -171,16 +178,6 @@ export class GameStateService {
     this.persist();
   }
 
-  /** Returns the current XP-based quest tier.
-   * TODO(F18): replace with DifficultyService.effectiveTier()
-   */
-  currentEffectiveTier(): QuestTier {
-    const xp = this.xp();
-    if (calcLevel(xp) >= 13) return 'master';
-    if (calcLevel(xp) >= 6) return 'journeyman';
-    return 'apprentice';
-  }
-
   private loadFromStorage(): GameState {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -212,8 +209,10 @@ export class GameStateService {
 
     return {
       ...state,
-      currentBranch:    migratedBranch,
-      unlockedBranches: [...new Set(migratedUnlocked)],
+      currentBranch:      migratedBranch,
+      unlockedBranches:   [...new Set(migratedUnlocked)],
+      difficultyPreference: state.difficultyPreference ?? null,
+      advancedFocus:        state.advancedFocus ?? null,
     };
   }
 

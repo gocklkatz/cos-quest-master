@@ -1,0 +1,137 @@
+.prompt-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.prompt-panel {
+  background: #1e1b2e;
+  border: 1px solid #3b3058;
+  border-radius: 12px;
+  width: 480px;
+  max-width: 95vw;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.prompt-title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #e2d9f3;
+  text-align: center;
+}
+
+.prompt-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #9b8ec4;
+  text-align: center;
+}
+
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  background: #110f1e;
+  border: 1px solid #3b3058;
+  border-radius: 8px;
+  padding: 14px 16px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: #7c3aed;
+    background: #1a1530;
+  }
+
+  &.selected {
+    border-color: #a78bfa;
+    background: #2d2550;
+  }
+}
+
+.option-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e2d9f3;
+}
+
+.option-desc {
+  font-size: 0.8rem;
+  color: #9b8ec4;
+}
+
+.focus-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.focus-label {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #c4b5d9;
+}
+
+.focus-options {
+  display: flex;
+  gap: 10px;
+}
+
+.focus-btn {
+  flex: 1;
+  background: #110f1e;
+  border: 1px solid #3b3058;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #c4b5d9;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: #7c3aed;
+    background: #1a1530;
+  }
+
+  &.selected {
+    border-color: #a78bfa;
+    background: #2d2550;
+    color: #e2d9f3;
+  }
+}
+
+.confirm-btn {
+  background: #7c3aed;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  align-self: center;
+  min-width: 160px;
+
+  &:hover:not(:disabled) { background: #6d28d9; }
+
+  &:disabled {
+    background: #3b3058;
+    color: #6b5f84;
+    cursor: not-allowed;
+  }
+}

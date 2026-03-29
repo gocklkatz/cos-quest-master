@@ -15,10 +15,13 @@ describe('SettingsModalComponent — Dynamic Quest Regeneration (F1)', () => {
       playerName: signal('Tester'),
       currentBranch: signal('setup'),
       dailyGoalMinutes: signal(20),
+      difficultyPreference: signal(null),
+      advancedFocus: signal(null),
       resetProgress: vi.fn(),
       updateSettings: vi.fn(),
       clearQuestBank: vi.fn(),
       setDailyGoal: vi.fn(),
+      updateDifficultyPreference: vi.fn(),
     } as unknown as GameStateService;
   }
 

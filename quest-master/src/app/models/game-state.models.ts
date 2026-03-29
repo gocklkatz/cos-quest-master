@@ -1,6 +1,9 @@
 import { IRISConfig } from './iris.models';
 import { Quest } from './quest.models';
 
+export type DifficultyPreference = 'beginner' | 'intermediate' | 'advanced';
+export type AdvancedFocus = 'oop' | 'sql';
+
 export interface QuestLogEntry {
   questId: string;
   title: string;
@@ -39,6 +42,10 @@ export interface GameState {
   totalXpAllTime: number;
   /** Number of times the player has completed the full curriculum. Increments on prestige. */
   prestigeLevel: number;
+  /** Explicit difficulty preference set by the player. null = not yet set (triggers first-run prompt). */
+  difficultyPreference: DifficultyPreference | null;
+  /** Advanced sub-track focus. Non-null only when difficultyPreference === 'advanced'. */
+  advancedFocus: AdvancedFocus | null;
 }
 
 export const DEFAULT_IRIS_CONFIG: IRISConfig = {
@@ -68,4 +75,6 @@ export const DEFAULT_GAME_STATE: GameState = {
   timeLog: {},
   totalXpAllTime: 0,
   prestigeLevel: 0,
+  difficultyPreference: null,
+  advancedFocus: null,
 };
